@@ -20,46 +20,46 @@ import * as ImagePicker from 'expo-image-picker';
 import { useTheme } from '../theme/ThemeContext';
 import { useData } from '../context/DataContext';
 import { POPULAR_BRANDS, BRAND_CATEGORIES, BrandItem } from '../constants/brands';
+import { 
+  PAISA_CORE_CATEGORIES, 
+  PAISA_EXTENDED_CATEGORIES, 
+  searchPaisaIcons, 
+  PaisaIconItem 
+} from '../constants/paisaIcons';
 import { scanReceiptWithOcrSpace, parseReceiptText, ParsedReceiptData } from '../utils/ocrService';
 
-// Paisa Tarzı Zengin İkon Kategorileri
-const ICON_CATEGORIES: { name: string; icon: any; icons: string[] }[] = [
-  {
-    name: 'Abonelik & Medya',
-    icon: 'tv-outline',
-    icons: ['tv-outline', 'musical-notes-outline', 'film-outline', 'logo-youtube', 'play-circle-outline', 'videocam-outline', 'radio-outline', 'headset-outline', 'game-controller-outline']
-  },
-  {
-    name: 'Fatura & Ev',
-    icon: 'receipt-outline',
-    icons: ['receipt-outline', 'flash-outline', 'water-outline', 'wifi-outline', 'call-outline', 'home-outline', 'newspaper-outline', 'shield-checkmark-outline', 'key-outline']
-  },
-  {
-    name: 'Market & Gıda',
-    icon: 'cart-outline',
-    icons: ['cart-outline', 'basket-outline', 'nutrition-outline', 'restaurant-outline', 'cafe-outline', 'fast-food-outline', 'beer-outline', 'fish-outline', 'pizza-outline']
-  },
-  {
-    name: 'Alışveriş & Marka',
-    icon: 'bag-handle-outline',
-    icons: ['bag-handle-outline', 'pricetag-outline', 'shirt-outline', 'watch-outline', 'gift-outline', 'laptop-outline', 'phone-portrait-outline', 'diamond-outline', 'glasses-outline']
-  },
-  {
-    name: 'Ulaşım & Seyahat',
-    icon: 'car-outline',
-    icons: ['car-outline', 'bus-outline', 'airplane-outline', 'subway-outline', 'bicycle-outline', 'boat-outline', 'train-outline', 'navigate-outline', 'map-outline']
-  },
-  {
-    name: 'Sağlık & Yaşam',
-    icon: 'medkit-outline',
-    icons: ['medkit-outline', 'fitness-outline', 'heart-outline', 'barbell-outline', 'bandage-outline', 'eye-outline', 'paw-outline', 'flower-outline']
-  },
-  {
-    name: 'Finans & İş',
-    icon: 'wallet-outline',
-    icons: ['wallet-outline', 'card-outline', 'cash-outline', 'trending-up-outline', 'briefcase-outline', 'school-outline', 'book-outline', 'calculator-outline']
+// Akıllı Marka Logosu (Hata durumunda otomatik vektör ikon veya monogram rozet fallback)
+const BrandLogoImage: React.FC<{ 
+  brand: BrandItem; 
+  size?: number; 
+  color?: string; 
+}> = ({ brand, size = 22, color }) => {
+  const [hasError, setHasError] = useState(false);
+
+  if (hasError) {
+    if (brand.vectorIcon) {
+      return <Ionicons name={brand.vectorIcon as any} size={size} color={color || brand.color} />;
+    }
+    return (
+      <Text style={{ 
+        fontWeight: 'bold', 
+        fontSize: size * 0.55, 
+        color: color || brand.color 
+      }}>
+        {brand.monogram || brand.name.slice(0, 2).toUpperCase()}
+      </Text>
+    );
   }
-];
+
+  return (
+    <Image
+      source={{ uri: brand.logoUrl }}
+      style={{ width: size, height: size, borderRadius: 5 }}
+      resizeMode="contain"
+      onError={() => setHasError(true)}
+    />
+  );
+};
 
 const PALETTE_COLORS = [
   '#FF9800', '#E91E63', '#2196F3', '#9C27B0', 
@@ -138,7 +138,8 @@ export default function AddExpenseScreen({ navigation }: any) {
   const [showIconModal, setShowIconModal] = useState(false);
   const [iconModalTab, setIconModalTab] = useState<'brands' | 'icons'>('brands');
   const [selectedBrandCategory, setSelectedBrandCategory] = useState<string>('Tümü');
-  const [activeIconCatIndex, setActiveIconCatIndex] = useState(0);
+  const [showMoreIcons, setShowMoreIcons] = useState(false);
+  const [iconSearchQuery, setIconSearchQuery] = useState('');
 
   // Fiş / Fatura & Gerçek Kamera & OCR
   const [receiptImageUri, setReceiptImageUri] = useState<string | null>(null);
@@ -327,6 +328,20 @@ export default function AddExpenseScreen({ navigation }: any) {
       setSelectedCategoryId(matched.id);
     }
     setShowIconModal(false);
+  };
+
+  // Paisa Vektörel Simge Seçildiğinde Çağrılır
+  const handleSelectPaisaIcon = (item: PaisaIconItem) => {
+    setCustomIcon(item.icon);
+    setBrandLogoUrl(null);
+    if (item.brandColor) {
+      setCustomColor(item.brandColor);
+    } else if (!customColor) {
+      setCustomColor(PALETTE_COLORS[0]);
+    }
+    if (item.isBrand && (!title.trim() || PAISA_CORE_CATEGORIES[0].icons.some(b => b.name === title))) {
+      setTitle(item.name);
+    }
   };
 
   // Otomatik Fiş No Üretici
@@ -632,7 +647,7 @@ export default function AddExpenseScreen({ navigation }: any) {
                 <Ionicons name={displayIcon as any} size={15} color={displayColor} />
               )}
               <Text style={{ color: displayColor, fontSize: 11 * m, fontFamily: tStyles.fontFamily, fontWeight: 'bold', marginLeft: 4 }}>
-                {brandLogoUrl ? 'Marka Logosu' : customIcon ? 'Özel Simge' : 'Logo / Simge Seç'}
+                {brandLogoUrl ? 'Marka Logosu' : customIcon ? 'Özel Simge' : 'Simge ve Logo Seç'}
               </Text>
               <Ionicons name="color-palette-outline" size={13} color={displayColor} style={{ marginLeft: 3 }} />
             </TouchableOpacity>
@@ -1122,51 +1137,85 @@ export default function AddExpenseScreen({ navigation }: any) {
         </View>
       </Modal>
 
-      {/* 🌟 2. PAISA TARZI ZENGİN SİMGE & LOGO SEÇİCİ MODALI */}
+      {/* 🌟 2. PAISA BİREBİR VEKTÖREL SİMGE & LOGO SEÇİCİ MODALI */}
       <Modal visible={showIconModal} animationType="slide" transparent onRequestClose={() => setShowIconModal(false)}>
         <View style={styles.modalBackdrop}>
           <TouchableWithoutFeedback onPress={() => setShowIconModal(false)}>
             <View style={StyleSheet.absoluteFill} />
           </TouchableWithoutFeedback>
 
-          <View style={[styles.calcModalCard, { backgroundColor: colors.card, borderTopLeftRadius: tStyles.roundness * 1.5, borderTopRightRadius: tStyles.roundness * 1.5, maxHeight: '88%' }]}>
-            <View style={styles.calcHeader}>
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <Ionicons name="shapes-outline" size={22} color={colors.primary} style={{ marginRight: 8 }} />
-                <Text style={[styles.calcModalTitle, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 16 * m, fontWeight: 'bold' }]}>
-                  Logo & Simge Kataloğu (Paisa)
+          <View style={[styles.calcModalCard, { backgroundColor: colors.card, borderTopLeftRadius: tStyles.roundness * 1.5, borderTopRightRadius: tStyles.roundness * 1.5, maxHeight: '90%' }]}>
+            {/* Üst Bar: Sol Geri/Kapat, Başlık ('Simge ve Logo Seçimi'), Sağda 'Daha fazla' butonu */}
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingBottom: 10, borderBottomWidth: 1, borderBottomColor: colors.text + '15' }}>
+              <TouchableOpacity 
+                onPress={() => setShowIconModal(false)} 
+                style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: colors.background, justifyContent: 'center', alignItems: 'center' }}
+              >
+                <Ionicons name="arrow-back" size={20} color={colors.text} />
+              </TouchableOpacity>
+
+              <Text style={{ color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 16 * m, fontWeight: 'bold' }}>
+                Simge ve Logo Seçimi
+              </Text>
+
+              <TouchableOpacity 
+                onPress={() => {
+                  setShowMoreIcons(!showMoreIcons);
+                  if (showMoreIcons) setIconSearchQuery('');
+                }} 
+                style={{ paddingVertical: 6, paddingHorizontal: 10, borderRadius: 16, backgroundColor: showMoreIcons ? colors.primary + '20' : 'transparent' }}
+              >
+                <Text style={{ color: colors.primary, fontFamily: tStyles.fontFamily, fontSize: 12.5 * m, fontWeight: 'bold' }}>
+                  {showMoreIcons ? 'Daha az' : 'Daha fazla'}
                 </Text>
-              </View>
-              <TouchableOpacity onPress={() => setShowIconModal(false)} style={styles.calcCloseBtn}>
-                <Ionicons name="close" size={22} color={colors.text} />
               </TouchableOpacity>
             </View>
 
-            {/* İki Sekmeli Seçici: Marka CDN Logoları vs Vektör Simgeler */}
-            <View style={{ flexDirection: 'row', backgroundColor: colors.background, borderRadius: 12, padding: 3, marginBottom: 12 }}>
+            {/* Arama Alanı (Daha Fazla Aktifken ya da Arama Yapılırken) */}
+            {showMoreIcons && (
+              <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: colors.background, borderRadius: 12, paddingHorizontal: 12, paddingVertical: 7, marginTop: 10, borderWidth: 1, borderColor: colors.text + '20' }}>
+                <Ionicons name="search-outline" size={17} color={colors.text} style={{ opacity: 0.5, marginRight: 8 }} />
+                <TextInput
+                  style={{ flex: 1, color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 12.5 * m, paddingVertical: 0 }}
+                  placeholder="Simge veya marka ara (Netflix, Kahve, Fatura, Taksi)..."
+                  placeholderTextColor={colors.text + '50'}
+                  value={iconSearchQuery}
+                  onChangeText={setIconSearchQuery}
+                  autoCorrect={false}
+                />
+                {iconSearchQuery.length > 0 && (
+                  <TouchableOpacity onPress={() => setIconSearchQuery('')} style={{ padding: 2 }}>
+                    <Ionicons name="close-circle" size={16} color={colors.text} style={{ opacity: 0.6 }} />
+                  </TouchableOpacity>
+                )}
+              </View>
+            )}
+
+            {/* Profesyonel İki Sekmeli Seçici: Kurumsal Markalar vs Vektörel Simgeler */}
+            <View style={{ flexDirection: 'row', backgroundColor: colors.background, borderRadius: 12, padding: 3, marginVertical: 10 }}>
               <TouchableOpacity
-                style={[{ flex: 1, paddingVertical: 8, alignItems: 'center', borderRadius: 9 }, iconModalTab === 'brands' && { backgroundColor: colors.card }]}
+                style={[{ flex: 1, paddingVertical: 8, alignItems: 'center', borderRadius: 9 }, iconModalTab === 'brands' && { backgroundColor: colors.card, elevation: 1 }]}
                 onPress={() => setIconModalTab('brands')}
               >
-                <Text style={{ color: iconModalTab === 'brands' ? colors.primary : colors.text, opacity: iconModalTab === 'brands' ? 1 : 0.6, fontWeight: 'bold', fontSize: 12 * m, fontFamily: tStyles.fontFamily }}>
-                  ✨ Marka CDN Logoları
+                <Text style={{ color: iconModalTab === 'brands' ? colors.primary : colors.text, opacity: iconModalTab === 'brands' ? 1 : 0.6, fontWeight: 'bold', fontSize: 12.5 * m, fontFamily: tStyles.fontFamily }}>
+                  Kurumsal Markalar
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={[{ flex: 1, paddingVertical: 8, alignItems: 'center', borderRadius: 9 }, iconModalTab === 'icons' && { backgroundColor: colors.card }]}
+                style={[{ flex: 1, paddingVertical: 8, alignItems: 'center', borderRadius: 9 }, iconModalTab === 'icons' && { backgroundColor: colors.card, elevation: 1 }]}
                 onPress={() => setIconModalTab('icons')}
               >
-                <Text style={{ color: iconModalTab === 'icons' ? colors.primary : colors.text, opacity: iconModalTab === 'icons' ? 1 : 0.6, fontWeight: 'bold', fontSize: 12 * m, fontFamily: tStyles.fontFamily }}>
-                  🎨 Vektör Simgeler
+                <Text style={{ color: iconModalTab === 'icons' ? colors.primary : colors.text, opacity: iconModalTab === 'icons' ? 1 : 0.6, fontWeight: 'bold', fontSize: 12.5 * m, fontFamily: tStyles.fontFamily }}>
+                  Vektörel Simgeler
                 </Text>
               </TouchableOpacity>
             </View>
 
             {iconModalTab === 'brands' ? (
-              /* ✨ Marka CDN Logoları Sekmesi */
-              <View>
+              /* ✨ Kurumsal Markalar Sekmesi */
+              <View style={{ flexShrink: 1 }}>
                 {/* Kategori Filtre Çipleri */}
-                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 10 }}>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 8, maxHeight: 36 }}>
                   {BRAND_CATEGORIES.map(bCat => (
                     <TouchableOpacity
                       key={bCat}
@@ -1183,11 +1232,20 @@ export default function AddExpenseScreen({ navigation }: any) {
                   ))}
                 </ScrollView>
 
-                {/* Popüler Markalar Izgarası */}
+                {/* Popüler Markalar Izgarası (Sistem Ölçekli, Boşluksuz, Akıllı Fallback Korumalı) */}
                 <ScrollView style={{ maxHeight: 290 }} showsVerticalScrollIndicator={false}>
                   <View style={styles.brandGrid}>
                     {POPULAR_BRANDS
-                      .filter(b => selectedBrandCategory === 'Tümü' || b.category === selectedBrandCategory)
+                      .filter(b => {
+                        const matchesCategory = selectedBrandCategory === 'Tümü' || b.category === selectedBrandCategory;
+                        if (!iconSearchQuery.trim()) return matchesCategory;
+                        const q = iconSearchQuery.toLowerCase().trim();
+                        return (
+                          b.name.toLowerCase().includes(q) ||
+                          b.category.toLowerCase().includes(q) ||
+                          b.keywords.some(k => k.toLowerCase().includes(q))
+                        );
+                      })
                       .map(brand => {
                         const isSelected = brandLogoUrl === brand.logoUrl;
                         return (
@@ -1196,18 +1254,18 @@ export default function AddExpenseScreen({ navigation }: any) {
                             style={[
                               styles.brandGridCard,
                               { backgroundColor: colors.background, borderRadius: Math.max(tStyles.roundness / 2, 8) },
-                              isSelected && { borderColor: brand.color, borderWidth: 2, backgroundColor: brand.color + '18' }
+                              isSelected && { borderColor: brand.color, borderWidth: 2, backgroundColor: brand.color + '15' }
                             ]}
                             onPress={() => handleSelectBrand(brand)}
                           >
                             <View style={[styles.brandLogoCircle, { backgroundColor: brand.color + '20' }]}>
-                              <Image source={{ uri: brand.logoUrl }} style={{ width: 26, height: 26, borderRadius: 6 }} resizeMode="contain" />
+                              <BrandLogoImage brand={brand} size={22} color={brand.color} />
                             </View>
-                            <Text numberOfLines={1} style={{ color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 11 * m, fontWeight: 'bold', marginTop: 4, textAlign: 'center' }}>
+                            <Text numberOfLines={1} style={{ color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 10 * m, fontWeight: '600', marginTop: 4, textAlign: 'center' }}>
                               {brand.name}
                             </Text>
-                            <Text numberOfLines={1} style={{ color: colors.text, opacity: 0.5, fontSize: 9 * m, textAlign: 'center' }}>
-                              {brand.category}
+                            <Text numberOfLines={1} style={{ color: colors.text, opacity: 0.5, fontSize: 8.5 * m, textAlign: 'center', marginTop: 1 }}>
+                              {brand.category.split('&')[0].trim()}
                             </Text>
                           </TouchableOpacity>
                         );
@@ -1216,83 +1274,110 @@ export default function AddExpenseScreen({ navigation }: any) {
                 </ScrollView>
               </View>
             ) : (
-              /* 🎨 Vektör Simgeler & Renk Paleti Sekmesi */
-              <View>
-                {/* Renk Paleti Seçimi */}
-                <Text style={[styles.label, { color: colors.text, opacity: 0.7, fontFamily: tStyles.fontFamily, fontSize: 11 * m, marginBottom: 8 }]}>
-                  VURGU RENGİ SEÇİN
-                </Text>
-                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 14 }}>
-                  {PALETTE_COLORS.map(c => {
-                    const isSelected = customColor === c;
-                    return (
-                      <TouchableOpacity
-                        key={c}
-                        style={[
-                          styles.colorDot, 
-                          { backgroundColor: c },
-                          isSelected && { borderColor: colors.text, borderWidth: 2, transform: [{ scale: 1.15 }] }
-                        ]}
-                        onPress={() => setCustomColor(c)}
-                      >
-                        {isSelected && <Ionicons name="checkmark" size={14} color="#FFF" />}
-                      </TouchableOpacity>
-                    );
-                  })}
-                </ScrollView>
-
-                {/* İkon Kategori Sekmeleri */}
-                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 12 }}>
-                  {ICON_CATEGORIES.map((cat, idx) => (
-                    <TouchableOpacity
-                      key={cat.name}
-                      style={[
-                        styles.iconCatTab,
-                        { backgroundColor: activeIconCatIndex === idx ? colors.primary : colors.background, borderRadius: 16 }
-                      ]}
-                      onPress={() => setActiveIconCatIndex(idx)}
-                    >
-                      <Ionicons name={cat.icon} size={14} color={activeIconCatIndex === idx ? colors.onPrimary : colors.text} />
-                      <Text style={{ color: activeIconCatIndex === idx ? colors.onPrimary : colors.text, fontFamily: tStyles.fontFamily, fontSize: 11 * m, fontWeight: 'bold', marginLeft: 4 }}>
-                        {cat.name}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </ScrollView>
-
-                {/* İkon Izgarası */}
-                <ScrollView style={{ maxHeight: 220 }} showsVerticalScrollIndicator={false}>
-                  <View style={styles.iconGrid}>
-                    {ICON_CATEGORIES[activeIconCatIndex].icons.map(iconName => {
-                      const isSelected = customIcon === iconName;
-                      const activeCol = customColor || colors.primary;
+              /* 🎨 Paisa Vektörel Simgeler & Renk Paleti Sekmesi */
+              <View style={{ flexShrink: 1 }}>
+                {/* Vurgu Rengi Paleti */}
+                <View style={{ marginBottom: 10 }}>
+                  <Text style={[styles.label, { color: colors.text, opacity: 0.7, fontFamily: tStyles.fontFamily, fontSize: 10.5 * m, marginBottom: 6 }]}>
+                    VURGU RENGİ
+                  </Text>
+                  <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                    {PALETTE_COLORS.map(c => {
+                      const isSelected = customColor === c;
                       return (
                         <TouchableOpacity
-                          key={iconName}
+                          key={c}
                           style={[
-                            styles.gridIconBtn,
-                            { backgroundColor: isSelected ? activeCol + '25' : colors.background, borderRadius: Math.max(tStyles.roundness / 2, 8) },
-                            isSelected && { borderColor: activeCol, borderWidth: 2 }
+                            styles.colorDot, 
+                            { backgroundColor: c },
+                            isSelected && { borderColor: colors.text, borderWidth: 2, transform: [{ scale: 1.15 }] }
                           ]}
-                          onPress={() => {
-                            setCustomIcon(iconName);
-                            setBrandLogoUrl(null);
-                            if (!customColor) setCustomColor(PALETTE_COLORS[0]);
-                          }}
+                          onPress={() => setCustomColor(c)}
                         >
-                          <Ionicons name={iconName as any} size={24} color={isSelected ? activeCol : colors.text} />
+                          {isSelected && <Ionicons name="checkmark" size={13} color="#FFF" />}
                         </TouchableOpacity>
                       );
                     })}
-                  </View>
+                  </ScrollView>
+                </View>
+
+                {/* Paisa Tarzı Vektörel İkon Listesi */}
+                <ScrollView style={{ maxHeight: 270 }} showsVerticalScrollIndicator={false}>
+                  {iconSearchQuery.trim() ? (
+                    /* Arama Sonuçları */
+                    <View>
+                      <Text style={{ color: colors.text, opacity: 0.6, fontSize: 11 * m, fontFamily: tStyles.fontFamily, marginBottom: 8 }}>
+                        Arama Sonuçları ({searchPaisaIcons(iconSearchQuery).length})
+                      </Text>
+                      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
+                        {searchPaisaIcons(iconSearchQuery).map(item => {
+                          const isSelected = customIcon === item.icon;
+                          const activeCol = customColor || item.brandColor || colors.primary;
+                          return (
+                            <TouchableOpacity
+                              key={item.id}
+                              style={[
+                                styles.paisaIconChip,
+                                { backgroundColor: isSelected ? activeCol : (isDark ? '#2A2421' : '#F3EDE8') },
+                                isSelected && { borderWidth: 2, borderColor: colors.text }
+                              ]}
+                              onPress={() => handleSelectPaisaIcon(item)}
+                            >
+                              {item.monogram ? (
+                                <Text style={{ fontFamily: tStyles.fontFamily, fontWeight: 'bold', fontSize: 17 * m, color: isSelected ? colors.onPrimary : (item.brandColor || colors.text) }}>
+                                  {item.monogram}
+                                </Text>
+                              ) : (
+                                <Ionicons name={item.icon as any} size={20} color={isSelected ? colors.onPrimary : (item.isBrand && item.brandColor ? item.brandColor : colors.text)} />
+                              )}
+                            </TouchableOpacity>
+                          );
+                        })}
+                      </View>
+                    </View>
+                  ) : (
+                    /* Paisa Kategorileri (Core 10 Kategori + Show More Durumunda Genişletilmiş) */
+                    (showMoreIcons ? [...PAISA_CORE_CATEGORIES, ...PAISA_EXTENDED_CATEGORIES] : PAISA_CORE_CATEGORIES).map(cat => (
+                      <View key={cat.id} style={{ marginBottom: 14 }}>
+                        <Text style={{ color: colors.primary, fontFamily: tStyles.fontFamily, fontSize: 12.5 * m, fontWeight: 'bold', marginBottom: 8 }}>
+                          {cat.englishName}
+                        </Text>
+                        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
+                          {cat.icons.map(item => {
+                            const isSelected = customIcon === item.icon;
+                            const activeCol = customColor || item.brandColor || colors.primary;
+                            return (
+                              <TouchableOpacity
+                                key={item.id}
+                                style={[
+                                  styles.paisaIconChip,
+                                  { backgroundColor: isSelected ? activeCol : (isDark ? '#2A2421' : '#F3EDE8') },
+                                  isSelected && { borderWidth: 2, borderColor: colors.text }
+                                ]}
+                                onPress={() => handleSelectPaisaIcon(item)}
+                              >
+                                {item.monogram ? (
+                                  <Text style={{ fontFamily: tStyles.fontFamily, fontWeight: 'bold', fontSize: 17 * m, color: isSelected ? colors.onPrimary : (item.brandColor || colors.text) }}>
+                                    {item.monogram}
+                                  </Text>
+                                ) : (
+                                  <Ionicons name={item.icon as any} size={20} color={isSelected ? colors.onPrimary : (item.isBrand && item.brandColor ? item.brandColor : colors.text)} />
+                                )}
+                              </TouchableOpacity>
+                            );
+                          })}
+                        </View>
+                      </View>
+                    ))
+                  )}
                 </ScrollView>
               </View>
             )}
 
-            {/* Temizle & Onayla Butonları */}
-            <View style={{ flexDirection: 'row', gap: 10, marginTop: 14 }}>
+            {/* Paisa Tarzı Alt Aksiyonlar: Sıfırla & Tamam */}
+            <View style={{ flexDirection: 'row', gap: 10, marginTop: 12, paddingTop: 10, borderTopWidth: 1, borderTopColor: colors.text + '15' }}>
               <TouchableOpacity
-                style={[styles.resetIconBtn, { backgroundColor: colors.background, borderRadius: tStyles.roundness }]}
+                style={[styles.resetIconBtn, { backgroundColor: colors.background, borderRadius: tStyles.roundness / 2 }]}
                 onPress={() => {
                   setCustomIcon(null);
                   setCustomColor(null);
@@ -1306,11 +1391,11 @@ export default function AddExpenseScreen({ navigation }: any) {
               </TouchableOpacity>
 
               <TouchableOpacity
-                style={[styles.confirmIconBtn, { backgroundColor: colors.primary, borderRadius: tStyles.roundness }]}
+                style={[styles.confirmIconBtn, { backgroundColor: colors.primary, borderRadius: tStyles.roundness / 2 }]}
                 onPress={() => setShowIconModal(false)}
               >
-                <Text style={{ color: colors.onPrimary, fontFamily: tStyles.fontFamily, fontSize: 13 * m, fontWeight: 'bold' }}>
-                  Seçimi Kullan
+                <Text style={{ color: colors.onPrimary, fontFamily: tStyles.fontFamily, fontSize: 14 * m, fontWeight: 'bold' }}>
+                  Tamam
                 </Text>
               </TouchableOpacity>
             </View>
@@ -1480,15 +1565,14 @@ const styles = StyleSheet.create({
   parseOcrBtn: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', paddingVertical: 9 },
 
   // İkon & Marka Kataloğu Stilleri
-  brandGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, paddingVertical: 6, justifyContent: 'space-between' },
-  brandGridCard: { width: '31%', padding: 10, alignItems: 'center', marginBottom: 6 },
-  brandLogoCircle: { width: 44, height: 44, borderRadius: 22, justifyContent: 'center', alignItems: 'center' },
-  colorDot: { width: 30, height: 30, borderRadius: 15, marginRight: 10, justifyContent: 'center', alignItems: 'center' },
-  iconCatTab: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12, paddingVertical: 7, marginRight: 8 },
-  iconGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, justifyContent: 'flex-start', paddingVertical: 6 },
-  gridIconBtn: { width: '22%', height: 48, justifyContent: 'center', alignItems: 'center' },
+  brandGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, paddingVertical: 6, justifyContent: 'flex-start' },
+  brandGridCard: { width: '23%', paddingVertical: 8, paddingHorizontal: 4, alignItems: 'center', marginBottom: 6, borderWidth: 1.5, borderColor: 'transparent' },
+  brandLogoCircle: { width: 38, height: 38, borderRadius: 19, justifyContent: 'center', alignItems: 'center' },
+  colorDot: { width: 28, height: 28, borderRadius: 14, marginRight: 8, justifyContent: 'center', alignItems: 'center' },
+  iconCatTab: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12, paddingVertical: 6, marginRight: 6 },
+  paisaIconChip: { width: 42, height: 42, borderRadius: 21, justifyContent: 'center', alignItems: 'center' },
   resetIconBtn: { flex: 1, alignItems: 'center', paddingVertical: 12 },
-  confirmIconBtn: { flex: 1, alignItems: 'center', paddingVertical: 12 },
+  confirmIconBtn: { flex: 1.4, alignItems: 'center', paddingVertical: 12 },
 
   // Modal Stilleri
   modalBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },

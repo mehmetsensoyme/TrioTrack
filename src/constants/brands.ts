@@ -7,6 +7,8 @@ export interface BrandItem {
   color: string;
   defaultCategoryKeyword: string;
   keywords: string[];
+  vectorIcon?: string;
+  monogram?: string;
 }
 
 export const BRAND_CATEGORIES = [
@@ -22,7 +24,7 @@ export const BRAND_CATEGORIES = [
 
 // Google yüksek çözünürlüklü Favicon & Touch Icon CDN API'si (128px PNG, kesintisiz, hızlı)
 const getCdnUrl = (domain: string) => 
-  `https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=http://${domain}&size=128`;
+  `https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://${domain}&size=128`;
 
 export const POPULAR_BRANDS: BrandItem[] = [
   // 🌟 ABONELİK & MEDYA
@@ -34,7 +36,9 @@ export const POPULAR_BRANDS: BrandItem[] = [
     logoUrl: getCdnUrl('netflix.com'),
     color: '#E50914',
     defaultCategoryKeyword: 'eğlence',
-    keywords: ['netflix', 'netfllx', 'nflx']
+    keywords: ['netflix', 'netfllx', 'nflx'],
+    vectorIcon: 'play-circle',
+    monogram: 'N'
   },
   {
     id: 'spotify',
@@ -44,7 +48,9 @@ export const POPULAR_BRANDS: BrandItem[] = [
     logoUrl: getCdnUrl('spotify.com'),
     color: '#1DB954',
     defaultCategoryKeyword: 'eğlence',
-    keywords: ['spotify', 'spotıfy']
+    keywords: ['spotify', 'spotıfy'],
+    vectorIcon: 'musical-notes',
+    monogram: 'S'
   },
   {
     id: 'youtube',
@@ -54,7 +60,9 @@ export const POPULAR_BRANDS: BrandItem[] = [
     logoUrl: getCdnUrl('youtube.com'),
     color: '#FF0000',
     defaultCategoryKeyword: 'eğlence',
-    keywords: ['youtube', 'google youtube', 'yt premium']
+    keywords: ['youtube', 'google youtube', 'yt premium'],
+    vectorIcon: 'logo-youtube',
+    monogram: 'YT'
   },
   {
     id: 'disney',
@@ -64,7 +72,9 @@ export const POPULAR_BRANDS: BrandItem[] = [
     logoUrl: getCdnUrl('disneyplus.com'),
     color: '#113CCF',
     defaultCategoryKeyword: 'eğlence',
-    keywords: ['disney', 'disney+', 'disneyplus']
+    keywords: ['disney', 'disney+', 'disneyplus'],
+    vectorIcon: 'sparkles',
+    monogram: 'D+'
   },
   {
     id: 'amazon_prime',
@@ -74,7 +84,9 @@ export const POPULAR_BRANDS: BrandItem[] = [
     logoUrl: getCdnUrl('primevideo.com'),
     color: '#00A8E1',
     defaultCategoryKeyword: 'eğlence',
-    keywords: ['prime video', 'amazon prime', 'primevideo']
+    keywords: ['prime video', 'amazon prime', 'primevideo'],
+    vectorIcon: 'logo-amazon',
+    monogram: 'P'
   },
   {
     id: 'blutv',
@@ -84,7 +96,9 @@ export const POPULAR_BRANDS: BrandItem[] = [
     logoUrl: getCdnUrl('blutv.com'),
     color: '#0099FF',
     defaultCategoryKeyword: 'eğlence',
-    keywords: ['blutv', 'blu tv']
+    keywords: ['blutv', 'blu tv'],
+    vectorIcon: 'tv',
+    monogram: 'BLU'
   },
   {
     id: 'gain',
@@ -94,7 +108,21 @@ export const POPULAR_BRANDS: BrandItem[] = [
     logoUrl: getCdnUrl('gain.tv'),
     color: '#FFD200',
     defaultCategoryKeyword: 'eğlence',
-    keywords: ['gain', 'gain tv']
+    keywords: ['gain', 'gain tv'],
+    vectorIcon: 'film',
+    monogram: 'G'
+  },
+  {
+    id: 'exxen',
+    name: 'Exxen',
+    category: 'Abonelik & Medya',
+    domain: 'exxen.com',
+    logoUrl: getCdnUrl('exxen.com'),
+    color: '#FFC800',
+    defaultCategoryKeyword: 'eğlence',
+    keywords: ['exxen', 'acun'],
+    vectorIcon: 'play-circle',
+    monogram: 'EXX'
   },
 
   // 🛒 MARKET & ALIŞVERİŞ
@@ -106,7 +134,9 @@ export const POPULAR_BRANDS: BrandItem[] = [
     logoUrl: getCdnUrl('migros.com.tr'),
     color: '#F37021',
     defaultCategoryKeyword: 'market',
-    keywords: ['migros', 'migros ticaret', 'macrocenter', 'mjet', '5m migros']
+    keywords: ['migros', 'migros ticaret', 'macrocenter', 'mjet', '5m migros'],
+    vectorIcon: 'cart',
+    monogram: 'M'
   },
   {
     id: 'bim',
@@ -116,7 +146,9 @@ export const POPULAR_BRANDS: BrandItem[] = [
     logoUrl: getCdnUrl('bim.com.tr'),
     color: '#E20613',
     defaultCategoryKeyword: 'market',
-    keywords: ['bim', 'bim birleşik', 'bim magaza', 'bim market']
+    keywords: ['bim', 'bim birleşik', 'bim magaza', 'bim market'],
+    vectorIcon: 'basket',
+    monogram: 'BİM'
   },
   {
     id: 'a101',
@@ -126,17 +158,21 @@ export const POPULAR_BRANDS: BrandItem[] = [
     logoUrl: getCdnUrl('a101.com.tr'),
     color: '#00ADEF',
     defaultCategoryKeyword: 'market',
-    keywords: ['a101', 'a-101', 'yeni magazacilik', 'a 101']
+    keywords: ['a101', 'a-101', 'yeni magazacilik', 'a 101'],
+    vectorIcon: 'cart',
+    monogram: 'A101'
   },
   {
     id: 'sok',
     name: 'ŞOK Market',
     category: 'Market & Alışveriş',
-    domain: 'sokmarket.com.tr',
-    logoUrl: getCdnUrl('sokmarket.com.tr'),
+    domain: 'www.sokmarket.com.tr',
+    logoUrl: getCdnUrl('www.sokmarket.com.tr'),
     color: '#E30613',
     defaultCategoryKeyword: 'market',
-    keywords: ['şok', 'sok', 'şok market', 'sok marketler']
+    keywords: ['şok', 'sok', 'şok market', 'sok marketler'],
+    vectorIcon: 'cart',
+    monogram: 'ŞOK'
   },
   {
     id: 'carrefoursa',
@@ -146,7 +182,9 @@ export const POPULAR_BRANDS: BrandItem[] = [
     logoUrl: getCdnUrl('carrefoursa.com'),
     color: '#004F9F',
     defaultCategoryKeyword: 'market',
-    keywords: ['carrefour', 'carrefoursa', 'carrefour sa']
+    keywords: ['carrefour', 'carrefoursa', 'carrefour sa'],
+    vectorIcon: 'cart',
+    monogram: 'C'
   },
   {
     id: 'trendyol',
@@ -156,7 +194,9 @@ export const POPULAR_BRANDS: BrandItem[] = [
     logoUrl: getCdnUrl('trendyol.com'),
     color: '#F27A1A',
     defaultCategoryKeyword: 'alışveriş',
-    keywords: ['trendyol', 'dsm grup', 'trendyol yemek', 'trendyol hizli market']
+    keywords: ['trendyol', 'dsm grup', 'trendyol yemek', 'trendyol hizli market'],
+    vectorIcon: 'bag-handle',
+    monogram: 'TY'
   },
   {
     id: 'hepsiburada',
@@ -166,7 +206,9 @@ export const POPULAR_BRANDS: BrandItem[] = [
     logoUrl: getCdnUrl('hepsiburada.com'),
     color: '#FF6000',
     defaultCategoryKeyword: 'alışveriş',
-    keywords: ['hepsiburada', 'd-market']
+    keywords: ['hepsiburada', 'd-market'],
+    vectorIcon: 'bag-handle',
+    monogram: 'HB'
   },
   {
     id: 'amazon_tr',
@@ -176,7 +218,9 @@ export const POPULAR_BRANDS: BrandItem[] = [
     logoUrl: getCdnUrl('amazon.com.tr'),
     color: '#FF9900',
     defaultCategoryKeyword: 'alışveriş',
-    keywords: ['amazon', 'amazon turkey', 'amazon com tr']
+    keywords: ['amazon', 'amazon turkey', 'amazon com tr'],
+    vectorIcon: 'logo-amazon',
+    monogram: 'AMZ'
   },
   {
     id: 'getir',
@@ -186,7 +230,9 @@ export const POPULAR_BRANDS: BrandItem[] = [
     logoUrl: getCdnUrl('getir.com'),
     color: '#5D3EBC',
     defaultCategoryKeyword: 'market',
-    keywords: ['getir', 'getir perakende', 'getir buyuk']
+    keywords: ['getir', 'getir perakende', 'getir buyuk'],
+    vectorIcon: 'basket',
+    monogram: 'GTR'
   },
   {
     id: 'ikea',
@@ -196,7 +242,9 @@ export const POPULAR_BRANDS: BrandItem[] = [
     logoUrl: getCdnUrl('ikea.com.tr'),
     color: '#0058A3',
     defaultCategoryKeyword: 'ev',
-    keywords: ['ikea', 'mapa mobilya']
+    keywords: ['ikea', 'mapa mobilya'],
+    vectorIcon: 'home',
+    monogram: 'IKEA'
   },
   {
     id: 'zara',
@@ -206,7 +254,9 @@ export const POPULAR_BRANDS: BrandItem[] = [
     logoUrl: getCdnUrl('zara.com'),
     color: '#111111',
     defaultCategoryKeyword: 'giyim',
-    keywords: ['zara', 'inditex', 'zara giyim']
+    keywords: ['zara', 'inditex', 'zara giyim'],
+    vectorIcon: 'shirt',
+    monogram: 'ZARA'
   },
 
   // ☕ YEMEK & KAFE
@@ -218,7 +268,9 @@ export const POPULAR_BRANDS: BrandItem[] = [
     logoUrl: getCdnUrl('starbucks.com'),
     color: '#006241',
     defaultCategoryKeyword: 'yemek',
-    keywords: ['starbucks', 'shaya kahve', 'starbucks coffee']
+    keywords: ['starbucks', 'shaya kahve', 'starbucks coffee'],
+    vectorIcon: 'cafe',
+    monogram: 'SB'
   },
   {
     id: 'yemeksepeti',
@@ -228,7 +280,9 @@ export const POPULAR_BRANDS: BrandItem[] = [
     logoUrl: getCdnUrl('yemeksepeti.com'),
     color: '#EA004B',
     defaultCategoryKeyword: 'yemek',
-    keywords: ['yemeksepeti', 'yemek sepeti', 'delivery hero']
+    keywords: ['yemeksepeti', 'yemek sepeti', 'delivery hero'],
+    vectorIcon: 'fast-food',
+    monogram: 'YS'
   },
   {
     id: 'mcdonalds',
@@ -238,7 +292,9 @@ export const POPULAR_BRANDS: BrandItem[] = [
     logoUrl: getCdnUrl('mcdonalds.com'),
     color: '#FFBC0D',
     defaultCategoryKeyword: 'yemek',
-    keywords: ['mcdonalds', 'mc donalds', 'anadolu restoran']
+    keywords: ['mcdonalds', 'mc donalds', 'anadolu restoran'],
+    vectorIcon: 'fast-food',
+    monogram: 'M'
   },
   {
     id: 'burgerking',
@@ -248,7 +304,9 @@ export const POPULAR_BRANDS: BrandItem[] = [
     logoUrl: getCdnUrl('burgerking.com.tr'),
     color: '#D62300',
     defaultCategoryKeyword: 'yemek',
-    keywords: ['burger king', 'tab gıda', 'tab gida']
+    keywords: ['burger king', 'tab gıda', 'tab gida'],
+    vectorIcon: 'fast-food',
+    monogram: 'BK'
   },
   {
     id: 'dominos',
@@ -258,7 +316,9 @@ export const POPULAR_BRANDS: BrandItem[] = [
     logoUrl: getCdnUrl('dominos.com.tr'),
     color: '#006491',
     defaultCategoryKeyword: 'yemek',
-    keywords: ['dominos', "domino's", 'dp avrasya']
+    keywords: ['dominos', "domino's", 'dp avrasya'],
+    vectorIcon: 'pizza',
+    monogram: 'DOM'
   },
   {
     id: 'kahvedunyasi',
@@ -268,7 +328,9 @@ export const POPULAR_BRANDS: BrandItem[] = [
     logoUrl: getCdnUrl('kahvedunyasi.com'),
     color: '#4A2511',
     defaultCategoryKeyword: 'yemek',
-    keywords: ['kahve dünyası', 'kahve dunyasi', 'altınmarka']
+    keywords: ['kahve dünyası', 'kahve dunyasi', 'altınmarka'],
+    vectorIcon: 'cafe',
+    monogram: 'KD'
   },
   {
     id: 'espressolab',
@@ -278,7 +340,9 @@ export const POPULAR_BRANDS: BrandItem[] = [
     logoUrl: getCdnUrl('espressolab.com'),
     color: '#222222',
     defaultCategoryKeyword: 'yemek',
-    keywords: ['espressolab', 'espresso lab']
+    keywords: ['espressolab', 'espresso lab'],
+    vectorIcon: 'cafe',
+    monogram: 'EL'
   },
 
   // ⚡ FATURA & OPERATÖR
@@ -290,7 +354,9 @@ export const POPULAR_BRANDS: BrandItem[] = [
     logoUrl: getCdnUrl('turkcell.com.tr'),
     color: '#002855',
     defaultCategoryKeyword: 'fatura',
-    keywords: ['turkcell', 'turkcell iletisim']
+    keywords: ['turkcell', 'turkcell iletisim'],
+    vectorIcon: 'call',
+    monogram: 'TC'
   },
   {
     id: 'vodafone',
@@ -300,7 +366,9 @@ export const POPULAR_BRANDS: BrandItem[] = [
     logoUrl: getCdnUrl('vodafone.com.tr'),
     color: '#E60000',
     defaultCategoryKeyword: 'fatura',
-    keywords: ['vodafone', 'vodafone telekomunikasyon']
+    keywords: ['vodafone', 'vodafone telekomunikasyon'],
+    vectorIcon: 'call',
+    monogram: 'VF'
   },
   {
     id: 'turktelekom',
@@ -310,7 +378,9 @@ export const POPULAR_BRANDS: BrandItem[] = [
     logoUrl: getCdnUrl('turktelekom.com.tr'),
     color: '#002D72',
     defaultCategoryKeyword: 'fatura',
-    keywords: ['türk telekom', 'turk telekom', 'ttnet']
+    keywords: ['türk telekom', 'turk telekom', 'ttnet'],
+    vectorIcon: 'call',
+    monogram: 'TT'
   },
   {
     id: 'enerjisa',
@@ -320,7 +390,9 @@ export const POPULAR_BRANDS: BrandItem[] = [
     logoUrl: getCdnUrl('enerjisa.com.tr'),
     color: '#003B46',
     defaultCategoryKeyword: 'fatura',
-    keywords: ['enerjisa', 'ayedaş', 'toroslar', 'baskent']
+    keywords: ['enerjisa', 'ayedaş', 'toroslar', 'baskent'],
+    vectorIcon: 'flash',
+    monogram: 'ENJ'
   },
   {
     id: 'igdas',
@@ -330,7 +402,9 @@ export const POPULAR_BRANDS: BrandItem[] = [
     logoUrl: getCdnUrl('igdas.istanbul'),
     color: '#1B365D',
     defaultCategoryKeyword: 'fatura',
-    keywords: ['igdas', 'i̇gdaş', 'istanbul gaz']
+    keywords: ['igdas', 'i̇gdaş', 'istanbul gaz'],
+    vectorIcon: 'flame',
+    monogram: 'İGDAŞ'
   },
   {
     id: 'iski',
@@ -340,7 +414,9 @@ export const POPULAR_BRANDS: BrandItem[] = [
     logoUrl: getCdnUrl('iski.istanbul'),
     color: '#0066B3',
     defaultCategoryKeyword: 'fatura',
-    keywords: ['iski', 'i̇ski̇', 'istanbul su']
+    keywords: ['iski', 'i̇ski̇', 'istanbul su'],
+    vectorIcon: 'water',
+    monogram: 'İSKİ'
   },
 
   // 🚗 ULAŞIM & AKARYAKIT
@@ -352,7 +428,9 @@ export const POPULAR_BRANDS: BrandItem[] = [
     logoUrl: getCdnUrl('shell.com.tr'),
     color: '#FBCE07',
     defaultCategoryKeyword: 'ulaşım',
-    keywords: ['shell', 'shell petrol', 'turcas']
+    keywords: ['shell', 'shell petrol', 'turcas'],
+    vectorIcon: 'speedometer',
+    monogram: 'SHL'
   },
   {
     id: 'opet',
@@ -362,7 +440,9 @@ export const POPULAR_BRANDS: BrandItem[] = [
     logoUrl: getCdnUrl('opet.com.tr'),
     color: '#0C2340',
     defaultCategoryKeyword: 'ulaşım',
-    keywords: ['opet', 'opet petrolcülük']
+    keywords: ['opet', 'opet petrolcülük'],
+    vectorIcon: 'speedometer',
+    monogram: 'OPT'
   },
   {
     id: 'petrolofisi',
@@ -372,7 +452,9 @@ export const POPULAR_BRANDS: BrandItem[] = [
     logoUrl: getCdnUrl('petrolofisi.com.tr'),
     color: '#ED1C24',
     defaultCategoryKeyword: 'ulaşım',
-    keywords: ['petrol ofisi', 'po petrol']
+    keywords: ['petrol ofisi', 'po petrol'],
+    vectorIcon: 'speedometer',
+    monogram: 'PO'
   },
   {
     id: 'uber',
@@ -382,7 +464,9 @@ export const POPULAR_BRANDS: BrandItem[] = [
     logoUrl: getCdnUrl('uber.com'),
     color: '#1A1A1A',
     defaultCategoryKeyword: 'ulaşım',
-    keywords: ['uber', 'uber bv', 'uber trip']
+    keywords: ['uber', 'uber bv', 'uber trip'],
+    vectorIcon: 'car',
+    monogram: 'UBER'
   },
   {
     id: 'bitaksi',
@@ -392,7 +476,9 @@ export const POPULAR_BRANDS: BrandItem[] = [
     logoUrl: getCdnUrl('bitaksi.com'),
     color: '#FCD116',
     defaultCategoryKeyword: 'ulaşım',
-    keywords: ['bitaksi', 'bi taksi']
+    keywords: ['bitaksi', 'bi taksi'],
+    vectorIcon: 'car',
+    monogram: 'BTX'
   },
   {
     id: 'marti',
@@ -402,7 +488,9 @@ export const POPULAR_BRANDS: BrandItem[] = [
     logoUrl: getCdnUrl('marti.tech'),
     color: '#00D26A',
     defaultCategoryKeyword: 'ulaşım',
-    keywords: ['martı', 'marti', 'marti tag', 'martı tag']
+    keywords: ['martı', 'marti', 'marti tag', 'martı tag'],
+    vectorIcon: 'bicycle',
+    monogram: 'MRTI'
   },
   {
     id: 'thy',
@@ -412,7 +500,9 @@ export const POPULAR_BRANDS: BrandItem[] = [
     logoUrl: getCdnUrl('turkishairlines.com'),
     color: '#E81932',
     defaultCategoryKeyword: 'ulaşım',
-    keywords: ['thy', 'türk hava yolları', 'turkish airlines']
+    keywords: ['thy', 'türk hava yolları', 'turkish airlines'],
+    vectorIcon: 'airplane',
+    monogram: 'THY'
   },
   {
     id: 'pegasus',
@@ -422,7 +512,9 @@ export const POPULAR_BRANDS: BrandItem[] = [
     logoUrl: getCdnUrl('flypgs.com'),
     color: '#EF7C00',
     defaultCategoryKeyword: 'ulaşım',
-    keywords: ['pegasus', 'flypgs', 'pegasus hava']
+    keywords: ['pegasus', 'flypgs', 'pegasus hava'],
+    vectorIcon: 'airplane',
+    monogram: 'PGS'
   },
 
   // 🎮 OYUN & TEKNOLOJİ
@@ -434,7 +526,9 @@ export const POPULAR_BRANDS: BrandItem[] = [
     logoUrl: getCdnUrl('apple.com'),
     color: '#555555',
     defaultCategoryKeyword: 'teknoloji',
-    keywords: ['apple', 'itunes', 'app store', 'apple.com/bill']
+    keywords: ['apple', 'itunes', 'app store', 'apple.com/bill'],
+    vectorIcon: 'logo-apple',
+    monogram: 'AAPL'
   },
   {
     id: 'google',
@@ -444,7 +538,9 @@ export const POPULAR_BRANDS: BrandItem[] = [
     logoUrl: getCdnUrl('google.com'),
     color: '#4285F4',
     defaultCategoryKeyword: 'teknoloji',
-    keywords: ['google', 'google play', 'google storage']
+    keywords: ['google', 'google play', 'google storage'],
+    vectorIcon: 'logo-google',
+    monogram: 'GOOG'
   },
   {
     id: 'openai',
@@ -454,17 +550,21 @@ export const POPULAR_BRANDS: BrandItem[] = [
     logoUrl: getCdnUrl('openai.com'),
     color: '#10A37F',
     defaultCategoryKeyword: 'teknoloji',
-    keywords: ['openai', 'chatgpt', 'chatgpt plus']
+    keywords: ['openai', 'chatgpt', 'chatgpt plus'],
+    vectorIcon: 'hardware-chip',
+    monogram: 'AI'
   },
   {
     id: 'steam',
     name: 'Steam',
     category: 'Oyun & Teknoloji',
-    domain: 'store.steampowered.com',
-    logoUrl: getCdnUrl('store.steampowered.com'),
+    domain: 'steampowered.com',
+    logoUrl: getCdnUrl('steampowered.com'),
     color: '#171A21',
     defaultCategoryKeyword: 'eğlence',
-    keywords: ['steam', 'valve', 'steampowered']
+    keywords: ['steam', 'valve', 'steampowered'],
+    vectorIcon: 'logo-steam',
+    monogram: 'STM'
   },
   {
     id: 'playstation',
@@ -474,7 +574,9 @@ export const POPULAR_BRANDS: BrandItem[] = [
     logoUrl: getCdnUrl('playstation.com'),
     color: '#003791',
     defaultCategoryKeyword: 'eğlence',
-    keywords: ['playstation', 'ps store', 'sony interactive']
+    keywords: ['playstation', 'ps store', 'sony interactive'],
+    vectorIcon: 'logo-playstation',
+    monogram: 'PS'
   },
 
   // 💳 BANKA & FİNANS
@@ -486,7 +588,9 @@ export const POPULAR_BRANDS: BrandItem[] = [
     logoUrl: getCdnUrl('papara.com'),
     color: '#6610F2',
     defaultCategoryKeyword: 'finans',
-    keywords: ['papara', 'papara elektronik']
+    keywords: ['papara', 'papara elektronik'],
+    vectorIcon: 'card',
+    monogram: 'PPR'
   },
   {
     id: 'garanti',
@@ -496,7 +600,9 @@ export const POPULAR_BRANDS: BrandItem[] = [
     logoUrl: getCdnUrl('garantibbva.com.tr'),
     color: '#00693E',
     defaultCategoryKeyword: 'finans',
-    keywords: ['garanti', 'garanti bbva']
+    keywords: ['garanti', 'garanti bbva'],
+    vectorIcon: 'card',
+    monogram: 'GBB'
   },
   {
     id: 'isbank',
@@ -506,7 +612,9 @@ export const POPULAR_BRANDS: BrandItem[] = [
     logoUrl: getCdnUrl('isbank.com.tr'),
     color: '#002B49',
     defaultCategoryKeyword: 'finans',
-    keywords: ['iş bankası', 'isbank', 'is bankasi', 'türkiye iş']
+    keywords: ['iş bankası', 'isbank', 'is bankasi', 'türkiye iş'],
+    vectorIcon: 'card',
+    monogram: 'İŞ'
   },
   {
     id: 'yapikredi',
@@ -516,7 +624,9 @@ export const POPULAR_BRANDS: BrandItem[] = [
     logoUrl: getCdnUrl('yapikredi.com.tr'),
     color: '#003399',
     defaultCategoryKeyword: 'finans',
-    keywords: ['yapı kredi', 'yapi kredi', 'ykb']
+    keywords: ['yapı kredi', 'yapi kredi', 'ykb'],
+    vectorIcon: 'card',
+    monogram: 'YKB'
   },
   {
     id: 'akbank',
@@ -526,7 +636,9 @@ export const POPULAR_BRANDS: BrandItem[] = [
     logoUrl: getCdnUrl('akbank.com'),
     color: '#E30A17',
     defaultCategoryKeyword: 'finans',
-    keywords: ['akbank', 'akbank t.a.ş.']
+    keywords: ['akbank', 'akbank t.a.ş.'],
+    vectorIcon: 'card',
+    monogram: 'AKB'
   },
   {
     id: 'ziraat',
@@ -536,7 +648,9 @@ export const POPULAR_BRANDS: BrandItem[] = [
     logoUrl: getCdnUrl('ziraatbank.com.tr'),
     color: '#E30613',
     defaultCategoryKeyword: 'finans',
-    keywords: ['ziraat', 'ziraat bankası']
+    keywords: ['ziraat', 'ziraat bankası'],
+    vectorIcon: 'card',
+    monogram: 'ZRT'
   },
   {
     id: 'enpara',
@@ -546,7 +660,9 @@ export const POPULAR_BRANDS: BrandItem[] = [
     logoUrl: getCdnUrl('enpara.com'),
     color: '#722282',
     defaultCategoryKeyword: 'finans',
-    keywords: ['enpara', 'enpara.com', 'qnb enpara']
+    keywords: ['enpara', 'enpara.com', 'qnb enpara'],
+    vectorIcon: 'card',
+    monogram: 'ENP'
   }
 ];
 
