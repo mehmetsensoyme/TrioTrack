@@ -24,7 +24,9 @@ import {
   PAISA_CORE_CATEGORIES, 
   PAISA_EXTENDED_CATEGORIES, 
   searchPaisaIcons, 
-  PaisaIconItem 
+  PaisaIconItem,
+  PaisaCategoryGroup,
+  VECTOR_CATEGORY_NAMES
 } from '../constants/paisaIcons';
 import { scanReceiptWithOcrSpace, parseReceiptText, ParsedReceiptData } from '../utils/ocrService';
 
@@ -138,6 +140,7 @@ export default function AddExpenseScreen({ navigation }: any) {
   const [showIconModal, setShowIconModal] = useState(false);
   const [iconModalTab, setIconModalTab] = useState<'brands' | 'icons'>('brands');
   const [selectedBrandCategory, setSelectedBrandCategory] = useState<string>('Tümü');
+  const [selectedVectorCategory, setSelectedVectorCategory] = useState<string>('Tümü');
   const [showMoreIcons, setShowMoreIcons] = useState(false);
   const [iconSearchQuery, setIconSearchQuery] = useState('');
 
@@ -1301,8 +1304,26 @@ export default function AddExpenseScreen({ navigation }: any) {
                   </ScrollView>
                 </View>
 
+                {/* Vektörel Simge Kategori Filtre Çipleri */}
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 10, maxHeight: 36 }}>
+                  {VECTOR_CATEGORY_NAMES.map(vCat => (
+                    <TouchableOpacity
+                      key={vCat}
+                      style={[
+                        styles.iconCatTab,
+                        { backgroundColor: selectedVectorCategory === vCat ? colors.primary : colors.background, borderRadius: 16 }
+                      ]}
+                      onPress={() => setSelectedVectorCategory(vCat)}
+                    >
+                      <Text style={{ color: selectedVectorCategory === vCat ? colors.onPrimary : colors.text, fontFamily: tStyles.fontFamily, fontSize: 11 * m, fontWeight: 'bold' }}>
+                        {vCat}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+
                 {/* Paisa Tarzı Vektörel İkon Listesi */}
-                <ScrollView style={{ maxHeight: 270 }} showsVerticalScrollIndicator={false}>
+                <ScrollView style={{ maxHeight: 260 }} showsVerticalScrollIndicator={false}>
                   {iconSearchQuery.trim() ? (
                     /* Arama Sonuçları */
                     <View>
@@ -1310,7 +1331,7 @@ export default function AddExpenseScreen({ navigation }: any) {
                         Arama Sonuçları ({searchPaisaIcons(iconSearchQuery).length})
                       </Text>
                       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
-                        {searchPaisaIcons(iconSearchQuery).map(item => {
+                        {searchPaisaIcons(iconSearchQuery).map((item: PaisaIconItem) => {
                           const isSelected = customIcon === item.icon;
                           const activeCol = customColor || item.brandColor || colors.primary;
                           return (
@@ -1336,39 +1357,49 @@ export default function AddExpenseScreen({ navigation }: any) {
                       </View>
                     </View>
                   ) : (
-                    /* Paisa Kategorileri (Core 10 Kategori + Show More Durumunda Genişletilmiş) */
-                    (showMoreIcons ? [...PAISA_CORE_CATEGORIES, ...PAISA_EXTENDED_CATEGORIES] : PAISA_CORE_CATEGORIES).map(cat => (
-                      <View key={cat.id} style={{ marginBottom: 14 }}>
-                        <Text style={{ color: colors.primary, fontFamily: tStyles.fontFamily, fontSize: 12.5 * m, fontWeight: 'bold', marginBottom: 8 }}>
-                          {cat.englishName}
-                        </Text>
-                        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
-                          {cat.icons.map(item => {
-                            const isSelected = customIcon === item.icon;
-                            const activeCol = customColor || item.brandColor || colors.primary;
-                            return (
-                              <TouchableOpacity
-                                key={item.id}
-                                style={[
-                                  styles.paisaIconChip,
-                                  { backgroundColor: isSelected ? activeCol : (isDark ? '#2A2421' : '#F3EDE8') },
-                                  isSelected && { borderWidth: 2, borderColor: colors.text }
-                                ]}
-                                onPress={() => handleSelectPaisaIcon(item)}
-                              >
-                                {item.monogram ? (
-                                  <Text style={{ fontFamily: tStyles.fontFamily, fontWeight: 'bold', fontSize: 17 * m, color: isSelected ? colors.onPrimary : (item.brandColor || colors.text) }}>
-                                    {item.monogram}
-                                  </Text>
-                                ) : (
-                                  <Ionicons name={item.icon as any} size={20} color={isSelected ? colors.onPrimary : (item.isBrand && item.brandColor ? item.brandColor : colors.text)} />
-                                )}
-                              </TouchableOpacity>
-                            );
-                          })}
+                    /* Paisa Kategorileri (Core Kategori + Show More veya Seçili Kategoriye göre) */
+                    (() => {
+                      const allCats: PaisaCategoryGroup[] = [...PAISA_CORE_CATEGORIES, ...PAISA_EXTENDED_CATEGORIES];
+                      const displayCats: PaisaCategoryGroup[] = selectedVectorCategory === 'Tümü'
+                        ? (showMoreIcons ? allCats : PAISA_CORE_CATEGORIES)
+                        : allCats.filter((c: PaisaCategoryGroup) => c.name === selectedVectorCategory);
+
+                      return displayCats.map((cat: PaisaCategoryGroup) => (
+                        <View key={cat.id} style={{ marginBottom: 14 }}>
+                          <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8, gap: 6 }}>
+                            <Ionicons name={cat.icon as any} size={15} color={colors.primary} />
+                            <Text style={{ color: colors.primary, fontFamily: tStyles.fontFamily, fontSize: 12.5 * m, fontWeight: 'bold' }}>
+                              {cat.name} <Text style={{ opacity: 0.6, fontWeight: 'normal', fontSize: 11 * m }}>({cat.englishName})</Text>
+                            </Text>
+                          </View>
+                          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
+                            {cat.icons.map((item: PaisaIconItem) => {
+                              const isSelected = customIcon === item.icon;
+                              const activeCol = customColor || item.brandColor || colors.primary;
+                              return (
+                                <TouchableOpacity
+                                  key={item.id}
+                                  style={[
+                                    styles.paisaIconChip,
+                                    { backgroundColor: isSelected ? activeCol : (isDark ? '#2A2421' : '#F3EDE8') },
+                                    isSelected && { borderWidth: 2, borderColor: colors.text }
+                                  ]}
+                                  onPress={() => handleSelectPaisaIcon(item)}
+                                >
+                                  {item.monogram ? (
+                                    <Text style={{ fontFamily: tStyles.fontFamily, fontWeight: 'bold', fontSize: 17 * m, color: isSelected ? colors.onPrimary : (item.brandColor || colors.text) }}>
+                                      {item.monogram}
+                                    </Text>
+                                  ) : (
+                                    <Ionicons name={item.icon as any} size={20} color={isSelected ? colors.onPrimary : (item.isBrand && item.brandColor ? item.brandColor : colors.text)} />
+                                  )}
+                                </TouchableOpacity>
+                              );
+                            })}
+                          </View>
                         </View>
-                      </View>
-                    ))
+                      ));
+                    })()
                   )}
                 </ScrollView>
               </View>
