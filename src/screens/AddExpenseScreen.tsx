@@ -10,12 +10,17 @@ import {
   Modal, 
   Animated, 
   Easing,
-  ActivityIndicator 
+  ActivityIndicator,
+  Image,
+  TouchableWithoutFeedback
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
 import { useTheme } from '../theme/ThemeContext';
 import { useData } from '../context/DataContext';
+import { POPULAR_BRANDS, BRAND_CATEGORIES, BrandItem } from '../constants/brands';
+import { scanReceiptWithOcrSpace, parseReceiptText, ParsedReceiptData } from '../utils/ocrService';
 
 // Paisa Tarzı Zengin İkon Kategorileri
 const ICON_CATEGORIES: { name: string; icon: any; icons: string[] }[] = [
@@ -126,18 +131,23 @@ export default function AddExpenseScreen({ navigation }: any) {
   const [title, setTitle] = useState('');
   const [note, setNote] = useState('');
 
-  // Logo & Özel Simge
+  // Logo & Marka CDN & Özel Simge
+  const [brandLogoUrl, setBrandLogoUrl] = useState<string | null>(null);
   const [customIcon, setCustomIcon] = useState<string | null>(null);
   const [customColor, setCustomColor] = useState<string | null>(null);
   const [showIconModal, setShowIconModal] = useState(false);
+  const [iconModalTab, setIconModalTab] = useState<'brands' | 'icons'>('brands');
+  const [selectedBrandCategory, setSelectedBrandCategory] = useState<string>('Tümü');
   const [activeIconCatIndex, setActiveIconCatIndex] = useState(0);
 
-  // Fiş / Fatura & OCR
+  // Fiş / Fatura & Gerçek Kamera & OCR
+  const [receiptImageUri, setReceiptImageUri] = useState<string | null>(null);
   const [receiptNo, setReceiptNo] = useState('');
   const [receiptAttached, setReceiptAttached] = useState(false);
   const [receiptStoreName, setReceiptStoreName] = useState('');
   const [showReceiptScanner, setShowReceiptScanner] = useState(false);
   const [isScanningOCR, setIsScanningOCR] = useState(false);
+  const [ocrStatusText, setOcrStatusText] = useState('');
   const [manualOCRInput, setManualOCRInput] = useState('');
 
   // Tarayıcı animasyonu
@@ -188,6 +198,137 @@ export default function AddExpenseScreen({ navigation }: any) {
     }
   }, [showReceiptScanner, scanAnim]);
 
+  // Kamera ile Doğrudan Fiş Çekme ve Canlı OCR
+  const handleCaptureWithCamera = async () => {
+    try {
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Kamera İzni Gerekli', 'Fiş ve faturalarınızı doğrudan kamera ile taramak için lütfen kamera erişim izni verin.');
+        return;
+      }
+      const result = await ImagePicker.launchCameraAsync({
+        allowsEditing: true,
+        quality: 0.7,
+        base64: true,
+      });
+
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        const asset = result.assets[0];
+        setReceiptImageUri(asset.uri);
+        setReceiptAttached(true);
+        setShowReceiptScanner(true);
+        await processReceiptOcr(asset.base64, asset.uri);
+      }
+    } catch (err: any) {
+      Alert.alert('Kamera Hatası', err?.message || 'Kamera açılırken bir sorun oluştu.');
+    }
+  };
+
+  // Galeriden Fiş / Fatura Seçme ve Canlı OCR
+  const handlePickFromGallery = async () => {
+    try {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Galeri İzni Gerekli', 'Fiş görseli yüklemek için lütfen fotoğraf kitaplığı izni verin.');
+        return;
+      }
+      const result = await ImagePicker.launchImageLibraryAsync({
+        allowsEditing: true,
+        quality: 0.7,
+        base64: true,
+      });
+
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        const asset = result.assets[0];
+        setReceiptImageUri(asset.uri);
+        setReceiptAttached(true);
+        setShowReceiptScanner(true);
+        await processReceiptOcr(asset.base64, asset.uri);
+      }
+    } catch (err: any) {
+      Alert.alert('Galeri Hatası', err?.message || 'Görsel seçilirken bir sorun oluştu.');
+    }
+  };
+
+  // Fiş Görselini OCR Motoru ile Ayrıştırma
+  const processReceiptOcr = async (base64?: string | null, imgUri?: string) => {
+    setIsScanningOCR(true);
+    setOcrStatusText('Belge taranıyor, tutar ve fiş bilgileri yapay zeka ile okunuyor...');
+    try {
+      let parsed: ParsedReceiptData | null = null;
+      if (base64) {
+        try {
+          parsed = await scanReceiptWithOcrSpace(base64);
+        } catch (apiErr) {
+          console.warn('OCR Space API uyarısı, yerel heuristik devrede:', apiErr);
+        }
+      }
+
+      if (parsed && (parsed.amount || parsed.storeName || parsed.receiptNo)) {
+        if (parsed.formattedAmount) setAmount(parsed.formattedAmount);
+        if (parsed.receiptNo) setReceiptNo(parsed.receiptNo);
+        if (parsed.date) setSelectedDate(parsed.date);
+        if (parsed.storeName) {
+          setTitle(parsed.storeName);
+          setReceiptStoreName(parsed.storeName);
+        }
+        if (parsed.matchedBrand) {
+          setBrandLogoUrl(parsed.matchedBrand.logoUrl);
+          setCustomColor(parsed.matchedBrand.color);
+          const matchedCat = categories.find(c => 
+            c.name.toLowerCase().includes(parsed!.matchedBrand!.defaultCategoryKeyword.toLowerCase()) ||
+            c.id.includes(parsed!.matchedBrand!.defaultCategoryKeyword)
+          );
+          if (matchedCat) {
+            setSelectedCategoryId(matchedCat.id);
+          }
+        }
+        setReceiptAttached(true);
+        setIsScanningOCR(false);
+        setOcrStatusText('');
+        setShowReceiptScanner(false);
+        Alert.alert(
+          'Fiş Başarıyla Ayrıştırıldı 🎉',
+          `Mağaza: ${parsed.storeName || 'Fiş'}\nTutar: ${currency} ${parsed.formattedAmount || amount}\nFiş No: ${parsed.receiptNo || receiptNo}`
+        );
+      } else {
+        const fallbackNo = `#FŞ-${Math.floor(1000 + Math.random() * 9000)}`;
+        setReceiptNo(prev => prev || fallbackNo);
+        setReceiptAttached(true);
+        setIsScanningOCR(false);
+        setOcrStatusText('');
+        setShowReceiptScanner(false);
+        Alert.alert(
+          'Fiş Fotoğrafı İliştirildi 📸',
+          'Fiş görseli işleme başarıyla eklendi. Tutar ve açıklamayı kontrol edebilirsiniz.'
+        );
+      }
+    } catch (err: any) {
+      setIsScanningOCR(false);
+      setOcrStatusText('');
+      setShowReceiptScanner(false);
+      Alert.alert('Belge Eklendi', 'Fiş görseli eklendi. Tutar alanını manuel tamamlayabilirsiniz.');
+    }
+  };
+
+  // Marka Seçildiğinde Çağrılır
+  const handleSelectBrand = (brand: BrandItem) => {
+    setBrandLogoUrl(brand.logoUrl);
+    setCustomColor(brand.color);
+    setCustomIcon(null);
+    if (!title.trim() || POPULAR_BRANDS.some(b => b.name === title)) {
+      setTitle(brand.name);
+    }
+    const matched = categories.find(c => 
+      c.name.toLowerCase().includes(brand.defaultCategoryKeyword.toLowerCase()) ||
+      c.id.toLowerCase().includes(brand.defaultCategoryKeyword.toLowerCase())
+    );
+    if (matched) {
+      setSelectedCategoryId(matched.id);
+    }
+    setShowIconModal(false);
+  };
+
   // Otomatik Fiş No Üretici
   const handleGenerateReceiptNo = () => {
     const randomNum = Math.floor(1000 + Math.random() * 9000);
@@ -209,7 +350,6 @@ export default function AddExpenseScreen({ navigation }: any) {
       setReceiptAttached(true);
       setNote(`${preset.desc} • ${preset.receiptNo}`);
       
-      // Kategori eşleştir
       const matchedCat = categories.find(c => c.id === preset.categoryId || c.name.toLowerCase().includes(preset.categoryName.toLowerCase()));
       if (matchedCat) {
         setSelectedCategoryId(matchedCat.id);
@@ -217,10 +357,8 @@ export default function AddExpenseScreen({ navigation }: any) {
       setCustomIcon(preset.icon);
       setCustomColor(preset.color);
       setShowReceiptScanner(false);
-      Alert.alert('Fiş Başarıyla Ayrıştırıldı 🎉', `İşlem: ${preset.store}
-Tutar: ${currency} ${preset.amount}
-Fiş No: ${preset.receiptNo}`);
-    }, 700);
+      Alert.alert('Fiş Başarıyla Ayrıştırıldı 🎉', `İşlem: ${preset.store}\nTutar: ${currency} ${preset.amount}\nFiş No: ${preset.receiptNo}`);
+    }, 500);
   };
 
   // Özel Fiş Metni Regex ile OCR Ayrıştırma
@@ -233,39 +371,25 @@ Fiş No: ${preset.receiptNo}`);
     setIsScanningOCR(true);
     setTimeout(() => {
       setIsScanningOCR(false);
-      const text = manualOCRInput;
+      const parsed = parseReceiptText(manualOCRInput);
       
-      // Tutar yakalama (Örn: TOPLAM: 350.50, TUTAR: 120 TL, veya doğrudan 250,50)
-      const amountRegex = /(?:TOPLAM|TUTAR|ÖDENEN)?\s*[:=]?\s*(?:₺|TL)?\s*([0-9]+[.,][0-9]{2})/i;
-      const amountMatch = text.match(amountRegex);
-
-      // Fiş no yakalama (Örn: FİŞ NO: 0482, NO: 1234, #1234)
-      const receiptNoRegex = /(?:FİŞ\s*NO|FATURA\s*NO|NO|BELGE\s*NO)\s*[:#=]?\s*([A-Z0-9-]+)/i;
-      const receiptMatch = text.match(receiptNoRegex);
-
-      // İlk satır genellikle mağaza adıdır
-      const firstLine = text.split('\n')[0]?.trim();
-
-      if (amountMatch && amountMatch[1]) {
-        const parsedAmt = amountMatch[1].replace(',', '.');
-        setAmount(parsedAmt);
+      if (parsed.formattedAmount) setAmount(parsed.formattedAmount);
+      if (parsed.receiptNo) setReceiptNo(parsed.receiptNo);
+      if (parsed.date) setSelectedDate(parsed.date);
+      if (parsed.storeName) {
+        setTitle(parsed.storeName);
+        setReceiptStoreName(parsed.storeName);
       }
-
-      const foundReceiptNo = receiptMatch ? `#${receiptMatch[1]}` : `#FŞ-${Math.floor(1000 + Math.random() * 9000)}`;
-      setReceiptNo(foundReceiptNo);
+      if (parsed.matchedBrand) {
+        setBrandLogoUrl(parsed.matchedBrand.logoUrl);
+        setCustomColor(parsed.matchedBrand.color);
+      }
       setReceiptAttached(true);
-
-      if (firstLine && firstLine.length > 2 && firstLine.length < 35) {
-        setTitle(firstLine);
-        setReceiptStoreName(firstLine);
-      }
-
-      setNote(`OCR Fiş Ayrıştırma • ${foundReceiptNo}`);
+      setNote(`OCR Metin Ayrıştırma • ${parsed.receiptNo}`);
       setShowReceiptScanner(false);
       setManualOCRInput('');
-      Alert.alert('Metin Ayrıştırıldı', `Tespit Edilen Fiş No: ${foundReceiptNo}
-Tutar: ${amountMatch ? amountMatch[1] : 'Belirtilmedi'}`);
-    }, 800);
+      Alert.alert('Metin Ayrıştırıldı', `Fiş No: ${parsed.receiptNo}\nTutar: ${parsed.formattedAmount || 'Manuel Belirtin'}`);
+    }, 400);
   };
 
   // Hesap Makinesi Tuş İşlemleri
@@ -363,9 +487,10 @@ Tutar: ${amountMatch ? amountMatch[1] : 'Belirtilmedi'}`);
       date: selectedDate,
       note,
       receiptNo: receiptAttached && receiptNo.trim() ? receiptNo.trim() : undefined,
-      receiptImage: receiptAttached ? 'receipt_attached_doc' : undefined,
+      receiptImage: receiptAttached ? (receiptImageUri || 'receipt_attached_doc') : undefined,
       customIcon: customIcon || undefined,
       customColor: customColor || undefined,
+      brandLogoUrl: brandLogoUrl || undefined,
     });
 
     navigation.goBack();
@@ -388,7 +513,7 @@ Tutar: ${amountMatch ? amountMatch[1] : 'Belirtilmedi'}`);
             Yeni İşlem Ekle
           </Text>
           <Text style={{ color: colors.text, opacity: 0.5, fontSize: 11 * m, fontFamily: tStyles.fontFamily }}>
-            TrioTrack v1.5.8 Hibrit Finans
+            TrioTrack v1.5.9 Hibrit Finans
           </Text>
         </View>
 
@@ -501,9 +626,13 @@ Tutar: ${amountMatch ? amountMatch[1] : 'Belirtilmedi'}`);
               style={[styles.customIconPill, { backgroundColor: displayColor + '18', borderRadius: 16 }]}
               onPress={() => setShowIconModal(true)}
             >
-              <Ionicons name={displayIcon as any} size={15} color={displayColor} />
-              <Text style={{ color: displayColor, fontSize: 11 * m, fontFamily: tStyles.fontFamily, fontWeight: 'bold', marginLeft: 5 }}>
-                {customIcon ? 'Özel Simge' : 'Simge Seç'}
+              {brandLogoUrl ? (
+                <Image source={{ uri: brandLogoUrl }} style={{ width: 16, height: 16, borderRadius: 4, marginRight: 4 }} resizeMode="contain" />
+              ) : (
+                <Ionicons name={displayIcon as any} size={15} color={displayColor} />
+              )}
+              <Text style={{ color: displayColor, fontSize: 11 * m, fontFamily: tStyles.fontFamily, fontWeight: 'bold', marginLeft: 4 }}>
+                {brandLogoUrl ? 'Marka Logosu' : customIcon ? 'Özel Simge' : 'Logo / Simge Seç'}
               </Text>
               <Ionicons name="color-palette-outline" size={13} color={displayColor} style={{ marginLeft: 3 }} />
             </TouchableOpacity>
@@ -511,14 +640,18 @@ Tutar: ${amountMatch ? amountMatch[1] : 'Belirtilmedi'}`);
 
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             <TouchableOpacity 
-              style={[styles.iconAvatarBox, { backgroundColor: displayColor + '20', borderRadius: 12 }]}
+              style={[styles.iconAvatarBox, { backgroundColor: displayColor + '20', borderRadius: 12, overflow: 'hidden' }]}
               onPress={() => setShowIconModal(true)}
             >
-              <Ionicons name={displayIcon as any} size={22} color={displayColor} />
+              {brandLogoUrl ? (
+                <Image source={{ uri: brandLogoUrl }} style={{ width: 28, height: 28, borderRadius: 6 }} resizeMode="contain" />
+              ) : (
+                <Ionicons name={displayIcon as any} size={22} color={displayColor} />
+              )}
             </TouchableOpacity>
             <TextInput
               style={[styles.textInput, { flex: 1, marginLeft: 12, color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 15 * m }]}
-              placeholder={type === 'transfer' ? 'Örn: Bankadan Nakit Çekme...' : 'Örn: BİM Market, Netflix, Benzin...'}
+              placeholder={type === 'transfer' ? 'Örn: Bankadan Nakit Çekme...' : 'Örn: BİM Market, Netflix, Starbucks...'}
               placeholderTextColor={colors.text + '50'}
               value={title}
               onChangeText={setTitle}
@@ -538,7 +671,7 @@ Tutar: ${amountMatch ? amountMatch[1] : 'Belirtilmedi'}`);
                   Fiş & Fatura Belgesi
                 </Text>
                 <Text style={{ color: colors.text, opacity: 0.5, fontSize: 10 * m, fontFamily: tStyles.fontFamily }}>
-                  Otomatik Fiş No & OCR Ayrıştırma
+                  Kamera ile Canlı OCR & Fiş No Ayrıştırma
                 </Text>
               </View>
             </View>
@@ -554,53 +687,98 @@ Tutar: ${amountMatch ? amountMatch[1] : 'Belirtilmedi'}`);
           </View>
 
           {receiptAttached ? (
-            /* Fiş Ekli Görünümü */
+            /* Fiş Ekli Görünümü (Gerçek Fotoğraf Önizlemeli) */
             <View style={[styles.attachedInfoBox, { backgroundColor: colors.background, borderRadius: tStyles.roundness / 1.5 }]}>
               <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
-                <Ionicons name="receipt" size={24} color={colors.primary} />
-                <View style={{ marginLeft: 10, flex: 1 }}>
+                {receiptImageUri ? (
+                  <View style={{ width: 44, height: 44, borderRadius: 8, overflow: 'hidden', backgroundColor: 'rgba(0,0,0,0.1)', marginRight: 10 }}>
+                    <Image source={{ uri: receiptImageUri }} style={{ width: 44, height: 44 }} resizeMode="cover" />
+                  </View>
+                ) : (
+                  <Ionicons name="receipt" size={24} color={colors.primary} style={{ marginRight: 10 }} />
+                )}
+                <View style={{ flex: 1 }}>
                   <Text style={{ color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 13 * m, fontWeight: 'bold' }}>
-                    {receiptNo || 'Kayıtlı Fiş'}
+                    {receiptNo || 'Kayıtlı Fiş / Belge'}
                   </Text>
                   <Text style={{ color: colors.text, opacity: 0.6, fontSize: 11 * m, fontFamily: tStyles.fontFamily }}>
                     {receiptStoreName ? `${receiptStoreName} • ` : ''}Tutar: {currency} {amount || '0.00'}
                   </Text>
+                  {receiptImageUri && (
+                    <Text style={{ color: '#10B981', fontSize: 10 * m, fontFamily: tStyles.fontFamily, fontWeight: 'bold', marginTop: 2 }}>
+                      📸 Fotoğraf Belgesi İliştirildi
+                    </Text>
+                  )}
                 </View>
               </View>
 
-              <TouchableOpacity 
-                style={styles.removeReceiptBtn}
-                onPress={() => {
-                  setReceiptAttached(false);
-                  setReceiptNo('');
-                  setReceiptStoreName('');
-                }}
-              >
-                <Ionicons name="trash-outline" size={18} color="#EF4444" />
-              </TouchableOpacity>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <TouchableOpacity 
+                  style={[styles.removeReceiptBtn, { marginRight: 6 }]}
+                  onPress={handleCaptureWithCamera}
+                >
+                  <Ionicons name="camera-outline" size={18} color={colors.primary} />
+                </TouchableOpacity>
+
+                <TouchableOpacity 
+                  style={styles.removeReceiptBtn}
+                  onPress={() => {
+                    setReceiptAttached(false);
+                    setReceiptNo('');
+                    setReceiptStoreName('');
+                    setReceiptImageUri(null);
+                  }}
+                >
+                  <Ionicons name="trash-outline" size={18} color="#EF4444" />
+                </TouchableOpacity>
+              </View>
             </View>
           ) : (
             /* Fiş Ekleme / Tarama Butonları */
-            <View style={styles.receiptActionsRow}>
-              <TouchableOpacity 
-                style={[styles.receiptActionBtn, { backgroundColor: colors.primary, borderRadius: Math.max(tStyles.roundness / 2, 8) }]}
-                onPress={() => setShowReceiptScanner(true)}
-              >
-                <Ionicons name="scan-outline" size={16} color={colors.onPrimary} />
-                <Text style={[styles.receiptActionText, { color: colors.onPrimary, fontFamily: tStyles.fontFamily, fontSize: 11 * m, fontWeight: 'bold', marginLeft: 6 }]}>
-                  Akıllı Fiş Tara (OCR)
-                </Text>
-              </TouchableOpacity>
+            <View style={{ marginTop: 10 }}>
+              <View style={{ flexDirection: 'row', gap: 8, marginBottom: 8 }}>
+                <TouchableOpacity 
+                  style={[styles.receiptActionBtn, { backgroundColor: colors.primary, borderRadius: Math.max(tStyles.roundness / 2, 8) }]}
+                  onPress={handleCaptureWithCamera}
+                >
+                  <Ionicons name="camera-outline" size={16} color={colors.onPrimary} />
+                  <Text style={[styles.receiptActionText, { color: colors.onPrimary, fontFamily: tStyles.fontFamily, fontSize: 11 * m, fontWeight: 'bold', marginLeft: 6 }]}>
+                    Kamera ile Çek (OCR)
+                  </Text>
+                </TouchableOpacity>
 
-              <TouchableOpacity 
-                style={[styles.receiptActionBtnSec, { backgroundColor: colors.background, borderRadius: Math.max(tStyles.roundness / 2, 8) }]}
-                onPress={handleGenerateReceiptNo}
-              >
-                <Ionicons name="flash-outline" size={15} color={colors.primary} />
-                <Text style={{ color: colors.primary, fontFamily: tStyles.fontFamily, fontSize: 11 * m, fontWeight: '600', marginLeft: 5 }}>
-                  Fiş No Üret
-                </Text>
-              </TouchableOpacity>
+                <TouchableOpacity 
+                  style={[styles.receiptActionBtnSec, { backgroundColor: colors.background, borderRadius: Math.max(tStyles.roundness / 2, 8) }]}
+                  onPress={handlePickFromGallery}
+                >
+                  <Ionicons name="images-outline" size={16} color={colors.primary} />
+                  <Text style={{ color: colors.primary, fontFamily: tStyles.fontFamily, fontSize: 11 * m, fontWeight: '600', marginLeft: 5 }}>
+                    Galeriden Seç
+                  </Text>
+                </TouchableOpacity>
+              </View>
+
+              <View style={{ flexDirection: 'row', gap: 8 }}>
+                <TouchableOpacity 
+                  style={[styles.receiptActionBtnSec, { flex: 1, backgroundColor: colors.background, borderRadius: Math.max(tStyles.roundness / 2, 8) }]}
+                  onPress={() => setShowReceiptScanner(true)}
+                >
+                  <Ionicons name="scan-outline" size={14} color={colors.text} style={{ opacity: 0.7 }} />
+                  <Text style={{ color: colors.text, opacity: 0.8, fontFamily: tStyles.fontFamily, fontSize: 11 * m, fontWeight: '600', marginLeft: 5 }}>
+                    OCR Menüsü & Şablonlar
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity 
+                  style={[styles.receiptActionBtnSec, { flex: 0.8, backgroundColor: colors.background, borderRadius: Math.max(tStyles.roundness / 2, 8) }]}
+                  onPress={handleGenerateReceiptNo}
+                >
+                  <Ionicons name="flash-outline" size={14} color={colors.primary} />
+                  <Text style={{ color: colors.primary, fontFamily: tStyles.fontFamily, fontSize: 11 * m, fontWeight: '600', marginLeft: 5 }}>
+                    Fiş No Üret
+                  </Text>
+                </TouchableOpacity>
+              </View>
             </View>
           )}
         </View>
@@ -798,8 +976,12 @@ Tutar: ${amountMatch ? amountMatch[1] : 'Belirtilmedi'}`);
       </ScrollView>
 
       {/* 🌟 1. AKILLI FİŞ VE FATURA OCR MODALI */}
-      <Modal visible={showReceiptScanner} animationType="slide" transparent>
+      <Modal visible={showReceiptScanner} animationType="slide" transparent onRequestClose={() => setShowReceiptScanner(false)}>
         <View style={styles.modalBackdrop}>
+          <TouchableWithoutFeedback onPress={() => setShowReceiptScanner(false)}>
+            <View style={StyleSheet.absoluteFill} />
+          </TouchableWithoutFeedback>
+
           <View style={[styles.ocrModalCard, { backgroundColor: colors.card, borderTopLeftRadius: tStyles.roundness * 1.5, borderTopRightRadius: tStyles.roundness * 1.5 }]}>
             <View style={styles.calcHeader}>
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -814,41 +996,72 @@ Tutar: ${amountMatch ? amountMatch[1] : 'Belirtilmedi'}`);
             </View>
 
             <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 520 }}>
-              {/* Lazer Tarama Simülasyon Kartı */}
+              {/* Lazer Tarama & Canlı Önizleme Kartı */}
               <View style={[styles.ocrScannerBox, { backgroundColor: colors.background, borderRadius: tStyles.roundness }]}>
-                <Animated.View 
-                  style={[
-                    styles.laserLine, 
-                    {
-                      transform: [{
-                        translateY: scanAnim.interpolate({
-                          inputRange: [0, 1],
-                          outputRange: [0, 90],
-                        })
-                      }]
-                    }
-                  ]} 
-                />
-                <Ionicons name="receipt-outline" size={44} color={colors.primary} style={{ opacity: 0.7 }} />
-                <Text style={{ color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 12 * m, fontWeight: '600', marginTop: 8 }}>
-                  Kamera & Optik Fiş Tanıma Alanı
-                </Text>
-                <Text style={{ color: colors.text, opacity: 0.5, fontSize: 11 * m, fontFamily: tStyles.fontFamily }}>
-                  Fiş üzerindeki KDV, toplam tutar ve fiş no otomatik algılanır
-                </Text>
+                {receiptImageUri ? (
+                  <View style={{ width: '100%', height: '100%', alignItems: 'center', justifyContent: 'center' }}>
+                    <Image source={{ uri: receiptImageUri }} style={{ width: '100%', height: 110, borderRadius: 8 }} resizeMode="contain" />
+                  </View>
+                ) : (
+                  <>
+                    <Animated.View 
+                      style={[
+                        styles.laserLine, 
+                        {
+                          transform: [{
+                            translateY: scanAnim.interpolate({
+                              inputRange: [0, 1],
+                              outputRange: [0, 90],
+                            })
+                          }]
+                        }
+                      ]} 
+                    />
+                    <Ionicons name="receipt-outline" size={40} color={colors.primary} style={{ opacity: 0.7 }} />
+                    <Text style={{ color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 12 * m, fontWeight: '600', marginTop: 6 }}>
+                      Kamera & Optik Fiş Tanıma Alanı
+                    </Text>
+                    <Text style={{ color: colors.text, opacity: 0.5, fontSize: 10 * m, fontFamily: tStyles.fontFamily }}>
+                      KDV, tutar, tarih ve fiş numarası otomatik algılanır
+                    </Text>
+                  </>
+                )}
+              </View>
+
+              {/* Kamera ve Galeri Hızlı Eylem Butonları */}
+              <View style={{ flexDirection: 'row', gap: 10, marginTop: 12, marginBottom: 6 }}>
+                <TouchableOpacity
+                  style={[styles.cameraModalBtn, { backgroundColor: colors.primary, borderRadius: Math.max(tStyles.roundness / 2, 8) }]}
+                  onPress={handleCaptureWithCamera}
+                >
+                  <Ionicons name="camera" size={18} color={colors.onPrimary} />
+                  <Text style={{ color: colors.onPrimary, fontFamily: tStyles.fontFamily, fontWeight: 'bold', fontSize: 12 * m, marginLeft: 6 }}>
+                    Kamera ile Çek (OCR)
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[styles.galleryModalBtn, { backgroundColor: colors.background, borderRadius: Math.max(tStyles.roundness / 2, 8) }]}
+                  onPress={handlePickFromGallery}
+                >
+                  <Ionicons name="images-outline" size={18} color={colors.primary} />
+                  <Text style={{ color: colors.primary, fontFamily: tStyles.fontFamily, fontWeight: 'bold', fontSize: 12 * m, marginLeft: 6 }}>
+                    Galeriden Seç
+                  </Text>
+                </TouchableOpacity>
               </View>
 
               {isScanningOCR && (
                 <View style={styles.ocrLoadingRow}>
                   <ActivityIndicator size="small" color={colors.primary} />
                   <Text style={{ color: colors.primary, fontFamily: tStyles.fontFamily, fontSize: 12 * m, marginLeft: 8, fontWeight: 'bold' }}>
-                    Belge taranıyor ve alanlar ayrıştırılıyor...
+                    {ocrStatusText || 'Belge taranıyor ve alanlar ayrıştırılıyor...'}
                   </Text>
                 </View>
               )}
 
               {/* Hızlı Hazır Fiş Şablonları */}
-              <Text style={[styles.label, { color: colors.text, opacity: 0.7, fontFamily: tStyles.fontFamily, fontSize: 12 * m, marginTop: 12, marginBottom: 8 }]}>
+              <Text style={[styles.label, { color: colors.text, opacity: 0.7, fontFamily: tStyles.fontFamily, fontSize: 11 * m, marginTop: 12, marginBottom: 8 }]}>
                 POPÜLER MAĞAZA VE FATURALAR (TEK DOKUNUŞLA TARA)
               </Text>
 
@@ -881,7 +1094,7 @@ Tutar: ${amountMatch ? amountMatch[1] : 'Belirtilmedi'}`);
               ))}
 
               {/* Serbest Metin Ayrıştırıcı */}
-              <View style={[styles.customOcrBox, { backgroundColor: colors.background, borderRadius: tStyles.roundness, marginTop: 14 }]}>
+              <View style={[styles.customOcrBox, { backgroundColor: colors.background, borderRadius: tStyles.roundness, marginTop: 10 }]}>
                 <Text style={{ color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 12 * m, fontWeight: 'bold', marginBottom: 4 }}>
                   Veya Fiş / Fatura Metnini Yapıştırın
                 </Text>
@@ -910,14 +1123,18 @@ Tutar: ${amountMatch ? amountMatch[1] : 'Belirtilmedi'}`);
       </Modal>
 
       {/* 🌟 2. PAISA TARZI ZENGİN SİMGE & LOGO SEÇİCİ MODALI */}
-      <Modal visible={showIconModal} animationType="slide" transparent>
+      <Modal visible={showIconModal} animationType="slide" transparent onRequestClose={() => setShowIconModal(false)}>
         <View style={styles.modalBackdrop}>
-          <View style={[styles.calcModalCard, { backgroundColor: colors.card, borderTopLeftRadius: tStyles.roundness * 1.5, borderTopRightRadius: tStyles.roundness * 1.5 }]}>
+          <TouchableWithoutFeedback onPress={() => setShowIconModal(false)}>
+            <View style={StyleSheet.absoluteFill} />
+          </TouchableWithoutFeedback>
+
+          <View style={[styles.calcModalCard, { backgroundColor: colors.card, borderTopLeftRadius: tStyles.roundness * 1.5, borderTopRightRadius: tStyles.roundness * 1.5, maxHeight: '88%' }]}>
             <View style={styles.calcHeader}>
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <Ionicons name="shapes-outline" size={22} color={colors.primary} style={{ marginRight: 8 }} />
                 <Text style={[styles.calcModalTitle, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 16 * m, fontWeight: 'bold' }]}>
-                  Logo ve Simge Kataloğu (Paisa)
+                  Logo & Simge Kataloğu (Paisa)
                 </Text>
               </View>
               <TouchableOpacity onPress={() => setShowIconModal(false)} style={styles.calcCloseBtn}>
@@ -925,73 +1142,152 @@ Tutar: ${amountMatch ? amountMatch[1] : 'Belirtilmedi'}`);
               </TouchableOpacity>
             </View>
 
-            {/* Renk Paleti Seçimi */}
-            <Text style={[styles.label, { color: colors.text, opacity: 0.7, fontFamily: tStyles.fontFamily, fontSize: 11 * m, marginBottom: 8 }]}>
-              VURGU RENGİ SEÇİN
-            </Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 14 }}>
-              {PALETTE_COLORS.map(c => {
-                const isSelected = customColor === c;
-                return (
-                  <TouchableOpacity
-                    key={c}
-                    style={[
-                      styles.colorDot, 
-                      { backgroundColor: c },
-                      isSelected && { borderColor: colors.text, borderWidth: 2, transform: [{ scale: 1.15 }] }
-                    ]}
-                    onPress={() => setCustomColor(c)}
-                  >
-                    {isSelected && <Ionicons name="checkmark" size={14} color="#FFF" />}
-                  </TouchableOpacity>
-                );
-              })}
-            </ScrollView>
+            {/* İki Sekmeli Seçici: Marka CDN Logoları vs Vektör Simgeler */}
+            <View style={{ flexDirection: 'row', backgroundColor: colors.background, borderRadius: 12, padding: 3, marginBottom: 12 }}>
+              <TouchableOpacity
+                style={[{ flex: 1, paddingVertical: 8, alignItems: 'center', borderRadius: 9 }, iconModalTab === 'brands' && { backgroundColor: colors.card }]}
+                onPress={() => setIconModalTab('brands')}
+              >
+                <Text style={{ color: iconModalTab === 'brands' ? colors.primary : colors.text, opacity: iconModalTab === 'brands' ? 1 : 0.6, fontWeight: 'bold', fontSize: 12 * m, fontFamily: tStyles.fontFamily }}>
+                  ✨ Marka CDN Logoları
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[{ flex: 1, paddingVertical: 8, alignItems: 'center', borderRadius: 9 }, iconModalTab === 'icons' && { backgroundColor: colors.card }]}
+                onPress={() => setIconModalTab('icons')}
+              >
+                <Text style={{ color: iconModalTab === 'icons' ? colors.primary : colors.text, opacity: iconModalTab === 'icons' ? 1 : 0.6, fontWeight: 'bold', fontSize: 12 * m, fontFamily: tStyles.fontFamily }}>
+                  🎨 Vektör Simgeler
+                </Text>
+              </TouchableOpacity>
+            </View>
 
-            {/* İkon Kategori Sekmeleri */}
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 12 }}>
-              {ICON_CATEGORIES.map((cat, idx) => (
-                <TouchableOpacity
-                  key={cat.name}
-                  style={[
-                    styles.iconCatTab,
-                    { backgroundColor: activeIconCatIndex === idx ? colors.primary : colors.background, borderRadius: 16 }
-                  ]}
-                  onPress={() => setActiveIconCatIndex(idx)}
-                >
-                  <Ionicons name={cat.icon} size={14} color={activeIconCatIndex === idx ? colors.onPrimary : colors.text} />
-                  <Text style={{ color: activeIconCatIndex === idx ? colors.onPrimary : colors.text, fontFamily: tStyles.fontFamily, fontSize: 11 * m, fontWeight: 'bold', marginLeft: 4 }}>
-                    {cat.name}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
-
-            {/* İkon Izgarası */}
-            <ScrollView style={{ maxHeight: 240 }} showsVerticalScrollIndicator={false}>
-              <View style={styles.iconGrid}>
-                {ICON_CATEGORIES[activeIconCatIndex].icons.map(iconName => {
-                  const isSelected = customIcon === iconName;
-                  const activeCol = customColor || colors.primary;
-                  return (
+            {iconModalTab === 'brands' ? (
+              /* ✨ Marka CDN Logoları Sekmesi */
+              <View>
+                {/* Kategori Filtre Çipleri */}
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 10 }}>
+                  {BRAND_CATEGORIES.map(bCat => (
                     <TouchableOpacity
-                      key={iconName}
+                      key={bCat}
                       style={[
-                        styles.gridIconBtn,
-                        { backgroundColor: isSelected ? activeCol + '25' : colors.background, borderRadius: Math.max(tStyles.roundness / 2, 8) },
-                        isSelected && { borderColor: activeCol, borderWidth: 2 }
+                        styles.iconCatTab,
+                        { backgroundColor: selectedBrandCategory === bCat ? colors.primary : colors.background, borderRadius: 16 }
                       ]}
-                      onPress={() => {
-                        setCustomIcon(iconName);
-                        if (!customColor) setCustomColor(PALETTE_COLORS[0]);
-                      }}
+                      onPress={() => setSelectedBrandCategory(bCat)}
                     >
-                      <Ionicons name={iconName as any} size={24} color={isSelected ? activeCol : colors.text} />
+                      <Text style={{ color: selectedBrandCategory === bCat ? colors.onPrimary : colors.text, fontFamily: tStyles.fontFamily, fontSize: 11 * m, fontWeight: 'bold' }}>
+                        {bCat}
+                      </Text>
                     </TouchableOpacity>
-                  );
-                })}
+                  ))}
+                </ScrollView>
+
+                {/* Popüler Markalar Izgarası */}
+                <ScrollView style={{ maxHeight: 290 }} showsVerticalScrollIndicator={false}>
+                  <View style={styles.brandGrid}>
+                    {POPULAR_BRANDS
+                      .filter(b => selectedBrandCategory === 'Tümü' || b.category === selectedBrandCategory)
+                      .map(brand => {
+                        const isSelected = brandLogoUrl === brand.logoUrl;
+                        return (
+                          <TouchableOpacity
+                            key={brand.id}
+                            style={[
+                              styles.brandGridCard,
+                              { backgroundColor: colors.background, borderRadius: Math.max(tStyles.roundness / 2, 8) },
+                              isSelected && { borderColor: brand.color, borderWidth: 2, backgroundColor: brand.color + '18' }
+                            ]}
+                            onPress={() => handleSelectBrand(brand)}
+                          >
+                            <View style={[styles.brandLogoCircle, { backgroundColor: brand.color + '20' }]}>
+                              <Image source={{ uri: brand.logoUrl }} style={{ width: 26, height: 26, borderRadius: 6 }} resizeMode="contain" />
+                            </View>
+                            <Text numberOfLines={1} style={{ color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 11 * m, fontWeight: 'bold', marginTop: 4, textAlign: 'center' }}>
+                              {brand.name}
+                            </Text>
+                            <Text numberOfLines={1} style={{ color: colors.text, opacity: 0.5, fontSize: 9 * m, textAlign: 'center' }}>
+                              {brand.category}
+                            </Text>
+                          </TouchableOpacity>
+                        );
+                      })}
+                  </View>
+                </ScrollView>
               </View>
-            </ScrollView>
+            ) : (
+              /* 🎨 Vektör Simgeler & Renk Paleti Sekmesi */
+              <View>
+                {/* Renk Paleti Seçimi */}
+                <Text style={[styles.label, { color: colors.text, opacity: 0.7, fontFamily: tStyles.fontFamily, fontSize: 11 * m, marginBottom: 8 }]}>
+                  VURGU RENGİ SEÇİN
+                </Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 14 }}>
+                  {PALETTE_COLORS.map(c => {
+                    const isSelected = customColor === c;
+                    return (
+                      <TouchableOpacity
+                        key={c}
+                        style={[
+                          styles.colorDot, 
+                          { backgroundColor: c },
+                          isSelected && { borderColor: colors.text, borderWidth: 2, transform: [{ scale: 1.15 }] }
+                        ]}
+                        onPress={() => setCustomColor(c)}
+                      >
+                        {isSelected && <Ionicons name="checkmark" size={14} color="#FFF" />}
+                      </TouchableOpacity>
+                    );
+                  })}
+                </ScrollView>
+
+                {/* İkon Kategori Sekmeleri */}
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 12 }}>
+                  {ICON_CATEGORIES.map((cat, idx) => (
+                    <TouchableOpacity
+                      key={cat.name}
+                      style={[
+                        styles.iconCatTab,
+                        { backgroundColor: activeIconCatIndex === idx ? colors.primary : colors.background, borderRadius: 16 }
+                      ]}
+                      onPress={() => setActiveIconCatIndex(idx)}
+                    >
+                      <Ionicons name={cat.icon} size={14} color={activeIconCatIndex === idx ? colors.onPrimary : colors.text} />
+                      <Text style={{ color: activeIconCatIndex === idx ? colors.onPrimary : colors.text, fontFamily: tStyles.fontFamily, fontSize: 11 * m, fontWeight: 'bold', marginLeft: 4 }}>
+                        {cat.name}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+
+                {/* İkon Izgarası */}
+                <ScrollView style={{ maxHeight: 220 }} showsVerticalScrollIndicator={false}>
+                  <View style={styles.iconGrid}>
+                    {ICON_CATEGORIES[activeIconCatIndex].icons.map(iconName => {
+                      const isSelected = customIcon === iconName;
+                      const activeCol = customColor || colors.primary;
+                      return (
+                        <TouchableOpacity
+                          key={iconName}
+                          style={[
+                            styles.gridIconBtn,
+                            { backgroundColor: isSelected ? activeCol + '25' : colors.background, borderRadius: Math.max(tStyles.roundness / 2, 8) },
+                            isSelected && { borderColor: activeCol, borderWidth: 2 }
+                          ]}
+                          onPress={() => {
+                            setCustomIcon(iconName);
+                            setBrandLogoUrl(null);
+                            if (!customColor) setCustomColor(PALETTE_COLORS[0]);
+                          }}
+                        >
+                          <Ionicons name={iconName as any} size={24} color={isSelected ? activeCol : colors.text} />
+                        </TouchableOpacity>
+                      );
+                    })}
+                  </View>
+                </ScrollView>
+              </View>
+            )}
 
             {/* Temizle & Onayla Butonları */}
             <View style={{ flexDirection: 'row', gap: 10, marginTop: 14 }}>
@@ -1000,6 +1296,7 @@ Tutar: ${amountMatch ? amountMatch[1] : 'Belirtilmedi'}`);
                 onPress={() => {
                   setCustomIcon(null);
                   setCustomColor(null);
+                  setBrandLogoUrl(null);
                   setShowIconModal(false);
                 }}
               >
@@ -1013,7 +1310,7 @@ Tutar: ${amountMatch ? amountMatch[1] : 'Belirtilmedi'}`);
                 onPress={() => setShowIconModal(false)}
               >
                 <Text style={{ color: colors.onPrimary, fontFamily: tStyles.fontFamily, fontSize: 13 * m, fontWeight: 'bold' }}>
-                  Simgeyi Kullan
+                  Seçimi Kullan
                 </Text>
               </TouchableOpacity>
             </View>
@@ -1022,8 +1319,12 @@ Tutar: ${amountMatch ? amountMatch[1] : 'Belirtilmedi'}`);
       </Modal>
 
       {/* 3. ENTEGRE HESAP MAKİNESİ BOTTOM SHEET MODALI */}
-      <Modal visible={showCalculator} animationType="slide" transparent>
+      <Modal visible={showCalculator} animationType="slide" transparent onRequestClose={() => setShowCalculator(false)}>
         <View style={styles.modalBackdrop}>
+          <TouchableWithoutFeedback onPress={() => setShowCalculator(false)}>
+            <View style={StyleSheet.absoluteFill} />
+          </TouchableWithoutFeedback>
+
           <View style={[styles.calcModalCard, { backgroundColor: colors.card, borderTopLeftRadius: tStyles.roundness * 1.5, borderTopRightRadius: tStyles.roundness * 1.5 }]}>
             {/* Modal Başlık */}
             <View style={styles.calcHeader}>
@@ -1171,12 +1472,17 @@ const styles = StyleSheet.create({
   ocrScannerBox: { height: 120, justifyContent: 'center', alignItems: 'center', position: 'relative', overflow: 'hidden', padding: 10 },
   laserLine: { position: 'absolute', top: 10, left: 16, right: 16, height: 2, backgroundColor: '#10B981', elevation: 3 },
   ocrLoadingRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginVertical: 10 },
+  cameraModalBtn: { flex: 1.2, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', paddingVertical: 12 },
+  galleryModalBtn: { flex: 0.8, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', paddingVertical: 12 },
   presetRow: { flexDirection: 'row', alignItems: 'center', padding: 10, marginBottom: 8 },
   customOcrBox: { padding: 12 },
   customOcrInput: { borderWidth: 1, borderColor: 'rgba(150,150,150,0.2)', borderRadius: 8, padding: 8, marginVertical: 6 },
   parseOcrBtn: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', paddingVertical: 9 },
 
-  // İkon Kataloğu Stilleri
+  // İkon & Marka Kataloğu Stilleri
+  brandGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, paddingVertical: 6, justifyContent: 'space-between' },
+  brandGridCard: { width: '31%', padding: 10, alignItems: 'center', marginBottom: 6 },
+  brandLogoCircle: { width: 44, height: 44, borderRadius: 22, justifyContent: 'center', alignItems: 'center' },
   colorDot: { width: 30, height: 30, borderRadius: 15, marginRight: 10, justifyContent: 'center', alignItems: 'center' },
   iconCatTab: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12, paddingVertical: 7, marginRight: 8 },
   iconGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, justifyContent: 'flex-start', paddingVertical: 6 },

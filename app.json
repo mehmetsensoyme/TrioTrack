@@ -2,7 +2,7 @@
   "expo": {
     "name": "TrioTrack",
     "slug": "TrioTrack",
-    "version": "1.5.8",
+    "version": "1.5.9",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
@@ -11,15 +11,30 @@
     },
     "android": {
       "package": "com.triotrack.app",
-      "versionCode": 3,
+      "versionCode": 4,
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
+      "permissions": [
+        "CAMERA",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE",
+        "READ_MEDIA_IMAGES"
+      ],
       "predictiveBackGestureEnabled": false
     },
+    "plugins": [
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "TrioTrack fiş ve fatura görsellerinizi taramak için fotoğraflarınıza erişmek istiyor.",
+          "cameraPermission": "TrioTrack fiş ve faturalarınızı doğrudan kamera ile taramak için kamera erişimi istiyor."
+        }
+      ]
+    ],
     "web": {
       "favicon": "./assets/favicon.png"
     }

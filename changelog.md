@@ -4,6 +4,26 @@ Tüm önemli değişiklikler bu dosyada belgelenmektedir. Proje [SemVer](https:/
 
 ---
 
+## [v1.5.9] - 2026-09-10 (Derleme: 2026.09.10)
+### 🌟 Canlı Kamera & OCR Motoru, CDN Marka Logoları & Evrensel Modal Backdrop Dismiss
+- **Gerçek Kamera ve Galeri Entegrasyonu ile Canlı OCR:**
+  - `expo-image-picker` ile cihaz kamerasından doğrudan fiş/fatura fotoğrafı çekme ve galeriden görsel seçme yeteneği eklendi.
+  - Kamera ve depolama izinleri (`CAMERA`, `READ_EXTERNAL_STORAGE`, `WRITE_EXTERNAL_STORAGE`, `READ_MEDIA_IMAGES`) `app.json` içine eklendi.
+  - `src/utils/ocrService.ts`: Canlı OCR Space API entegrasyonu ve akıllı Türkçe fiş ayrıştırıcı motoru (Toplam Tutar, Fiş No, Tarih, Mağaza Eşleme, KDV algılama) devreye alındı.
+  - Harcama formuna gerçek fiş fotoğrafı önizleme kartı, fotoğrafı silme veya kamerayla yeniden çekme kontrolleri entegre edildi.
+  - Çekilen fiş fotoğrafı harcama nesnesine (`receiptImage`) kaydedilir ve işlem detay modalında tam boyutta incelenebilir.
+- **Paisa CDN Marka Logoları Kataloğu:**
+  - 35+ popüler marka (Netflix, Spotify, YouTube, Disney+, Starbucks, Migros, BİM, A101, ŞOK, Shell, Opet, Trendyol, Apple vb.) yüksek çözünürlüklü CDN URL'leri ile kataloglandı (`src/constants/brands.ts`).
+  - Harcama formundaki simge seçici iki sekmeli hale getirildi: "✨ Marka CDN Logoları" (kategori filtreli arama ızgarası) ve "🎨 Vektör Simgeler".
+  - Marka logoları ana ekranda, işlem detayında, global aramada, cüzdan geçmişinde ve raporlar ekranındaki en büyük gider bannerında avatar olarak sergilenir.
+- **Evrensel Modal Backdrop Dismiss (Dış Boşluğa Dokununca Kapanma):**
+  - Uygulamadaki istisnasız tüm modallarda (Fiş Tarayıcı, Hesap Makinesi, Logo Seçici, İşlem Arama, İşlem Detayı, Ay/Dönem Seçici, Neler Yeni, Hesap Ekle, Kategori Bütçesi, Cüzdan Detay, Kategori Ekle, Abonelik Ekle, Borç Ekle, Kısmi Ödeme, Borç Geçmişi, Bütçe Hedefi, JSON İçe Aktar, Kurulum Yedek Yükleme) karartılmış dış siyah alana dokunulduğunda modalın anında kapanması sağlandı.
+  - Tüm modallara Android fiziksel geri tuşu entegrasyonu (`onRequestClose`) tamamlandı.
+- **Sürüm Yükseltmesi:**
+  - `v1.5.9` (Build `2026.09.10`, `versionCode 4`) olarak tüm yapılandırma dosyaları senkronize edildi.
+
+---
+
 ## [v1.5.8] - 2026-09-10 (Derleme: 2026.09.10)
 ### 🌟 Fiş/Fatura OCR Tanıma, Bakiye Mahremiyeti & Bütünleşik Hesaplar Merkezi
 - **Akıllı Fiş & Fatura Tarayıcı (OCR & Otomatik Fiş No):**

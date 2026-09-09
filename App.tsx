@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, Modal, TextInput, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, Modal, TextInput, Alert, Image, TouchableWithoutFeedback } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -176,7 +176,7 @@ const HomeScreen = ({ navigation }: any) => {
             >
               <Ionicons name="sparkles" size={14} color="#F59E0B" />
               <Text style={{ color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 11 * m, fontWeight: 'bold', marginLeft: 4 }}>
-                v1.5.8
+                v1.5.9
               </Text>
               <View style={[styles.pulsingDot, { backgroundColor: '#F59E0B' }]} />
             </TouchableOpacity>
@@ -562,23 +562,32 @@ const HomeScreen = ({ navigation }: any) => {
                 onPress={() => handleOpenTxDetail(tx)}
                 style={[styles.txCard, { backgroundColor: colors.card, borderRadius: tStyles.roundness, elevation: tStyles.elevation }]}
               >
-                <View style={[styles.txIconBox, { backgroundColor: colorToUse + '20' }]}>
-                  <Ionicons 
-                    name={iconToUse as any} 
-                    size={20} 
-                    color={colorToUse} 
-                  />
+                <View style={[styles.txIconBox, { backgroundColor: colorToUse + '20', overflow: 'hidden' }]}>
+                  {tx.brandLogoUrl ? (
+                    <Image source={{ uri: tx.brandLogoUrl }} style={{ width: 24, height: 24, borderRadius: 6 }} resizeMode="contain" />
+                  ) : (
+                    <Ionicons 
+                      name={iconToUse as any} 
+                      size={20} 
+                      color={colorToUse} 
+                    />
+                  )}
                 </View>
 
                 <View style={{ flex: 1, marginLeft: 12 }}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 4 }}>
                     <Text style={[styles.txTitle, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 14 * m, fontWeight: 'bold' }]}>
                       {tx.title}
                     </Text>
                     {tx.receiptNo && (
-                      <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#10B98118', paddingHorizontal: 5, paddingVertical: 1, borderRadius: 4, marginLeft: 6 }}>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#10B98118', paddingHorizontal: 5, paddingVertical: 1, borderRadius: 4 }}>
                         <Ionicons name="receipt-outline" size={10} color="#10B981" />
                         <Text style={{ color: '#10B981', fontSize: 9 * m, fontWeight: 'bold', marginLeft: 2 }}>{tx.receiptNo}</Text>
+                      </View>
+                    )}
+                    {tx.receiptImage && (tx.receiptImage.startsWith('file:') || tx.receiptImage.startsWith('data:') || tx.receiptImage.startsWith('http')) && (
+                      <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#3B82F618', paddingHorizontal: 4, paddingVertical: 1, borderRadius: 4 }}>
+                        <Ionicons name="camera-outline" size={10} color="#3B82F6" />
                       </View>
                     )}
                   </View>
@@ -629,8 +638,12 @@ const HomeScreen = ({ navigation }: any) => {
       </ScrollView>
 
       {/* PAISA & ZERO TARZI ARAMA VE FİLTRELEME MODALI */}
-      <Modal visible={showSearchModal} animationType="slide" transparent>
+      <Modal visible={showSearchModal} animationType="slide" transparent onRequestClose={() => setShowSearchModal(false)}>
         <View style={styles.modalBackdrop}>
+          <TouchableWithoutFeedback onPress={() => setShowSearchModal(false)}>
+            <View style={StyleSheet.absoluteFill} />
+          </TouchableWithoutFeedback>
+
           <View style={[styles.searchModalCard, { backgroundColor: colors.card, borderTopLeftRadius: tStyles.roundness * 1.5, borderTopRightRadius: tStyles.roundness * 1.5 }]}>
             <View style={styles.sheetPill} />
             
@@ -722,12 +735,16 @@ const HomeScreen = ({ navigation }: any) => {
                       }}
                       style={[styles.txCard, { backgroundColor: colors.background, borderRadius: tStyles.roundness }]}
                     >
-                      <View style={[styles.txIconBox, { backgroundColor: (cat?.color || colors.primary) + '20' }]}>
-                        <Ionicons 
-                          name={isTransfer ? 'swap-horizontal' : (cat?.icon as any) || 'pricetag-outline'} 
-                          size={18} 
-                          color={cat?.color || colors.primary} 
-                        />
+                      <View style={[styles.txIconBox, { backgroundColor: (cat?.color || colors.primary) + '20', overflow: 'hidden' }]}>
+                        {tx.brandLogoUrl ? (
+                          <Image source={{ uri: tx.brandLogoUrl }} style={{ width: 22, height: 22, borderRadius: 5 }} resizeMode="contain" />
+                        ) : (
+                          <Ionicons 
+                            name={isTransfer ? 'swap-horizontal' : (cat?.icon as any) || 'pricetag-outline'} 
+                            size={18} 
+                            color={cat?.color || colors.primary} 
+                          />
+                        )}
                       </View>
                       <View style={{ flex: 1, marginLeft: 10 }}>
                         <Text style={[styles.txTitle, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 13 * m }]}>
@@ -757,8 +774,12 @@ const HomeScreen = ({ navigation }: any) => {
       </Modal>
 
       {/* İŞLEM DETAY & DÜZENLEME MODALI (PAISA & ZERO) */}
-      <Modal visible={selectedTxForDetail !== null} transparent animationType="fade">
+      <Modal visible={selectedTxForDetail !== null} transparent animationType="fade" onRequestClose={() => setSelectedTxForDetail(null)}>
         <View style={styles.modalBackdrop}>
+          <TouchableWithoutFeedback onPress={() => setSelectedTxForDetail(null)}>
+            <View style={StyleSheet.absoluteFill} />
+          </TouchableWithoutFeedback>
+
           <View style={[styles.txDetailCard, { backgroundColor: colors.card, borderRadius: tStyles.roundness * 1.2 }]}>
             {selectedTxForDetail && (() => {
               const cat = categories.find(c => c.id === selectedTxForDetail.categoryId);
@@ -772,12 +793,16 @@ const HomeScreen = ({ navigation }: any) => {
                   {/* Başlık ve Kapat Butonu */}
                   <View style={styles.txDetailHeaderRow}>
                     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                      <View style={[styles.txIconBox, { backgroundColor: (isTransfer ? '#7C3AED' : (cat?.color || colors.primary)) + '20', marginRight: 10 }]}>
-                        <Ionicons 
-                          name={isTransfer ? 'swap-horizontal' : ((cat?.icon || 'receipt-outline') as any)} 
-                          size={22} 
-                          color={isTransfer ? '#7C3AED' : (cat?.color || colors.primary)} 
-                        />
+                      <View style={[styles.txIconBox, { backgroundColor: (isTransfer ? '#7C3AED' : (cat?.color || colors.primary)) + '20', marginRight: 10, overflow: 'hidden' }]}>
+                        {selectedTxForDetail.brandLogoUrl ? (
+                          <Image source={{ uri: selectedTxForDetail.brandLogoUrl }} style={{ width: 24, height: 24, borderRadius: 6 }} resizeMode="contain" />
+                        ) : (
+                          <Ionicons 
+                            name={isTransfer ? 'swap-horizontal' : ((cat?.icon || 'receipt-outline') as any)} 
+                            size={22} 
+                            color={isTransfer ? '#7C3AED' : (cat?.color || colors.primary)} 
+                          />
+                        )}
                       </View>
                       <View>
                         <Text style={[styles.txDetailCategory, { color: isTransfer ? '#7C3AED' : (cat?.color || colors.primary), fontFamily: tStyles.fontFamily, fontSize: 13 * m, fontWeight: 'bold' }]}>
@@ -848,6 +873,23 @@ const HomeScreen = ({ navigation }: any) => {
                       <Text style={{ color: '#10B981', fontWeight: 'bold', fontSize: 13 * m, fontFamily: tStyles.fontFamily }}>
                         {selectedTxForDetail.receiptNo}
                       </Text>
+                    </View>
+                  )}
+
+                  {/* Gerçek Fiş Fotoğrafı Varsa Göster */}
+                  {selectedTxForDetail.receiptImage && (selectedTxForDetail.receiptImage.startsWith('file:') || selectedTxForDetail.receiptImage.startsWith('data:') || selectedTxForDetail.receiptImage.startsWith('http')) && (
+                    <View style={{ marginTop: 8, padding: 10, borderRadius: 8, backgroundColor: colors.background }}>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
+                        <Ionicons name="camera-outline" size={14} color={colors.primary} style={{ marginRight: 6 }} />
+                        <Text style={{ color: colors.text, opacity: 0.7, fontSize: 11 * m, fontFamily: tStyles.fontFamily, fontWeight: 'bold' }}>
+                          Fiş / Fatura Fotoğrafı (OCR Belgesi)
+                        </Text>
+                      </View>
+                      <Image 
+                        source={{ uri: selectedTxForDetail.receiptImage }} 
+                        style={{ width: '100%', height: 130, borderRadius: 6 }} 
+                        resizeMode="cover" 
+                      />
                     </View>
                   )}
 
@@ -923,8 +965,12 @@ const HomeScreen = ({ navigation }: any) => {
       </Modal>
 
       {/* ZERO TARZI AY VE YIL SEÇİCİ MODALI */}
-      <Modal visible={showMonthModal} transparent animationType="slide">
+      <Modal visible={showMonthModal} transparent animationType="slide" onRequestClose={() => setShowMonthModal(false)}>
         <View style={styles.modalBackdrop}>
+          <TouchableWithoutFeedback onPress={() => setShowMonthModal(false)}>
+            <View style={StyleSheet.absoluteFill} />
+          </TouchableWithoutFeedback>
+
           <View style={[styles.monthModalCard, { backgroundColor: colors.card, borderTopLeftRadius: tStyles.roundness * 1.5, borderTopRightRadius: tStyles.roundness * 1.5 }]}>
             <View style={styles.sheetPill} />
 
@@ -995,9 +1041,13 @@ const HomeScreen = ({ navigation }: any) => {
         </View>
       </Modal>
 
-      {/* 🌟 NELER YENİ? / SÜRÜM YENİLİKLERİ MERKEZİ (v1.5.8) */}
-      <Modal visible={showWhatsNewModal} transparent animationType="slide">
+      {/* 🌟 NELER YENİ? / SÜRÜM YENİLİKLERİ MERKEZİ (v1.5.9) */}
+      <Modal visible={showWhatsNewModal} transparent animationType="slide" onRequestClose={() => setShowWhatsNewModal(false)}>
         <View style={styles.modalBackdrop}>
+          <TouchableWithoutFeedback onPress={() => setShowWhatsNewModal(false)}>
+            <View style={StyleSheet.absoluteFill} />
+          </TouchableWithoutFeedback>
+
           <View style={[styles.whatsNewCard, { backgroundColor: colors.card, borderTopLeftRadius: tStyles.roundness * 1.5, borderTopRightRadius: tStyles.roundness * 1.5 }]}>
             <View style={styles.whatsNewHeader}>
               <View style={[styles.whatsNewIconCircle, { backgroundColor: colors.primary + '20' }]}>
@@ -1006,14 +1056,14 @@ const HomeScreen = ({ navigation }: any) => {
               <View style={{ flex: 1, marginLeft: 12 }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
                   <Text style={[styles.whatsNewTitle, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 18 * m, fontWeight: 'bold' }]}>
-                    TrioTrack v1.5.8
+                    TrioTrack v1.5.9
                   </Text>
                   <View style={{ backgroundColor: '#10B981', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 8 }}>
                     <Text style={{ color: '#FFF', fontSize: 9 * m, fontWeight: 'bold' }}>YENİ</Text>
                   </View>
                 </View>
                 <Text style={{ color: colors.text, opacity: 0.6, fontSize: 11 * m, fontFamily: tStyles.fontFamily }}>
-                  Build 2026.09.10 • Kararlılık & İnovasyon Sürümü
+                  Build 2026.09.10 • Akıllı Kamera & Marka CDN Sürümü
                 </Text>
               </View>
               <TouchableOpacity onPress={() => setShowWhatsNewModal(false)}>
@@ -1022,77 +1072,62 @@ const HomeScreen = ({ navigation }: any) => {
             </View>
 
             <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 420, marginVertical: 12 }}>
-              {/* Madde 1: Fiş & OCR */}
+              {/* Madde 1: Gerçek Kamera & OCR */}
               <View style={styles.whatsNewItem}>
                 <View style={[styles.tagBadge, { backgroundColor: '#10B98120' }]}>
                   <Text style={{ color: '#10B981', fontSize: 10 * m, fontWeight: 'bold', fontFamily: tStyles.fontFamily }}>ÖZELLİK</Text>
                 </View>
                 <View style={{ flex: 1, marginLeft: 10 }}>
                   <Text style={[styles.whatsNewItemTitle, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 13 * m, fontWeight: 'bold' }]}>
-                    Akıllı Fiş & Fatura Tarayıcı (OCR)
+                    Gerçek Kamera & Canlı OCR Ayrıştırıcı
                   </Text>
                   <Text style={[styles.whatsNewItemDesc, { color: colors.text, opacity: 0.65, fontFamily: tStyles.fontFamily, fontSize: 11 * m }]}>
-                    Fiş veya fatura metninden tutar, fiş no ve mağaza adını otomatik algılama ve harcamalara resmi fiş numarası ekleme.
+                    Kamera izni ile fiş veya faturalarınızı doğrudan cihazdan fotoğraflayın. Tutar, fiş no, tarih ve mağaza adı yapay zeka ile otomatik doldurulur ve fotoğraf belgesi işleme iliştirilir.
                   </Text>
                 </View>
               </View>
 
-              {/* Madde 2: Mahremiyet Modu */}
+              {/* Madde 2: CDN Marka Logoları */}
               <View style={styles.whatsNewItem}>
                 <View style={[styles.tagBadge, { backgroundColor: '#3B82F620' }]}>
                   <Text style={{ color: '#3B82F6', fontSize: 10 * m, fontWeight: 'bold', fontFamily: tStyles.fontFamily }}>ÖZELLİK</Text>
                 </View>
                 <View style={{ flex: 1, marginLeft: 10 }}>
                   <Text style={[styles.whatsNewItemTitle, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 13 * m, fontWeight: 'bold' }]}>
-                    Toplam Bakiye Mahremiyet Seçeneği (Privacy Mode)
+                    Paisa Marka CDN Logoları Kataloğu
                   </Text>
                   <Text style={[styles.whatsNewItemDesc, { color: colors.text, opacity: 0.65, fontFamily: tStyles.fontFamily, fontSize: 11 * m }]}>
-                    Ana ekrandaki bakiye kartında göz simgesiyle tek dokunuşta toplam bakiye ve cüzdan tutarlarını gizleyebilme.
+                    Netflix, Spotify, Starbucks, Migros, BİM, Shell, Trendyol, Apple vb. onlarca popüler markanın gerçek logoları tek dokunuşla harcama ikonu olarak seçilebilir.
                   </Text>
                 </View>
               </View>
 
-              {/* Madde 3: Birleşik Hesaplar & Ayarlar */}
+              {/* Madde 3: Dış Boşluğa Dokununca Kapanma */}
               <View style={styles.whatsNewItem}>
                 <View style={[styles.tagBadge, { backgroundColor: '#8B5CF620' }]}>
-                  <Text style={{ color: '#8B5CF6', fontSize: 10 * m, fontWeight: 'bold', fontFamily: tStyles.fontFamily }}>GELİŞTİRME</Text>
+                  <Text style={{ color: '#8B5CF6', fontSize: 10 * m, fontWeight: 'bold', fontFamily: tStyles.fontFamily }}>KULLANILABİLİRLİK</Text>
                 </View>
                 <View style={{ flex: 1, marginLeft: 10 }}>
                   <Text style={[styles.whatsNewItemTitle, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 13 * m, fontWeight: 'bold' }]}>
-                    Bütünleşik Hesaplar & Finans Merkezi
+                    Siyah Boş Alanlara Dokununca Kapanma
                   </Text>
                   <Text style={[styles.whatsNewItemDesc, { color: colors.text, opacity: 0.65, fontFamily: tStyles.fontFamily, fontSize: 11 * m }]}>
-                    Alt menüden bağımsız Ayarlar sekmesi kaldırılarak Hesaplar sekmesiyle kullanıcı profili ve ayarlar tek çatı altında birleştirildi.
+                    Hesap makinesi, fiş tarayıcı, ikon seçici, filtre ve işlem detay pencerelerinde ekranın karartılmış boş alanlarına dokunulduğunda pencere anında kapanır.
                   </Text>
                 </View>
               </View>
 
-              {/* Madde 4: Paisa Logo & İkon Kataloğu */}
+              {/* Madde 4: Mahremiyet Modu */}
               <View style={styles.whatsNewItem}>
                 <View style={[styles.tagBadge, { backgroundColor: '#F59E0B20' }]}>
                   <Text style={{ color: '#F59E0B', fontSize: 10 * m, fontWeight: 'bold', fontFamily: tStyles.fontFamily }}>GELİŞTİRME</Text>
                 </View>
                 <View style={{ flex: 1, marginLeft: 10 }}>
                   <Text style={[styles.whatsNewItemTitle, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 13 * m, fontWeight: 'bold' }]}>
-                    Kategorize Logo ve Simge Kataloğu
+                    Bakiye Gizleme (Göz Simgesi)
                   </Text>
                   <Text style={[styles.whatsNewItemDesc, { color: colors.text, opacity: 0.65, fontFamily: tStyles.fontFamily, fontSize: 11 * m }]}>
-                    Abonelikler, faturalar, market ve harcamalar için zengin renk paletli ve kategorize simge seçici.
-                  </Text>
-                </View>
-              </View>
-
-              {/* Madde 5: Düzeltme & Mikro Animasyonlar */}
-              <View style={styles.whatsNewItem}>
-                <View style={[styles.tagBadge, { backgroundColor: '#EC489920' }]}>
-                  <Text style={{ color: '#EC4899', fontSize: 10 * m, fontWeight: 'bold', fontFamily: tStyles.fontFamily }}>DÜZELTME</Text>
-                </View>
-                <View style={{ flex: 1, marginLeft: 10 }}>
-                  <Text style={[styles.whatsNewItemTitle, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 13 * m, fontWeight: 'bold' }]}>
-                    Mikro Animasyonlar & Yüksek Stabilite
-                  </Text>
-                  <Text style={[styles.whatsNewItemDesc, { color: colors.text, opacity: 0.65, fontFamily: tStyles.fontFamily, fontSize: 11 * m }]}>
-                    Akıllı harçlık motoru (Buckwheat) ve bütçe kartlarında akıcı görsel geçişler ve sıfır çökme garantisi.
+                    Ana ekrandaki bakiye kartında göz simgesiyle tek dokunuşta cüzdan bakiyelerini ve toplam tutarı gizleyebilme.
                   </Text>
                 </View>
               </View>

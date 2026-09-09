@@ -1,5 +1,12 @@
 # TrioTrack - Görev ve Yol Haritası (TODO List)
 
+## ✅ Tamamlanan Özellikler (v1.5.9)
+- [x] Sürüm numarası `v1.5.9` (Derleme: `2026.09.10`, `versionCode: 4`) olarak tüm konfigürasyonlara (`app.json`, `package.json`, `version.ts`, `build.gradle`, `changelog.md`) uygulandı.
+- [x] **Canlı Kamera & Galeri Entegrasyonu ile Gerçek OCR:** `expo-image-picker` ile cihaz kamerasından doğrudan fotoğraf çekme, galeriden görsel seçme, `CAMERA` ve `STORAGE` izinleri, `ocrService.ts` OCR Space API motoru ve regex Türkçe fiş ayrıştırıcı entegre edildi.
+- [x] **Gerçek Fiş Fotoğrafı İliştirme & Görüntüleme:** Harcamalara gerçek fiş fotoğrafı ekleme (`receiptImage`), silme, değiştirme ve işlem detay modalında tam boyutta görüntüleme sağlandı.
+- [x] **Paisa CDN Marka Logoları Kataloğu:** 35+ popüler marka (Netflix, Spotify, Migros, BİM, Starbucks, Shell vb.) CDN URL'leri ile kataloglandı (`brands.ts`). Harcama formu, işlem listeleri, arama ve raporlar ekranlarında marka logoları avatar olarak entegre edildi.
+- [x] **Evrensel Modal Dış Boşluğa Dokununca Kapanma (Backdrop Dismiss):** Uygulamadaki istisnasız tüm modallarda (Fiş Tarayıcı, Hesap Makinesi, Logo Seçici, Arama, İşlem Detay, Ay Seçici, Neler Yeni, Hesap Ekle, Bütçe, Cüzdan Detay, Kategori Ekle, Abonelik Ekle, Borç Ekle, Kısmi Ödeme, Ödeme Geçmişi, Bütçe Hedefi, JSON İçe Aktar, Kurulum Yedekten Geri Yükle) karartılmış dış siyah alana dokunulduğunda modalın anında kapanması ve Android geri tuşu (`onRequestClose`) sağlandı.
+
 ## ✅ Tamamlanan Özellikler (v1.5.8)
 - [x] Sürüm numarası `v1.5.8` (Derleme: `2026.09.10`) olarak tüm konfigürasyonlara (`app.json`, `package.json`, `version.ts`, `build.gradle`, `changelog.md`) uygulandı.
 - [x] **Akıllı Fiş & Fatura Tarayıcı (OCR & Fiş No):** Harcamalara fiş belgesi ekleme, otomatik Fiş No üretme (`#FŞ-xxxx`), lazer tarama animasyonlu OCR modalı, Türk mağaza/fatura hazır şablonları (BİM, Starbucks, Opet, Enerjisa, Eczane) ve regex metin ayrıştırıcısı eklendi.

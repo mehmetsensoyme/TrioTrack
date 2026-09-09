@@ -15,10 +15,11 @@ export interface Transaction {
   toAccountId?: string;
   date: string; // YYYY-MM-DD
   note?: string;
-  receiptImage?: string; // Fiş/fatura görseli (thumbnail/simülasyon)
+  receiptImage?: string; // Fiş/fatura görseli (gerçek kamera URI veya base64)
   receiptNo?: string; // Fiş veya fatura numarası (örn: FİŞ NO: #0482)
   customIcon?: string; // Özel logo veya simge
   customColor?: string; // Özel renk
+  brandLogoUrl?: string; // CDN Marka Logosu URL'i (örn: Netflix, Spotify, Starbucks)
 }
 
 export interface Account {

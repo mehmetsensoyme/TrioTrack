@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Modal, Alert, Switch } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Modal, Alert, Switch, TouchableWithoutFeedback, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../theme/ThemeContext';
@@ -772,8 +772,11 @@ export default function AccountsBudgetsScreen({ navigation }: any) {
       </ScrollView>
 
       {/* Hesap Ekleme Modalı */}
-      <Modal visible={showAddAccountModal} transparent animationType="slide">
+      <Modal visible={showAddAccountModal} transparent animationType="slide" onRequestClose={() => setShowAddAccountModal(false)}>
         <View style={styles.modalOverlay}>
+          <TouchableWithoutFeedback onPress={() => setShowAddAccountModal(false)}>
+            <View style={StyleSheet.absoluteFill} />
+          </TouchableWithoutFeedback>
           <View style={[styles.modalContent, { backgroundColor: colors.card, borderRadius: tStyles.roundness }]}>
             <Text style={[styles.modalTitle, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 18 * m }]}>Yeni Hesap / Cüzdan</Text>
             
@@ -828,8 +831,11 @@ export default function AccountsBudgetsScreen({ navigation }: any) {
       </Modal>
 
       {/* Bütçe Belirleme Modalı */}
-      <Modal visible={showBudgetModal} transparent animationType="slide">
+      <Modal visible={showBudgetModal} transparent animationType="slide" onRequestClose={() => setShowBudgetModal(false)}>
         <View style={styles.modalOverlay}>
+          <TouchableWithoutFeedback onPress={() => setShowBudgetModal(false)}>
+            <View style={StyleSheet.absoluteFill} />
+          </TouchableWithoutFeedback>
           <View style={[styles.modalContent, { backgroundColor: colors.card, borderRadius: tStyles.roundness }]}>
             <Text style={[styles.modalTitle, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 18 * m }]}>Kategori Bütçesi Belirle</Text>
             
@@ -872,8 +878,11 @@ export default function AccountsBudgetsScreen({ navigation }: any) {
       </Modal>
 
       {/* PAISA CÜZDAN DETAY & BAKİYE DÜZENLEME MODALI */}
-      <Modal visible={showAccountDetailModal} transparent animationType="slide">
+      <Modal visible={showAccountDetailModal} transparent animationType="slide" onRequestClose={() => setShowAccountDetailModal(false)}>
         <View style={styles.modalOverlay}>
+          <TouchableWithoutFeedback onPress={() => setShowAccountDetailModal(false)}>
+            <View style={StyleSheet.absoluteFill} />
+          </TouchableWithoutFeedback>
           <View style={[styles.modalContent, { backgroundColor: colors.card, borderRadius: tStyles.roundness, maxHeight: '85%' }]}>
             <View style={styles.modalHeader}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
@@ -958,6 +967,9 @@ export default function AccountsBudgetsScreen({ navigation }: any) {
                   .filter(t => t.accountId === selectedAccountForDetail?.id || t.toAccountId === selectedAccountForDetail?.id)
                   .map(tx => (
                     <View key={tx.id} style={[styles.miniTxRow, { backgroundColor: colors.background, borderRadius: Math.max(tStyles.roundness / 2, 6) }]}>
+                      {tx.brandLogoUrl ? (
+                        <Image source={{ uri: tx.brandLogoUrl }} style={{ width: 22, height: 22, borderRadius: 5, marginRight: 8 }} resizeMode="contain" />
+                      ) : null}
                       <View style={{ flex: 1 }}>
                         <Text style={{ color: colors.text, fontWeight: '600', fontSize: 12 * m }}>{tx.title}</Text>
                         <Text style={{ color: colors.text, opacity: 0.5, fontSize: 10 * m }}>{tx.date}</Text>
@@ -991,8 +1003,11 @@ export default function AccountsBudgetsScreen({ navigation }: any) {
       </Modal>
 
       {/* YENİ KATEGORİ EKLEME MODALI (PAISA & ZERO) */}
-      <Modal visible={showAddCatModal} transparent animationType="slide">
+      <Modal visible={showAddCatModal} transparent animationType="slide" onRequestClose={() => setShowAddCatModal(false)}>
         <View style={styles.modalOverlay}>
+          <TouchableWithoutFeedback onPress={() => setShowAddCatModal(false)}>
+            <View style={StyleSheet.absoluteFill} />
+          </TouchableWithoutFeedback>
           <View style={[styles.modalContent, { backgroundColor: colors.card, borderRadius: tStyles.roundness }]}>
             <View style={styles.modalHeader}>
               <Text style={[styles.modalTitle, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 18 * m, marginBottom: 0 }]}>
@@ -1073,8 +1088,11 @@ export default function AccountsBudgetsScreen({ navigation }: any) {
       </Modal>
 
       {/* YENİ DÜZENLİ İŞLEM / ABONELİK MODALI (PAISA) */}
-      <Modal visible={showAddRecurringModal} transparent animationType="slide">
+      <Modal visible={showAddRecurringModal} transparent animationType="slide" onRequestClose={() => setShowAddRecurringModal(false)}>
         <View style={styles.modalOverlay}>
+          <TouchableWithoutFeedback onPress={() => setShowAddRecurringModal(false)}>
+            <View style={StyleSheet.absoluteFill} />
+          </TouchableWithoutFeedback>
           <View style={[styles.modalContent, { backgroundColor: colors.card, borderRadius: tStyles.roundness, maxHeight: '90%' }]}>
             <View style={styles.modalHeader}>
               <Text style={[styles.modalTitle, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 18 * m, marginBottom: 0 }]}>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch, TextInput, Alert, Platform, Share, Modal, Linking } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch, TextInput, Alert, Platform, Share, Modal, Linking, TouchableWithoutFeedback } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -654,8 +654,11 @@ export default function SettingsScreen({ navigation }: any) {
       </ScrollView>
 
       {/* AYLIK BÜTÇE HEDEFİ AYARLAMA MODALI (BUCKWHEAT) */}
-      <Modal visible={showGoalModal} transparent animationType="slide">
+      <Modal visible={showGoalModal} transparent animationType="slide" onRequestClose={() => setShowGoalModal(false)}>
         <View style={styles.modalOverlay}>
+          <TouchableWithoutFeedback onPress={() => setShowGoalModal(false)}>
+            <View style={StyleSheet.absoluteFill} />
+          </TouchableWithoutFeedback>
           <View style={[styles.modalContent, { backgroundColor: colors.card, borderRadius: tStyles.roundness }]}>
             <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
               <Ionicons name="flag-outline" size={20} color={colors.primary} style={{ marginRight: 8 }} />
@@ -697,8 +700,11 @@ export default function SettingsScreen({ navigation }: any) {
       </Modal>
 
       {/* JSON YEDEKTEN GERİ YÜKLEME MODALI (PAISA) */}
-      <Modal visible={showImportModal} transparent animationType="slide">
+      <Modal visible={showImportModal} transparent animationType="slide" onRequestClose={() => setShowImportModal(false)}>
         <View style={styles.modalOverlay}>
+          <TouchableWithoutFeedback onPress={() => setShowImportModal(false)}>
+            <View style={StyleSheet.absoluteFill} />
+          </TouchableWithoutFeedback>
           <View style={[styles.modalContent, { backgroundColor: colors.card, borderRadius: tStyles.roundness, maxHeight: '80%' }]}>
             <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
               <Ionicons name="cloud-download-outline" size={22} color="#009688" style={{ marginRight: 8 }} />

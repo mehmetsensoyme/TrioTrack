@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, TouchableWithoutFeedback, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../theme/ThemeContext';
@@ -228,7 +228,11 @@ export default function ReportsScreen() {
         {maxExpense && (
           <View style={[styles.maxExpenseBanner, { backgroundColor: colors.card, borderRadius: tStyles.roundness, elevation: tStyles.elevation }]}>
             <View style={[styles.bannerIconBox, { backgroundColor: '#EF4444' + '20' }]}>
-              <Ionicons name="alert-circle-outline" size={20} color="#EF4444" />
+              {maxExpense.brandLogoUrl ? (
+                <Image source={{ uri: maxExpense.brandLogoUrl }} style={{ width: 22, height: 22, borderRadius: 5 }} resizeMode="contain" />
+              ) : (
+                <Ionicons name="alert-circle-outline" size={20} color="#EF4444" />
+              )}
             </View>
             <View style={{ flex: 1, marginLeft: 10 }}>
               <Text style={[styles.bannerTitle, { color: colors.text, opacity: 0.6, fontFamily: tStyles.fontFamily, fontSize: 11 * m }]}>
@@ -355,8 +359,11 @@ export default function ReportsScreen() {
       </ScrollView>
 
       {/* ZERO TARZI AY VE YIL SEÇİCİ BOTTOM SHEET MODALI */}
-      <Modal visible={showMonthModal} transparent animationType="slide">
+      <Modal visible={showMonthModal} transparent animationType="slide" onRequestClose={() => setShowMonthModal(false)}>
         <View style={styles.modalBackdrop}>
+          <TouchableWithoutFeedback onPress={() => setShowMonthModal(false)}>
+            <View style={StyleSheet.absoluteFill} />
+          </TouchableWithoutFeedback>
           <View style={[styles.monthModalCard, { backgroundColor: colors.card, borderTopLeftRadius: tStyles.roundness * 1.5, borderTopRightRadius: tStyles.roundness * 1.5 }]}>
             <View style={styles.sheetPill} />
 

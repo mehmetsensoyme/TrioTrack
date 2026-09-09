@@ -11,7 +11,8 @@ import {
   Switch,
   Modal,
   Alert,
-  ActivityIndicator
+  ActivityIndicator,
+  TouchableWithoutFeedback
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -862,8 +863,11 @@ export default function OnboardingScreen({ navigation }: any) {
       </KeyboardAvoidingView>
 
       {/* YEDEKTEN GERİ YÜKLEME MODALI (Zero / Paisa) */}
-      <Modal visible={showRestoreModal} transparent animationType="slide">
+      <Modal visible={showRestoreModal} transparent animationType="slide" onRequestClose={() => setShowRestoreModal(false)}>
         <View style={styles.modalBackdrop}>
+          <TouchableWithoutFeedback onPress={() => setShowRestoreModal(false)}>
+            <View style={StyleSheet.absoluteFill} />
+          </TouchableWithoutFeedback>
           <View style={[styles.modalCard, { backgroundColor: colors.card, borderRadius: tStyles.roundness }]}>
             <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
               <Ionicons name="cloud-download-outline" size={22} color={colors.primary} style={{ marginRight: 8 }} />
