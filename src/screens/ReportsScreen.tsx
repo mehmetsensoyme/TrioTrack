@@ -15,7 +15,7 @@ const MONTH_ABBR = [
   'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'
 ];
 
-export default function ReportsScreen() {
+export default function ReportsScreen({ navigation }: any) {
   const insets = useSafeAreaInsets();
   const { colors, styles: tStyles, currency, isDark } = useTheme();
   const { 
@@ -89,29 +89,60 @@ export default function ReportsScreen() {
     <View style={[styles.container, { backgroundColor: colors.background, paddingTop: Math.max(insets.top, 16) }]}>
       <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 110 }} showsVerticalScrollIndicator={false}>
         
-        {/* Üst Başlık & Zero Tarzı Ay Seçici Butonu */}
-        <View style={styles.header}>
-          <View style={{ flex: 1 }}>
-            <Text style={[styles.title, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 22 * m, fontWeight: tStyles.titleWeight }]}>
-              Finansal Analiz & Rapor
-            </Text>
-            <Text style={[styles.subtitle, { color: colors.text, opacity: 0.6, fontFamily: tStyles.fontFamily, fontSize: 13 * m }]}>
-              Detaylı Nakit Akışı & Harcama Dağılımı
-            </Text>
+        {/* 🌟 FİNANSAL ANALİZ STANDART MODÜL HEADER */}
+        <View style={styles.headerRow}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+            <View 
+              style={[
+                styles.moduleIconBadge, 
+                { 
+                  backgroundColor: colors.primary + '18', 
+                  borderColor: colors.primary + '30',
+                  borderWidth: 1,
+                  borderRadius: Math.max(tStyles.roundness / 2, 12) 
+                }
+              ]}
+            >
+              <Ionicons name="pie-chart-outline" size={24} color={colors.primary} />
+            </View>
+            <View style={{ marginLeft: 12, flex: 1 }}>
+              <Text 
+                style={[
+                  styles.screenHeaderTitle, 
+                  { 
+                    color: colors.text, 
+                    fontFamily: tStyles.fontFamily, 
+                    fontSize: 18 * m, 
+                    fontWeight: tStyles.titleWeight 
+                  }
+                ]}
+                numberOfLines={1}
+              >
+                Finansal Analiz
+              </Text>
+              
+              {/* Zero Ay Seçici Hap Buton (Ana Sayfa ile Birebir Standart) */}
+              <TouchableOpacity 
+                style={[styles.zeroMonthBadge, { backgroundColor: colors.card, borderRadius: tStyles.roundness }]}
+                onPress={() => {
+                  setPickerYear(parseInt(currentYear, 10));
+                  setShowMonthModal(true);
+                }}
+              >
+                <Text style={{ color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 11.5 * m, fontWeight: 'bold' }}>
+                  {MONTH_NAMES[selectedMonthIndex]} {currentYear}
+                </Text>
+                <Ionicons name="chevron-down" size={13} color={colors.primary} style={{ marginLeft: 4 }} />
+              </TouchableOpacity>
+            </View>
           </View>
 
-          {/* Zero Ay Seçici Hap Buton */}
+          {/* Ayarlar İkon Butonu (⚙️) */}
           <TouchableOpacity 
-            style={[styles.monthPill, { backgroundColor: colors.card, borderRadius: tStyles.roundness, elevation: tStyles.elevation }]}
-            onPress={() => {
-              setPickerYear(parseInt(currentYear, 10));
-              setShowMonthModal(true);
-            }}
+            style={[styles.headerActionBtn, { backgroundColor: colors.card, borderRadius: tStyles.roundness }]}
+            onPress={() => navigation?.navigate('Settings')}
           >
-            <Text style={[styles.monthPillText, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 12 * m, fontWeight: 'bold' }]}>
-              {MONTH_NAMES[selectedMonthIndex]} {currentYear}
-            </Text>
-            <Ionicons name="chevron-down" size={14} color={colors.primary} style={{ marginLeft: 4 }} />
+            <Ionicons name="settings-outline" size={20} color={colors.text} />
           </TouchableOpacity>
         </View>
 
@@ -447,11 +478,34 @@ export default function ReportsScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
-  title: {},
-  subtitle: { marginTop: 2 },
-  monthPill: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12, paddingVertical: 8 },
-  monthPillText: {},
+  headerRow: { 
+    flexDirection: 'row', 
+    justifyContent: 'space-between', 
+    alignItems: 'center', 
+    marginBottom: 16, 
+    marginTop: 4 
+  },
+  moduleIconBadge: { 
+    width: 44, 
+    height: 44, 
+    justifyContent: 'center', 
+    alignItems: 'center' 
+  },
+  screenHeaderTitle: {},
+  zeroMonthBadge: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    alignSelf: 'flex-start', 
+    paddingHorizontal: 10, 
+    paddingVertical: 5, 
+    marginTop: 5 
+  },
+  headerActionBtn: { 
+    width: 40, 
+    height: 40, 
+    justifyContent: 'center', 
+    alignItems: 'center' 
+  },
 
   flowCard: { padding: 18, marginBottom: 14 },
   flowLabel: { fontWeight: 'bold', letterSpacing: 0.5, marginBottom: 4 },

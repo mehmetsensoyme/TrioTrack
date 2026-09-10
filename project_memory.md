@@ -32,4 +32,4 @@ TrioTrack, 3 popüler açık kaynaklı finans uygulamasının en güçlü yönle
 ## 🔒 Güvenlik & Donanım Uyumluluğu
 - **Navbar / Gesture Pill Güvenliği:** `useSafeAreaInsets` ile alt sistem çubuğu asla menü butonlarının üzerine binmez.
 - **Status Bar:** Cihaz bildirim alanı şeffaf/renk uyumlu olarak yapılandırılmıştır.
-- **Sürüm Takibi:** Her güncellemede `APP_VERSION` (`1.6.5`, versionCode 6) ve `APP_BUILD` (`2026.09.11`) artırılarak `app.json`, `package.json` ve `version.ts` dosyaları senkronize tutulur.
+- **Sürüm Takibi:** Her güncellemede `APP_VERSION` (`1.6.6`, versionCode 7) ve `APP_BUILD` (`2026.09.11`) artırılarak `app.json`, `package.json`, `android/app/build.gradle` ve `version.ts` dosyaları senkronize tutulur.

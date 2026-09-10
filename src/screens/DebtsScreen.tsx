@@ -12,7 +12,7 @@ const DEBT_CATEGORIES: { id: DebtCategory; label: string; icon: any }[] = [
   { id: 'loan', label: 'Banka Kredisi', icon: 'business-outline' },
 ];
 
-export default function DebtsScreen() {
+export default function DebtsScreen({ navigation }: any) {
   const insets = useSafeAreaInsets();
   const { colors, styles: tStyles, currency, isDark } = useTheme();
   const { debtors, addDebtor, settleDebtor, deleteDebtor, recordDebtPayment } = useData();
@@ -120,6 +120,79 @@ export default function DebtsScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background, paddingTop: Math.max(insets.top, 16) }]}>
+      {/* 🌟 BORÇ & ALACAK STANDART MODÜL HEADER */}
+      <View style={styles.headerRow}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+          <View 
+            style={[
+              styles.moduleIconBadge, 
+              { 
+                backgroundColor: colors.primary + '18', 
+                borderColor: colors.primary + '30',
+                borderWidth: 1,
+                borderRadius: Math.max(tStyles.roundness / 2, 12) 
+              }
+            ]}
+          >
+            <Ionicons name="people-outline" size={24} color={colors.primary} />
+          </View>
+          <View style={{ marginLeft: 12, flex: 1 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+              <Text 
+                style={[
+                  styles.screenHeaderTitle, 
+                  { 
+                    color: colors.text, 
+                    fontFamily: tStyles.fontFamily, 
+                    fontSize: 18 * m, 
+                    fontWeight: tStyles.titleWeight 
+                  }
+                ]}
+                numberOfLines={1}
+              >
+                Borç & Alacak
+              </Text>
+              <View style={[styles.countBadge, { backgroundColor: colors.primary + '15' }]}>
+                <Text style={{ color: colors.primary, fontFamily: tStyles.fontFamily, fontSize: 10 * m, fontWeight: 'bold' }}>
+                  {debtors.filter(d => !d.settled).length} Aktif
+                </Text>
+              </View>
+            </View>
+            <Text 
+              style={[
+                styles.screenHeaderSubtitle, 
+                { 
+                  color: colors.text, 
+                  opacity: 0.6, 
+                  fontFamily: tStyles.fontFamily, 
+                  fontSize: 11.5 * m, 
+                  marginTop: 2 
+                }
+              ]}
+              numberOfLines={1}
+            >
+              Kişi bazlı borç ve alacak defteri
+            </Text>
+          </View>
+        </View>
+
+        {/* Aksiyon Butonları: Hızlı Ekle (+) ve Ayarlar (⚙️) */}
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+          <TouchableOpacity 
+            style={[styles.headerActionBtn, { backgroundColor: colors.card, borderRadius: tStyles.roundness }]}
+            onPress={() => setShowAddModal(true)}
+          >
+            <Ionicons name="add" size={20} color={colors.primary} />
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={[styles.headerActionBtn, { backgroundColor: colors.card, borderRadius: tStyles.roundness }]}
+            onPress={() => navigation?.navigate('Settings')}
+          >
+            <Ionicons name="settings-outline" size={20} color={colors.text} />
+          </TouchableOpacity>
+        </View>
+      </View>
+
       {/* Zero Tarzı Özet Kartları */}
       <View style={styles.summaryRow}>
         <View style={[styles.summaryCard, { backgroundColor: colors.card, borderRadius: tStyles.roundness, elevation: tStyles.elevation }]}>
@@ -637,7 +710,34 @@ export default function DebtsScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  summaryRow: { flexDirection: 'row', gap: 12, paddingHorizontal: 16, paddingTop: 16 },
+  headerRow: { 
+    flexDirection: 'row', 
+    justifyContent: 'space-between', 
+    alignItems: 'center', 
+    paddingHorizontal: 16, 
+    marginBottom: 14, 
+    marginTop: 4 
+  },
+  moduleIconBadge: { 
+    width: 44, 
+    height: 44, 
+    justifyContent: 'center', 
+    alignItems: 'center' 
+  },
+  screenHeaderTitle: {},
+  screenHeaderSubtitle: {},
+  countBadge: { 
+    paddingHorizontal: 8, 
+    paddingVertical: 3, 
+    borderRadius: 8 
+  },
+  headerActionBtn: { 
+    width: 40, 
+    height: 40, 
+    justifyContent: 'center', 
+    alignItems: 'center' 
+  },
+  summaryRow: { flexDirection: 'row', gap: 12, paddingHorizontal: 16, paddingTop: 4 },
   summaryCard: { flex: 1, padding: 16 },
   badgeCircle: { width: 28, height: 28, borderRadius: 14, justifyContent: 'center', alignItems: 'center', marginBottom: 8 },
   summaryLabel: { letterSpacing: 0.5, marginBottom: 4 },

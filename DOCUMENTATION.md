@@ -1,8 +1,8 @@
 # 📘 TrioTrack — Kapsamlı Proje ve Mimari Dokümantasyonu
 
-> **Sürüm:** 1.6.0  
-> **Son Güncelleme:** 10 Eylül 2026  
-> **Durum:** Aktif Geliştirme (Adım Adım İlerleme)
+> **Sürüm:** 1.6.6 (Build 2026.09.11 - versionCode: 7)  
+> **Son Güncelleme:** 11 Eylül 2026  
+> **Durum:** Kararlı Sürüm (Tüm Sekmelerde Birleşik Header & APK Derlendi)
 
 ---
 
@@ -251,6 +251,16 @@ flowchart TD
       5. 4 adet aylık gelir birikim oranı hedef seçeneği (%10, %20, %30, %50).
     * `DataContext.tsx` içine `financialGoal` ve `savingsTargetPercent` durumları, AsyncStorage anahtarları, `completeOnboarding` parametreleri ve JSON yedekleme desteği eklendi.
     * Onboarding Slide 6 (Özet Kartı) içine seçilen finansal hedef ve tasarruf oranı canlı olarak entegre edildi.
+* **v1.6.6 (11 Eylül 2026 - versionCode: 7):**
+  * **Tüm Sekmelerde Tek Standart Birleşik Header Mimarisi:** Ana Sayfa, Cüzdan & Bütçe, Borçlar ve Raporlar sekmelerindeki başlık alanları kusursuz bir tasarım standardında birleştirildi.
+  * **44x44 Modül Rozetleri:** Ana Sayfada profil avatarı (gerçek fotoğraf/tematik rozet/monogram), Cüzdanlar sekmesinde Cüzdan (`wallet-outline`), Borçlar sekmesinde Kişiler (`people-outline`), Raporlar sekmesinde Pasta Grafik (`pie-chart-outline`) rozetleri standart boyutta ve renk tonunda konumlandırıldı.
+  * **Tipografik Standart:** Tüm sekmelerin başlık boyutu `18 * m` (`titleWeight`) olarak eşitlendi.
+  * **Bağlamsal Alt Öğeler:** Zaman odaklı sekmelerde (Ana Sayfa & Raporlar) başlığın hemen altına standart kompakt ay seçici hap butonu; varlık/defter odaklı sekmelerde (Cüzdan & Borçlar) başlığın yanına sayaç rozeti (`X Hesap`, `X Aktif`) ve altına açıklayıcı alt başlık yerleştirildi.
+  * **Standart Sağ Aksiyon Butonları:** Tüm sekmelere `40x40` ayarlar (`⚙️`) kısayolu, Cüzdan ve Borçlar sekmelerine ise doğrudan yeni kayıt eklemeyi sağlayan (`➕`) hızlı işlem butonları entegre edildi.
+* **v1.6.5 (11 Eylül 2026):**
+  * **Kalıcı Tema & Tipografi Hafızası (AsyncStorage):** Cihaz beklemedeyken veya arka plandan yeniden açıldığında seçilen tema (Paisa, Zero, Buckwheat), tema modu (Aydınlık / Koyu) ve yazı tipinin (Modern, Klasik, Kod) sistem varsayılanına sıfırlanması sorunu kalıcı olarak çözüldü.
+  * **Akıllı Sürüm Bildirim Rozeti (Seen / Unseen):** Ana ekrandaki "Neler Yeni?" rozeti yalnızca güncellenmiş yeni bir sürüm olduğunda görünür; bir kez incelendikten sonra ana ekrandan kalkar ve Ayarlar sekmesinde arşivlenir.
+  * **Tam Sürüm Geçmişi (Changelog):** v1.0.0 ilk çekirdek sürümünden günümüze tüm mimari adımlar ve yenilikler değişiklik günlüğüne entegre edildi.
 * **v1.6.4 (10 Eylül 2026):**
   * **Android Status Bar & Modal Karartma Bütünlüğü (`statusBarTranslucent={true}`):** Android işletim sisteminde varsayılan modal pencerelerinin üst durum çubuğunun (saat, pil, wifi göstergesi) arkasına geçememesi ve tepeyi çiğ beyaz bırakması sorunu, uygulamadaki tüm 22 modala `statusBarTranslucent={true}` özelliği eklenerek kökten çözüldü. Karartma artık ekranın en tepesinden en altına kadar kesintisiz ve homojen uygulanır.
   * **Kusursuz ve Kararlı Arka Plan Dokunarak Kapatma (Backdrop Dismiss):** Android üzerinde `TouchableWithoutFeedback` içine konan arka plansız boş `View` elemanlarının dokunma olaylarını (touch hit-testing) ıskalaması ve modalı kapatmaması sorunu; yerine in-flow `TouchableOpacity` (`activeOpacity={1}`) kapatma bileşenleri ve `rgba(0, 0, 0, 0.65)` derin arka plan gölgesi yerleştirilerek %100 güvenilir hale getirildi.

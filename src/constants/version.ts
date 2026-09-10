@@ -1,4 +1,4 @@
-export const APP_VERSION = '1.6.5';
+export const APP_VERSION = '1.6.6';
 export const APP_BUILD = '2026.09.11';
 export const APP_NAME = 'TrioTrack';
 export const APP_DESCRIPTION = 'Paisa, Zero ve Buckwheat mimarilerini birleştiren akıllı kişisel finans ve bütçe yöneticisi';
@@ -24,10 +24,46 @@ export interface VersionRelease {
 
 export const CHANGELOG_HISTORY: VersionRelease[] = [
   {
+    version: '1.6.6',
+    buildDate: '11 Eylül 2026',
+    title: 'Tek Standart Header Mimarisi & Hızlı Modül Yönetimi',
+    isLatest: true,
+    summary: 'Tüm sekmelerdeki başlık ve aksiyon çubukları tek bir standart görsel dilde birleştirildi, cüzdan ve borç defterine hızlı kayıt butonları eklendi.',
+    items: [
+      {
+        id: '166-1',
+        type: 'design',
+        typeLabel: 'TASARIM',
+        title: 'Tüm Sekmelerde Birleşik Standart Header (Birinci Sınıf UI)',
+        description: 'Ana Sayfa, Cüzdan & Bütçe, Borçlar ve Raporlar sekmelerindeki başlık alanları; 44x44 piksellik modül rozetleri, 18px standart başlık boyutu ve bağlamsal hap butonlarıyla tek bir görsel dilde birleştirildi.'
+      },
+      {
+        id: '166-2',
+        type: 'feature',
+        typeLabel: 'ÖZELLİK',
+        title: 'Borç & Alacak İçin Yepyeni Modül Başlığı ve Hızlı Ekleme',
+        description: 'Borç & Alacak sekmesindeki eksik başlık giderilerek People rozeti, aktif kişi sayacı ve tek dokunuşla borç/alacak ekleme (+) ve ayarlar (⚙️) butonları entegre edildi.'
+      },
+      {
+        id: '166-3',
+        type: 'design',
+        typeLabel: 'TASARIM',
+        title: 'Finansal Analiz & Raporlar İçin Optimize Header ve Ay Seçici',
+        description: 'Rapor ekranındaki orantısız başlık revize edildi; Pie Chart rozeti, ana sayfayla tam uyumlu kompakt ay seçici hap butonu ve sağ ayarlar kısayolu yerleştirildi.'
+      },
+      {
+        id: '166-4',
+        type: 'feature',
+        typeLabel: 'ÖZELLİK',
+        title: 'Cüzdan & Bütçe Headerına Hızlı Hesap Ekleme Butonu',
+        description: 'Hesaplar sekmesi başlığında doğrudan hesap açmayı sağlayan (+) butonu ve ayarlar kısayolu tek bir aksiyon grubunda buluşturuldu.'
+      }
+    ]
+  },
+  {
     version: '1.6.5',
     buildDate: '11 Eylül 2026',
     title: 'Kalıcı Tema Hafızası & Gelişmiş Değişiklik Günlüğü',
-    isLatest: true,
     summary: 'Cihaz beklemedeyken temanın sıfırlanması giderildi, tek bakışta kapanan akıllı bildirim rozeti ve ilk sürümlerden itibaren tüm sürüm geçmişi eklendi.',
     items: [
       {
