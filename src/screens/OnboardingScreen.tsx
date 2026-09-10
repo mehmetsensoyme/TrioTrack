@@ -1019,48 +1019,47 @@ export default function OnboardingScreen({ navigation }: any) {
                             borderColor: isSelected ? colors.primary : 'rgba(0,0,0,0.05)',
                             borderRadius: tStyles.roundness,
                           },
-                          isSelected && { backgroundColor: colors.primary + '0A', borderColor: colors.primary }
+                          isSelected && { backgroundColor: colors.primary + '0C', borderColor: colors.primary }
                         ]}
                         onPress={() => setLocalFinancialGoal(goal.id)}
                         activeOpacity={0.7}
                       >
                         <View style={[styles.goalIconBox, { backgroundColor: goal.color + '18' }]}>
-                          <Ionicons name={goal.icon as any} size={20} color={goal.color} />
+                          <Ionicons name={goal.icon as any} size={22} color={goal.color} />
                         </View>
                         
-                        <View style={{ flex: 1, marginRight: 8 }}>
-                          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 2 }}>
-                            <Text style={[
-                              styles.goalTitle,
-                              { 
-                                color: colors.text, 
-                                fontFamily: tStyles.fontFamily, 
-                                fontSize: 13.5 * m,
-                                fontWeight: isSelected ? 'bold' : '600'
-                              }
-                            ]}>
-                              {goal.title}
-                            </Text>
-                            <View style={[styles.goalBadge, { backgroundColor: goal.color + '18' }]}>
-                              <Text style={[styles.goalBadgeText, { color: goal.color, fontSize: 10 * m }]}>
-                                {goal.badge}
-                              </Text>
-                            </View>
-                          </View>
-                          <Text style={[styles.goalSubtitle, { color: colors.text, opacity: 0.6, fontFamily: tStyles.fontFamily, fontSize: 11.5 * m, lineHeight: 15 }]}>
+                        <View style={{ flex: 1, marginRight: 12 }}>
+                          <Text style={[
+                            styles.goalTitle,
+                            { 
+                              color: colors.text, 
+                              fontFamily: tStyles.fontFamily, 
+                              fontSize: 14 * m,
+                              fontWeight: isSelected ? 'bold' : '600',
+                              marginBottom: 3
+                            }
+                          ]}>
+                            {goal.title}
+                          </Text>
+                          <Text style={[
+                            styles.goalSubtitle,
+                            { 
+                              color: colors.text, 
+                              opacity: 0.62, 
+                              fontFamily: tStyles.fontFamily, 
+                              fontSize: 11.5 * m, 
+                              lineHeight: 16 
+                            }
+                          ]}>
                             {goal.subtitle}
                           </Text>
                         </View>
 
-                        <View style={[
-                          styles.goalRadioCircle,
-                          {
-                            borderColor: isSelected ? colors.primary : colors.text + '30',
-                            backgroundColor: isSelected ? colors.primary : 'transparent'
-                          }
-                        ]}>
-                          {isSelected && <Ionicons name="checkmark" size={12} color={colors.onPrimary} />}
-                        </View>
+                        <Ionicons
+                          name={isSelected ? "checkmark-circle" : "ellipse-outline"}
+                          size={22}
+                          color={isSelected ? colors.primary : colors.text + '35'}
+                        />
                       </TouchableOpacity>
                     );
                   })}
@@ -1392,14 +1391,9 @@ export default function OnboardingScreen({ navigation }: any) {
                   <Text style={[styles.summaryItemLabel, { color: colors.text, opacity: 0.6, fontFamily: tStyles.fontFamily, fontSize: 12 * m }]}>
                     Finansal Hedef:
                   </Text>
-                  <View style={{ alignItems: 'flex-end', flex: 1, marginLeft: 8 }}>
-                    <Text style={[styles.summaryItemVal, { color: colors.text, fontWeight: 'bold', fontFamily: tStyles.fontFamily, fontSize: 12.5 * m, textAlign: 'right' }]} numberOfLines={1}>
-                      {getFinancialGoal(financialGoal).title}
-                    </Text>
-                    <Text style={{ color: getFinancialGoal(financialGoal).color, fontSize: 10.5 * m, fontWeight: 'bold' }}>
-                      {getFinancialGoal(financialGoal).badge}
-                    </Text>
-                  </View>
+                  <Text style={[styles.summaryItemVal, { color: colors.primary, fontWeight: 'bold', fontFamily: tStyles.fontFamily, fontSize: 13 * m }]}>
+                    {getFinancialGoal(financialGoal).title}
+                  </Text>
                 </View>
                 <View style={styles.summaryItemRow}>
                   <Text style={[styles.summaryItemLabel, { color: colors.text, opacity: 0.6, fontFamily: tStyles.fontFamily, fontSize: 12 * m }]}>
@@ -2200,43 +2194,30 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   financialGoalsList: {
-    gap: 8,
+    gap: 10,
   },
   financialGoalCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 11,
-    paddingHorizontal: 13,
+    paddingVertical: 13,
+    paddingHorizontal: 14,
     borderWidth: 1.5,
     elevation: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.04,
+    shadowRadius: 3,
   },
   goalIconBox: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 11,
+    marginRight: 12,
   },
   goalTitle: {},
   goalSubtitle: {},
-  goalBadge: {
-    paddingHorizontal: 7,
-    paddingVertical: 2,
-    borderRadius: 6,
-  },
-  goalBadgeText: {
-    fontWeight: 'bold',
-  },
-  goalRadioCircle: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    borderWidth: 2,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginLeft: 2,
-  },
   savingsPillBtn: {
     flex: 1,
     paddingVertical: 8,

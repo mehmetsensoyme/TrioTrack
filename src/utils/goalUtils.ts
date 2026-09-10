@@ -26,7 +26,7 @@ export const FINANCIAL_GOALS: FinancialGoal[] = [
   },
   {
     id: 'debt_free',
-    title: 'Borçları Sıfırlama',
+    title: 'Borçları Kapatma',
     subtitle: 'Kredi kartı ve kişi borçlarınızı adım adım sıfırlayana kadar takip edin.',
     icon: 'shield-checkmark-outline',
     color: '#2196F3',
