@@ -829,8 +829,12 @@ export default function SettingsScreen({ navigation }: any) {
         {/* 9. GELİŞTİRİCİ & MARKA İMZASI */}
         <View style={[styles.brandCard, { backgroundColor: colors.card, borderRadius: tStyles.roundness, elevation: tStyles.elevation }]}>
           <View style={styles.brandTopRow}>
-            <View style={[styles.brandLogoBadge, { backgroundColor: colors.primary }]}>
-              <Ionicons name="pie-chart" size={26} color={colors.onPrimary} />
+            <View style={[styles.brandLogoBadge, { overflow: 'hidden', backgroundColor: 'transparent' }]}>
+              <Image 
+                source={require('../../assets/triotrack_logo.png')} 
+                style={{ width: 46, height: 46, borderRadius: 12 }} 
+                resizeMode="cover" 
+              />
             </View>
             <View style={{ flex: 1, marginLeft: 14 }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>

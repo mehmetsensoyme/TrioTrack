@@ -57,6 +57,13 @@ export const CHANGELOG_HISTORY: VersionRelease[] = [
         typeLabel: 'ÖZELLİK',
         title: 'Cüzdan & Bütçe Headerına Hızlı Hesap Ekleme Butonu',
         description: 'Hesaplar sekmesi başlığında doğrudan hesap açmayı sağlayan (+) butonu ve ayarlar kısayolu tek bir aksiyon grubunda buluşturuldu.'
+      },
+      {
+        id: '166-5',
+        type: 'design',
+        typeLabel: 'TASARIM',
+        title: 'Resmi Uygulama Logosu & Launcher İkon Revizyonu',
+        description: 'TrioTrack üç boyutlu mobius logosu; tüm sistem başlatıcı (launcher) mipmap çözünürlüklerine, adaptif uygulama ikonlarına ve Ayarlar ekranındaki geliştirici marka alanına resmi logo olarak entegre edildi.'
       }
     ]
   },

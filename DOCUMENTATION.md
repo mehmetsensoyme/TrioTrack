@@ -257,6 +257,7 @@ flowchart TD
   * **Tipografik Standart:** Tüm sekmelerin başlık boyutu `18 * m` (`titleWeight`) olarak eşitlendi.
   * **Bağlamsal Alt Öğeler:** Zaman odaklı sekmelerde (Ana Sayfa & Raporlar) başlığın hemen altına standart kompakt ay seçici hap butonu; varlık/defter odaklı sekmelerde (Cüzdan & Borçlar) başlığın yanına sayaç rozeti (`X Hesap`, `X Aktif`) ve altına açıklayıcı alt başlık yerleştirildi.
   * **Standart Sağ Aksiyon Butonları:** Tüm sekmelere `40x40` ayarlar (`⚙️`) kısayolu, Cüzdan ve Borçlar sekmelerine ise doğrudan yeni kayıt eklemeyi sağlayan (`➕`) hızlı işlem butonları entegre edildi.
+  * **Resmi Uygulama Logosu & Launcher İkon Revizyonu:** `assets/triotrack_logo.png` tüm Android launcher mipmap katmanlarına (`mdpi`, `hdpi`, `xhdpi`, `xxhdpi`, `xxxhdpi`), adaptive icon foreground/background yapılarına ve Ayarlar ekranının en altındaki marka kartına resmi logo olarak entegre edildi.
 * **v1.6.5 (11 Eylül 2026):**
   * **Kalıcı Tema & Tipografi Hafızası (AsyncStorage):** Cihaz beklemedeyken veya arka plandan yeniden açıldığında seçilen tema (Paisa, Zero, Buckwheat), tema modu (Aydınlık / Koyu) ve yazı tipinin (Modern, Klasik, Kod) sistem varsayılanına sıfırlanması sorunu kalıcı olarak çözüldü.
   * **Akıllı Sürüm Bildirim Rozeti (Seen / Unseen):** Ana ekrandaki "Neler Yeni?" rozeti yalnızca güncellenmiş yeni bir sürüm olduğunda görünür; bir kez incelendikten sonra ana ekrandan kalkar ve Ayarlar sekmesinde arşivlenir.
