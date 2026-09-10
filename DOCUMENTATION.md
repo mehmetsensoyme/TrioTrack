@@ -195,6 +195,7 @@ Tüm veriler cihaz üzerinde yerel olarak saklanır.
 2. **Akıcı Sayfa & Modal Geçişleri:** React Native Screens + `animationType="slide"` donanım destekli pencereler.
 3. **Dinamik Liste Geçişleri:** `LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut)` ile kategori filtrelerinde sıfır takılmalı yeniden dizilim.
 4. **Evrensel Modal Kapanışı (Backdrop Dismiss):** Tüm modalların siyah/saydam boş alanına dokunulduğunda (`TouchableWithoutFeedback`) anında ve yumuşak kapanma.
+5. **Yüzen Yarı Saydam Navigasyon Barları (Translucent Floating Bars):** Onboarding ekranında üst 'Geri' barı ve alt buton çubuğu, içerikleri sert kesen katı kutular yerine %85 yarı saydam (`colors.background + 'D9'`) ve yüzen (`position: 'absolute'`) yapıya kavuşturulmuştur. Liste kaydırıldığında içerik butonların arkasından akıcı ve pürüzsüzce geçer.
 
 ---
 
@@ -204,15 +205,26 @@ Tüm veriler cihaz üzerinde yerel olarak saklanır.
 flowchart TD
     Step1["✅ 1. Adım: Veritabanı & Sıfır Bakiye Düzeltmesi"]
     Step2["✅ 2. Adım: Simge Kataloğu & 13 Kategori Sentezi"]
-    Step3["✅ 3. Adım: Karşılama Ekranı Sadeleştirmesi & Çok Kanallı Yedek"]
-    Step4["⏳ 4. Adım: Onboarding 1-6 Adımlarının İncelenmesi ve İyileştirilmesi"]
-    Step5["⏳ 5. Adım: Ana Ekran (Home) ve Canlı Buckwheat Harçlık Motoru"]
-    Step6["⏳ 6. Adım: Cüzdanlar, Borçlar ve Raporlama Ekranları"]
+    Step3["✅ 3. Adım: Karşılama Ekranı (Slide 0) & Çok Kanallı Yedek"]
+    Step4["✅ 4. Adım: Özellik Turu (Slide 1) Onayı"]
+    Step5["✅ 5. Adım: Kişiselleştirme, Fotoğraf & Tipografi & Yüzen Saydam Bar (Slide 2)"]
+    Step6["⏳ 6. Adım: Para Birimi & Finansal Hedef (Slide 3)"]
+    Step7["⏳ 7. Adım: Varsayılan Cüzdanlar & Bakiyeler (Slide 4)"]
+    Step8["⏳ 8. Adım: Buckwheat Harçlık Motoru Kurulumu (Slide 5)"]
     
-    Step1 --> Step2 --> Step3 --> Step4 --> Step5 --> Step6
+    Step1 --> Step2 --> Step3 --> Step4 --> Step5 --> Step6 --> Step7 --> Step8
 ```
 
 ### Değişiklik Günlüğü (Changelog):
+* **v1.6.3 (10 Eylül 2026):**
+  * **Yüzen Yarı Saydam Navigasyon & Alt Bar (Floating Translucent Bars):** Onboarding ekranında sayfa kaydırıldığında alt butonların ve üst 'Geri' butonunun katı/opak blok halinde içeriği kesmesi engellendi. Her iki bar da %85 yarı saydam (`colors.background + 'D9'`), z-index destekli ve yüzen yapıya dönüştürülerek liste içeriğinin butonların arkasından akıcı şekilde akması sağlandı.
+  * **Avatar Düğme Temizliği:** Profil fotoğrafı seçim dairesinin altındaki mükerrer metin butonu kaldırılarak arayüz sadeleştirildi.
+* **v1.6.2 (10 Eylül 2026):**
+  * **Kullanıcı Fotoğrafı Yükleme:** Onboarding 3. adım (Slide 2) ve Ayarlar ekranına `expo-image-picker` ile Galeri ve Kamera üzerinden profil fotoğrafı yükleme ve kırpma yeteneği eklendi.
+  * **Ham Emoji Probleminin Çözümü:** Mor temada ve diğer seçeneklerde yapay/soluk duran `'👤'` emojisi kaldırıldı; yerine seçilen gerçek fotoğraf, 6 şık tematik avatar rozeti veya yüksek kontrastlı monogram harf getirildi.
+  * **Hazır Karakter Rozetleri (`avatarUtils.ts`):** Finansör, Gizlilik, Enerjik, Girişimci, Minimalist ve Vizyoner olmak üzere 6 tematik hazır avatar seçeneği eklendi.
+  * **Yazı Tipi (Tipografi) & Boyutu Seçimi:** Onboarding Slide 2'ye canlı font önizlemeli Modern (Sans-serif), Klasik (Serif/Georgia) ve Teknik (Monospace/Menlo) yazı tipi ile Kompakt/Standart/Geniş punto kontrolleri entegre edildi.
+  * **Uygulama Geneli Canlı Senkronizasyon:** Profil avatarı ve yazı tipi ayarları hem Onboarding özet kartına (Slide 6), hem Ayarlar (`SettingsScreen`) ekranına, hem de Cüzdanlar (`AccountsBudgetsScreen`) selamlama başlığına bağlandı.
 * **v1.6.1 (10 Eylül 2026):**
   * TrioTrack resmi sonsuzluk/mobius uygulama logosu üretildi ve Karşılama Ekranı (Slide 0) başlığının üstüne yerleştirildi.
   * Karşılama ekranına 3 uygulamanın felsefi birleşimini yansıtan ilham verici manifesto metni eklendi.
