@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch, TextInput, Alert, Platform, Share, Modal, Linking, TouchableWithoutFeedback, ActivityIndicator, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
+import * as LocalAuthentication from 'expo-local-authentication';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme } from '../theme/ThemeContext';
@@ -69,11 +70,16 @@ export default function SettingsScreen({ navigation }: any) {
     userAvatar,
     setUserAvatar,
     weekStartMonday,
-    setWeekStartMonday
+    setWeekStartMonday,
+    isBiometricEnabled,
+    setBiometricEnabled,
+    setIsAppLocked
   } = useData();
 
   const [dailyReminder, setDailyReminder] = useState(true);
-  const [biometricsEnabled, setBiometricsEnabled] = useState(false);
+  const [biometricType, setBiometricType] = useState<string>('Biyometrik');
+  const [hasBiometricHardware, setHasBiometricHardware] = useState(false);
+  const [isBiometricEnrolled, setIsBiometricEnrolled] = useState(false);
   const [showGoalModal, setShowGoalModal] = useState(false);
   const [newGoalInput, setNewGoalInput] = useState(String(monthlyBudgetGoal));
   const [showExportModal, setShowExportModal] = useState(false);
@@ -143,14 +149,89 @@ export default function SettingsScreen({ navigation }: any) {
 
   useEffect(() => {
     (async () => {
-      const bio = await AsyncStorage.getItem('@triotrack_biometrics_enabled');
-      if (bio !== null) setBiometricsEnabled(bio === 'true');
+      try {
+        const hasHardware = await LocalAuthentication.hasHardwareAsync();
+        const isEnrolled = await LocalAuthentication.isEnrolledAsync();
+        setHasBiometricHardware(hasHardware);
+        setIsBiometricEnrolled(isEnrolled);
+
+        const supportedTypes = await LocalAuthentication.supportedAuthenticationTypesAsync();
+        if (supportedTypes.includes(LocalAuthentication.AuthenticationType.FACIAL_RECOGNITION)) {
+          setBiometricType('Face ID / Yüz Tanıma');
+        } else if (supportedTypes.includes(LocalAuthentication.AuthenticationType.FINGERPRINT)) {
+          setBiometricType('Parmak İzi');
+        } else if (supportedTypes.includes(LocalAuthentication.AuthenticationType.IRIS)) {
+          setBiometricType('İris');
+        } else {
+          setBiometricType('Cihaz PIN / Şifre');
+        }
+      } catch (err) {
+        console.warn('Biyometrik donanım tespiti hatası:', err);
+      }
     })();
   }, []);
 
   const handleToggleBiometrics = async (val: boolean) => {
-    setBiometricsEnabled(val);
-    await AsyncStorage.setItem('@triotrack_biometrics_enabled', String(val));
+    if (val) {
+      try {
+        let authResult = await LocalAuthentication.authenticateAsync({
+          promptMessage: 'TrioTrack Güvenlik Kilidini Etkinleştir',
+          cancelLabel: 'Vazgeç',
+          disableDeviceFallback: false,
+          fallbackLabel: 'Cihaz Şifresini Kullan',
+          requireConfirmation: false,
+          biometricsSecurityLevel: 'strong',
+        });
+
+        // Eğer ilk deneme cihaz kısıtından başarısız olursa saf biyometrik ile tekrar dene
+        if (!authResult.success && authResult.error !== 'user_cancel') {
+          authResult = await LocalAuthentication.authenticateAsync({
+            promptMessage: 'TrioTrack Güvenlik Kilidini Etkinleştir',
+            cancelLabel: 'Vazgeç',
+            disableDeviceFallback: true,
+            requireConfirmation: false,
+          });
+        }
+
+        if (authResult.success) {
+          await setBiometricEnabled(true);
+          Alert.alert('Güvenlik Kilidi Aktif', 'TrioTrack artık açılışta ve arka plandan dönüldüğünde kimlik doğrulaması isteyecek.');
+        } else {
+          if (authResult.error === 'user_cancel') {
+            return;
+          }
+          Alert.alert(
+            'Doğrulama Başarısız',
+            `Kimlik doğrulanamadı (${authResult.error || 'Bilinmeyen hata'}). Lütfen tekrar deneyin.`
+          );
+        }
+      } catch (err: any) {
+        Alert.alert('Hata', err?.message || 'Kimlik doğrulama başlatılamadı.');
+      }
+    } else {
+      Alert.alert(
+        'Güvenlik Kilidini Kapat',
+        'Uygulama güvenlik kilidini kapatmak istediğinizden emin misiniz? Finansal verileriniz doğrudan erişilebilir hale gelecektir.',
+        [
+          { text: 'Vazgeç', style: 'cancel' },
+          {
+            text: 'Kapat',
+            style: 'destructive',
+            onPress: async () => {
+              await setBiometricEnabled(false);
+            }
+          }
+        ]
+      );
+    }
+  };
+
+  const handleTestLock = () => {
+    if (!isBiometricEnabled) {
+      Alert.alert('Bilgi', 'Önce yukarıdaki anahtardan Uygulama Güvenlik Kilidini aktif edin.');
+      return;
+    }
+    setIsAppLocked(true);
   };
 
   const handleSaveGoal = () => {
@@ -651,29 +732,78 @@ export default function SettingsScreen({ navigation }: any) {
             />
           </View>
 
-          {/* Uygulama Kilidi & Biyometrik (Paisa) */}
-          <View style={[styles.toggleRow, { borderTopWidth: 1, borderTopColor: 'rgba(0,0,0,0.05)', paddingTop: 12, marginTop: 12 }]}>
+        </View>
+
+        {/* 7. GÜVENLİK & UYGULAMA KİLİDİ (BİYOMETRİK / CİHAZ KİLİDİ) */}
+        <View style={[styles.card, { backgroundColor: colors.card, borderRadius: tStyles.roundness, elevation: tStyles.elevation }]}>
+          <View style={styles.cardHeaderRow}>
+            <Ionicons name="shield-checkmark" size={18} color={colors.primary} />
+            <Text style={[styles.cardTitle, { color: colors.primary, fontFamily: tStyles.fontFamily, fontSize: 13 * m }]}>
+              GÜVENLİK & UYGULAMA KİLİDİ
+            </Text>
+          </View>
+
+          {/* Biyometrik Anahtar */}
+          <View style={styles.toggleRow}>
             <View style={{ flex: 1, marginRight: 10 }}>
-              <Text style={[styles.toggleLabel, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 14 * m }]}>
-                Uygulama Güvenlik Kilidi
-              </Text>
-              <Text style={[styles.toggleDesc, { color: colors.text, opacity: 0.6, fontFamily: tStyles.fontFamily, fontSize: 11 * m }]}>
-                TrioTrack açılışında biyometrik doğrulama ister.
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                <Ionicons 
+                  name={Platform.OS === 'ios' ? 'scan-outline' : 'finger-print-outline'} 
+                  size={18} 
+                  color={colors.primary} 
+                />
+                <Text style={[styles.toggleLabel, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 14 * m, fontWeight: 'bold' }]}>
+                  {biometricType} Kilidi
+                </Text>
+              </View>
+              <Text style={[styles.toggleDesc, { color: colors.text, opacity: 0.6, fontFamily: tStyles.fontFamily, fontSize: 11 * m, marginTop: 4 }]}>
+                Uygulama açılışında ve arka plandan dönüldüğünde kimlik doğrulaması ister.
               </Text>
             </View>
             <Switch
-              value={biometricsEnabled}
+              value={isBiometricEnabled}
               onValueChange={handleToggleBiometrics}
               trackColor={{ true: colors.primary, false: colors.background }}
               thumbColor="#FFF"
             />
           </View>
+
+          {/* Donanım ve Durum Bilgisi */}
+          <View style={[styles.biometricInfoBox, { backgroundColor: colors.background, borderRadius: Math.max(tStyles.roundness / 2, 8) }]}>
+            <Ionicons 
+              name={hasBiometricHardware ? "checkmark-circle" : "information-circle-outline"} 
+              size={16} 
+              color={hasBiometricHardware ? "#10B981" : "#F59E0B"} 
+              style={{ marginRight: 8, marginTop: 2 }} 
+            />
+            <Text style={[styles.biometricInfoText, { color: colors.text, opacity: 0.75, fontFamily: tStyles.fontFamily, fontSize: 11.5 * m, flex: 1, lineHeight: 16 }]}>
+              {hasBiometricHardware 
+                ? (isBiometricEnrolled 
+                    ? `Cihazınızda ${biometricType} ve şifre fallback desteği aktif.`
+                    : 'Biyometrik donanım mevcut ancak henüz parmak izi/yüz kaydedilmemiş. Cihaz PIN kodu ile doğrulama yapılabilir.')
+                : 'Cihazınızda biyometrik sensör tespit edilemedi. Cihaz PIN/desen kilidi ile doğrulama yapılabilir.'}
+            </Text>
+          </View>
+
+          {/* Kilidi Şimdi Test Et Butonu */}
+          {isBiometricEnabled && (
+            <TouchableOpacity 
+              style={[styles.testLockBtn, { backgroundColor: colors.primary + '18', borderColor: colors.primary + '40', borderRadius: Math.max(tStyles.roundness / 2, 8) }]}
+              onPress={handleTestLock}
+              activeOpacity={0.7}
+            >
+              <Ionicons name="lock-closed-outline" size={16} color={colors.primary} style={{ marginRight: 8 }} />
+              <Text style={{ color: colors.primary, fontFamily: tStyles.fontFamily, fontSize: 13 * m, fontWeight: 'bold' }}>
+                Kilidi Şimdi Test Et
+              </Text>
+            </TouchableOpacity>
+          )}
         </View>
 
-        {/* 7. VERİ YÖNETİMİ & GÜVENLİK (PAISA & ZERO) */}
+        {/* 8. VERİ YÖNETİMİ & YEDEKLEME (PAISA & ZERO) */}
         <View style={[styles.card, { backgroundColor: colors.card, borderRadius: tStyles.roundness, elevation: tStyles.elevation }]}>
           <View style={styles.cardHeaderRow}>
-            <Ionicons name="shield-checkmark-outline" size={18} color={colors.primary} />
+            <Ionicons name="cloud-upload-outline" size={18} color={colors.primary} />
             <Text style={[styles.cardTitle, { color: colors.primary, fontFamily: tStyles.fontFamily, fontSize: 13 * m }]}>
               VERİ YÖNETİMİ & YEDEKLEME
             </Text>
@@ -1594,4 +1724,23 @@ const styles = StyleSheet.create({
   backupChannelBtn: { flexDirection: 'row', alignItems: 'center', padding: 12, marginBottom: 8 },
   backupChannelIconBox: { width: 40, height: 40, borderRadius: 20, justifyContent: 'center', alignItems: 'center', marginRight: 12 },
   backupChannelTitle: { fontWeight: 'bold', marginBottom: 2 },
+
+  // Biyometrik Kilit Stilleri
+  biometricInfoBox: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    padding: 10,
+    marginTop: 10,
+    marginBottom: 8,
+  },
+  biometricInfoText: {},
+  testLockBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 11,
+    paddingHorizontal: 16,
+    borderWidth: 1,
+    marginTop: 4,
+  },
 });

@@ -1,4 +1,4 @@
-export const APP_VERSION = '1.6.6';
+export const APP_VERSION = '1.6.7';
 export const APP_BUILD = '2026.09.11';
 export const APP_NAME = 'TrioTrack';
 export const APP_DESCRIPTION = 'Paisa, Zero ve Buckwheat mimarilerini birleştiren akıllı kişisel finans ve bütçe yöneticisi';
@@ -24,10 +24,46 @@ export interface VersionRelease {
 
 export const CHANGELOG_HISTORY: VersionRelease[] = [
   {
+    version: '1.6.7',
+    buildDate: '11 Eylül 2026',
+    title: 'Biyometrik Uygulama Kilidi & Üst Düzey Güvenlik Katmanı',
+    isLatest: true,
+    summary: 'Parmak izi, Face ID ve cihaz PIN doğrulamasıyla verileriniz artık tamamen güvende. Uygulama açılışında ve arka plana geçtiğinde otomatik kilitlenme devrede.',
+    items: [
+      {
+        id: '167-1',
+        type: 'feature',
+        typeLabel: 'GÜVENLİK',
+        title: 'Biyometrik Kimlik Doğrulama & Uygulama Kilidi',
+        description: 'TrioTrack artık cihazınızdaki parmak izi okuyucu (Fingerprint) ve yüz tanıma (Face ID) donanımlarını doğrudan destekler. Finansal verileriniz yetkisiz erişimlere karşı anında korunur.'
+      },
+      {
+        id: '167-2',
+        type: 'core',
+        typeLabel: 'ÇEKİRDEK',
+        title: 'Arka Plan & Yaşam Döngüsü Koruması (AppState Security)',
+        description: 'TrioTrack açıkken başka bir uygulamaya geçildiğinde veya ana ekrana dönüldüğünde sistem otomatik olarak kilitlenir. Uygulamaya geri döndüğünüzde anında tam ekran koruma ekranı açılır.'
+      },
+      {
+        id: '167-3',
+        type: 'feature',
+        typeLabel: 'ÖZELLİK',
+        title: 'Ayarlar Güvenlik Paneli & Kilidi Anında Test Etme',
+        description: 'Ayarlar ekranına yeni "Güvenlik & Uygulama Kilidi" kartı eklendi. Cihazınızın donanım ve biyometrik kayıt durumunu görebilir, tek dokunuşla kilidi anında test edebilirsiniz.'
+      },
+      {
+        id: '167-4',
+        type: 'fix',
+        typeLabel: 'DÜZELTME',
+        title: 'Sıfır Kilitlenme Koruması & Cihaz PIN Desteği',
+        description: 'Kilit anahtarı açılırken önce kullanıcının kimliğini doğrulaması zorunlu tutularak kullanıcının kilitli kalması önlendi. Biyometrik sensör bulunmayan veya kaydedilmemiş cihazlarda cihaz PIN/desen şifresiyle güvenle çalışır.'
+      }
+    ]
+  },
+  {
     version: '1.6.6',
     buildDate: '11 Eylül 2026',
     title: 'Tek Standart Header Mimarisi & Hızlı Modül Yönetimi',
-    isLatest: true,
     summary: 'Tüm sekmelerdeki başlık ve aksiyon çubukları tek bir standart görsel dilde birleştirildi, cüzdan ve borç defterine hızlı kayıt butonları eklendi.',
     items: [
       {

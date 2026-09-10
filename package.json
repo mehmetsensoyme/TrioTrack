@@ -1,6 +1,6 @@
 {
   "name": "triotrack",
-  "version": "1.6.6",
+  "version": "1.6.7",
   "main": "index.ts",
   "dependencies": {
     "@expo/vector-icons": "^15.1.1",
@@ -14,6 +14,7 @@
     "expo-document-picker": "~57.0.1",
     "expo-file-system": "~57.0.6",
     "expo-image-picker": "~57.0.16",
+    "expo-local-authentication": "~57.0.2",
     "expo-sharing": "~57.0.18",
     "expo-status-bar": "~57.0.1",
     "react": "19.2.3",

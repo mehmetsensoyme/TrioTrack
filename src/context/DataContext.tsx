@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo, useRef } from 'react';
+import { AppState, AppStateStatus, Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { database } from '../watermelondb/database';
 import { APP_VERSION } from '../constants/version';
@@ -113,6 +114,10 @@ interface DataContextProps {
   totalBalance: number;
   isBalanceHidden: boolean;
   toggleBalanceHidden: () => Promise<void>;
+  isBiometricEnabled: boolean;
+  setBiometricEnabled: (enabled: boolean) => Promise<void>;
+  isAppLocked: boolean;
+  setIsAppLocked: (locked: boolean) => void;
   totalIncomeThisMonth: number;
   totalExpenseThisMonth: number;
   buckwheatMetrics: BuckwheatMetrics;
@@ -213,12 +218,19 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [savingsTargetPercent, setSavingsTargetPercentState] = useState<number>(20);
   const [weekStartMonday, setWeekStartMondayState] = useState<boolean>(true);
   const [isBalanceHidden, setIsBalanceHidden] = useState<boolean>(false);
+  const [isBiometricEnabled, setIsBiometricEnabledState] = useState<boolean>(false);
+  const [isAppLocked, setIsAppLocked] = useState<boolean>(false);
   const [isLoaded, setIsLoaded] = useState(false);
 
   // AsyncStorage'dan verileri yükle (Açılışta)
   useEffect(() => {
     (async () => {
       try {
+        const storedBiometric = await AsyncStorage.getItem('@triotrack_biometric_enabled');
+        if (storedBiometric === 'true') {
+          setIsBiometricEnabledState(true);
+          setIsAppLocked(true);
+        }
         const storedOnboarded = await AsyncStorage.getItem('@triotrack_onboarded');
         if (storedOnboarded === 'true') {
           setIsOnboarded(true);
@@ -427,6 +439,46 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
       return nextVal;
     });
+  };
+
+  // Biyometrik Kilit: Uygulama arka plana geçtiğinde otomatik kilitle
+  const lastUnlockTimeRef = useRef<number>(0);
+
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', (nextAppState: AppStateStatus) => {
+      // Android'de 'inactive', sistem dialogu (BiometricPrompt, izinler vb.) açıldığında veya kapandığında tetiklenir.
+      // Yalnızca gerçek arka plana ('background') geçildiğinde kilitlemeliyiz.
+      const shouldLock = Platform.OS === 'android'
+        ? nextAppState === 'background'
+        : nextAppState.match(/inactive|background/);
+
+      // Kilit yeni açıldıysa (ilk 2.5 saniye) arka plan geçişi gibi algılanmasını önle
+      const justUnlocked = Date.now() - lastUnlockTimeRef.current < 2500;
+
+      if (shouldLock && isBiometricEnabled && !justUnlocked) {
+        setIsAppLocked(true);
+      }
+    });
+
+    return () => {
+      subscription.remove();
+    };
+  }, [isBiometricEnabled]);
+
+  const handleSetAppLocked = (locked: boolean) => {
+    if (!locked) {
+      lastUnlockTimeRef.current = Date.now();
+    }
+    setIsAppLocked(locked);
+  };
+
+  const setBiometricEnabled = async (enabled: boolean) => {
+    setIsBiometricEnabledState(enabled);
+    if (!enabled) {
+      lastUnlockTimeRef.current = Date.now();
+      setIsAppLocked(false);
+    }
+    await AsyncStorage.setItem('@triotrack_biometric_enabled', enabled ? 'true' : 'false');
   };
 
   // Eylemler
@@ -864,6 +916,10 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         totalBalance,
         isBalanceHidden,
         toggleBalanceHidden,
+        isBiometricEnabled,
+        setBiometricEnabled,
+        isAppLocked,
+        setIsAppLocked: handleSetAppLocked,
         totalIncomeThisMonth,
         totalExpenseThisMonth,
         buckwheatMetrics,

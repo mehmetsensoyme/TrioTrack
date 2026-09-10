@@ -1,8 +1,8 @@
 # 📘 TrioTrack — Kapsamlı Proje ve Mimari Dokümantasyonu
 
-> **Sürüm:** 1.6.6 (Build 2026.09.11 - versionCode: 7)  
+> **Sürüm:** 1.6.7 (Build 2026.09.11 - versionCode: 8)  
 > **Son Güncelleme:** 11 Eylül 2026  
-> **Durum:** Kararlı Sürüm (Tüm Sekmelerde Birleşik Header & APK Derlendi)
+> **Durum:** Kararlı Sürüm (Biyometrik Uygulama Kilidi, Standart Headerlar & APK Derlendi)
 
 ---
 
@@ -251,6 +251,17 @@ flowchart TD
       5. 4 adet aylık gelir birikim oranı hedef seçeneği (%10, %20, %30, %50).
     * `DataContext.tsx` içine `financialGoal` ve `savingsTargetPercent` durumları, AsyncStorage anahtarları, `completeOnboarding` parametreleri ve JSON yedekleme desteği eklendi.
     * Onboarding Slide 6 (Özet Kartı) içine seçilen finansal hedef ve tasarruf oranı canlı olarak entegre edildi.
+* **v1.6.7 (11 Eylül 2026 - versionCode: 8):**
+  * **Biyometrik Kimlik Doğrulama & Uygulama Kilidi Katmanı (`expo-local-authentication`):**
+    * Cihazdaki parmak izi okuyucu (Fingerprint) ve yüz tanıma (Face ID) donanımları ile tam entegre kilit sistemi eklendi.
+    * Donanım bulunmayan veya biyometrik veri kaydedilmemiş cihazlar için sistem PIN/şifre geri dönüş (fallback) mimarisi sağlandı.
+  * **Arka Plan & Yaşam Döngüsü Koruması (Lifecycle AppState Security):**
+    * Uygulama arka plana geçtiğinde (`inactive` veya `background`) veya kapatılıp yeniden açıldığında hassas finansal verilerin korunması için kilit anında devreye girer.
+    * Uygulama ön plana geldiğinde (`active`), tam ekran `BiometricLockOverlay` devreye girerek biyometrik onay ekranını otomatik tetikler.
+  * **Ayarlar Güvenlik & Uygulama Kilidi Yönetim Paneli:**
+    * Ayarlar sekmesine özel "GÜVENLİK & UYGULAMA KİLİDİ" kartı eklendi. Cihazın biyometrik sensör tipi (Face ID, Parmak İzi, PIN) ve kayıt durumu dinamik olarak gösterilir.
+    * "Kilidi Şimdi Test Et" butonu ile kullanıcının kilidi anında deneyimlemesi sağlandı.
+    * Güvenlik anahtarı açılırken önce kimlik doğrulaması şart koşularak sıfır kilitlenme (anti-lockout) koruması garantilendi.
 * **v1.6.6 (11 Eylül 2026 - versionCode: 7):**
   * **Tüm Sekmelerde Tek Standart Birleşik Header Mimarisi:** Ana Sayfa, Cüzdan & Bütçe, Borçlar ve Raporlar sekmelerindeki başlık alanları kusursuz bir tasarım standardında birleştirildi.
   * **44x44 Modül Rozetleri:** Ana Sayfada profil avatarı (gerçek fotoğraf/tematik rozet/monogram), Cüzdanlar sekmesinde Cüzdan (`wallet-outline`), Borçlar sekmesinde Kişiler (`people-outline`), Raporlar sekmesinde Pasta Grafik (`pie-chart-outline`) rozetleri standart boyutta ve renk tonunda konumlandırıldı.

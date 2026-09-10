@@ -11,6 +11,7 @@ import { DataProvider, useData } from './src/context/DataContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { APP_VERSION } from './src/constants/version';
 import { WhatsNewModal } from './src/components/WhatsNewModal';
+import { BiometricLockOverlay } from './src/components/BiometricLockOverlay';
 import { getAvatarPreset } from './src/utils/avatarUtils';
 
 import OnboardingScreen from './src/screens/OnboardingScreen';
@@ -1207,36 +1208,42 @@ const MainTabs = () => {
 // ANA UYGULAMA GİRİŞİ
 const AppContent = () => {
   const { isDark, colors } = useTheme();
-  const { isOnboarded, isLoaded } = useData();
+  const { isOnboarded, isLoaded, isBiometricEnabled, isAppLocked, setIsAppLocked } = useData();
 
   if (!isLoaded) {
     return <View style={{ flex: 1, backgroundColor: colors.background }} />;
   }
 
   return (
-    <NavigationContainer>
-      <StatusBar 
-        barStyle={isDark ? "light-content" : "dark-content"} 
-        backgroundColor={colors.background} 
-        translucent={false} 
-      />
-      <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName={isOnboarded ? "Home" : "Onboarding"}>
-        {!isOnboarded && (
-          <Stack.Screen name="Onboarding" component={OnboardingScreen} />
-        )}
-        <Stack.Screen name="Home" component={MainTabs} />
-        <Stack.Screen 
-          name="AddExpense" 
-          component={AddExpenseScreen} 
-          options={{ presentation: 'modal' }}
+    <View style={{ flex: 1 }}>
+      <NavigationContainer>
+        <StatusBar 
+          barStyle={isDark ? "light-content" : "dark-content"} 
+          backgroundColor={colors.background} 
+          translucent={false} 
         />
-        <Stack.Screen name="Settings" component={SettingsScreen} />
-        <Stack.Screen name="Ayarlar" component={SettingsScreen} />
-        {isOnboarded && (
-          <Stack.Screen name="Onboarding" component={OnboardingScreen} />
-        )}
-      </Stack.Navigator>
-    </NavigationContainer>
+        <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName={isOnboarded ? "Home" : "Onboarding"}>
+          {!isOnboarded && (
+            <Stack.Screen name="Onboarding" component={OnboardingScreen} />
+          )}
+          <Stack.Screen name="Home" component={MainTabs} />
+          <Stack.Screen 
+            name="AddExpense" 
+            component={AddExpenseScreen} 
+            options={{ presentation: 'modal' }}
+          />
+          <Stack.Screen name="Settings" component={SettingsScreen} />
+          <Stack.Screen name="Ayarlar" component={SettingsScreen} />
+          {isOnboarded && (
+            <Stack.Screen name="Onboarding" component={OnboardingScreen} />
+          )}
+        </Stack.Navigator>
+      </NavigationContainer>
+      <BiometricLockOverlay
+        visible={isBiometricEnabled && isAppLocked}
+        onUnlock={() => setIsAppLocked(false)}
+      />
+    </View>
   );
 };
 
