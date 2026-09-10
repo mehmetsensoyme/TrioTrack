@@ -11,6 +11,7 @@ import { DataProvider, useData } from './src/context/DataContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { APP_VERSION } from './src/constants/version';
 import { WhatsNewModal } from './src/components/WhatsNewModal';
+import { getAvatarPreset } from './src/utils/avatarUtils';
 
 import OnboardingScreen from './src/screens/OnboardingScreen';
 import AddExpenseScreen from './src/screens/AddExpenseScreen';
@@ -49,6 +50,7 @@ const HomeScreen = ({ navigation }: any) => {
     accounts,
     debtors,
     userName,
+    userAvatar,
     selectedMonth,
     setSelectedMonth,
     monthlyBudgetGoal,
@@ -57,6 +59,8 @@ const HomeScreen = ({ navigation }: any) => {
     editTransaction,
     setBudgetRecalcMode
   } = useData();
+
+  const avatarPreset = getAvatarPreset(userAvatar);
 
   const [showMonthModal, setShowMonthModal] = useState(false);
   const [showWhatsNewModal, setShowWhatsNewModal] = useState(false);
@@ -178,26 +182,56 @@ const HomeScreen = ({ navigation }: any) => {
         }}
       >
         
-        {/* Karşılama, Zero Ay Seçici ve Ayarlar Butonu */}
+        {/* Karşılama, Profil Avatarı, Zero Ay Seçici ve Aksiyon Butonları */}
         <View style={styles.headerRow}>
-          <View style={{ flex: 1 }}>
-            <Text style={[styles.greeting, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 20 * m, fontWeight: tStyles.titleWeight }]}>
-              Merhaba, {userName} 👋
-            </Text>
-            
-            {/* Zero Ay Seçici Hap Buton */}
+          <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+            {/* Kullanıcı Profil Avatarı (Dokunulduğunda Ayarlar / Profile gider) */}
             <TouchableOpacity 
-              style={[styles.zeroMonthBadge, { backgroundColor: colors.card, borderRadius: tStyles.roundness }]}
-              onPress={() => {
-                setPickerYear(parseInt(currentYear, 10));
-                setShowMonthModal(true);
-              }}
+              style={[
+                styles.homeAvatarCircle, 
+                { 
+                  backgroundColor: avatarPreset ? avatarPreset.bg : colors.primary,
+                  borderColor: colors.primary + '35',
+                }
+              ]}
+              onPress={() => navigation.navigate('Settings')}
+              activeOpacity={0.8}
             >
-              <Text style={{ color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 12 * m, fontWeight: 'bold' }}>
-                {MONTH_NAMES[selectedMonthIndex]} {currentYear}
-              </Text>
-              <Ionicons name="chevron-down" size={14} color={colors.primary} style={{ marginLeft: 4 }} />
+              {userAvatar && !userAvatar.startsWith('preset:') ? (
+                <Image source={{ uri: userAvatar }} style={{ width: 44, height: 44, borderRadius: 22 }} resizeMode="cover" />
+              ) : avatarPreset ? (
+                <Ionicons name={avatarPreset.icon as any} size={22} color="#FFF" />
+              ) : userName?.trim() ? (
+                <Text style={[styles.homeAvatarLetter, { color: colors.onPrimary, fontFamily: tStyles.fontFamily, fontSize: 18 * m, fontWeight: 'bold' }]}>
+                  {userName.trim().charAt(0).toUpperCase()}
+                </Text>
+              ) : (
+                <Ionicons name="person" size={20} color={colors.onPrimary} />
+              )}
             </TouchableOpacity>
+
+            <View style={{ marginLeft: 12, flex: 1 }}>
+              <Text 
+                style={[styles.greeting, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 18 * m, fontWeight: tStyles.titleWeight }]}
+                numberOfLines={1}
+              >
+                Merhaba, {userName} 👋
+              </Text>
+              
+              {/* Zero Ay Seçici Hap Buton */}
+              <TouchableOpacity 
+                style={[styles.zeroMonthBadge, { backgroundColor: colors.card, borderRadius: tStyles.roundness }]}
+                onPress={() => {
+                  setPickerYear(parseInt(currentYear, 10));
+                  setShowMonthModal(true);
+                }}
+              >
+                <Text style={{ color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 11.5 * m, fontWeight: 'bold' }}>
+                  {MONTH_NAMES[selectedMonthIndex]} {currentYear}
+                </Text>
+                <Ionicons name="chevron-down" size={13} color={colors.primary} style={{ marginLeft: 4 }} />
+              </TouchableOpacity>
+            </View>
           </View>
 
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
@@ -1212,6 +1246,16 @@ export default function App() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, marginTop: 8 },
+  homeAvatarCircle: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    justifyContent: 'center',
+    alignItems: 'center',
+    overflow: 'hidden',
+    borderWidth: 1.5,
+  },
+  homeAvatarLetter: {},
   greeting: {},
   dateSubtitle: { marginTop: 2 },
   settingsBtn: { width: 40, height: 40, justifyContent: 'center', alignItems: 'center' },

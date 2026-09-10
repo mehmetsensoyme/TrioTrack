@@ -4,7 +4,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../theme/ThemeContext';
 import { useData, Account, RecurringItem, Category } from '../context/DataContext';
-import { getAvatarPreset } from '../utils/avatarUtils';
 
 const PALETTE_COLORS = ['#FF9800', '#E91E63', '#2196F3', '#9C27B0', '#4CAF50', '#F44336', '#009688', '#3F51B5'];
 const CATEGORY_ICONS = ['cart-outline', 'fast-food-outline', 'car-outline', 'receipt-outline', 'film-outline', 'medkit-outline', 'fitness-outline', 'school-outline', 'gift-outline', 'airplane-outline', 'home-outline', 'cafe-outline'];
@@ -34,12 +33,9 @@ export default function AccountsBudgetsScreen({ navigation }: any) {
     debtors,
     totalBalance,
     userName,
-    userAvatar,
     isBalanceHidden,
     toggleBalanceHidden,
   } = useData();
-
-  const avatarPreset = useMemo(() => getAvatarPreset(userAvatar), [userAvatar]);
 
   const [activeTab, setActiveTab] = useState<'accounts' | 'budgets' | 'recurring' | 'buckwheat'>('accounts');
   
@@ -229,41 +225,26 @@ export default function AccountsBudgetsScreen({ navigation }: any) {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background, paddingTop: Math.max(insets.top, 16) }]}>
-      {/* 🌟 PAISA & ZERO TARZI KULLANICI PROFİLİ VE HESAP KONTROL MERKEZİ HEADER */}
+      {/* 🌟 CÜZDAN & BÜTÇE KONTROL MERKEZİ HEADER */}
       <View style={[styles.paisaProfileHeader, { paddingHorizontal: 16 }]}>
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
-            <TouchableOpacity 
-              style={[
-                styles.profileAvatarCircle, 
-                { 
-                  backgroundColor: avatarPreset ? avatarPreset.bg : colors.primary,
-                  overflow: 'hidden',
-                  borderWidth: 1.5,
-                  borderColor: colors.primary + '30',
-                }
-              ]}
-              onPress={() => navigation?.navigate('Settings')}
-              activeOpacity={0.8}
-            >
-              {userAvatar && !userAvatar.startsWith('preset:') ? (
-                <Image source={{ uri: userAvatar }} style={{ width: 44, height: 44, borderRadius: 22 }} resizeMode="cover" />
-              ) : avatarPreset ? (
-                <Ionicons name={avatarPreset.icon as any} size={22} color="#FFF" />
-              ) : userName?.trim() ? (
-                <Text style={[styles.profileAvatarLetter, { color: colors.onPrimary, fontFamily: tStyles.fontFamily, fontSize: 18 * m, fontWeight: 'bold' }]}>
-                  {userName.trim().charAt(0).toUpperCase()}
-                </Text>
-              ) : (
-                <Ionicons name="person" size={20} color={colors.onPrimary} />
-              )}
-            </TouchableOpacity>
+            <View style={[styles.moduleIconBadge, { backgroundColor: colors.primary + '18', borderRadius: Math.max(tStyles.roundness / 2, 12) }]}>
+              <Ionicons name="wallet-outline" size={24} color={colors.primary} />
+            </View>
             <View style={{ marginLeft: 12, flex: 1 }}>
-              <Text style={[styles.profileGreeting, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 18 * m, fontWeight: tStyles.titleWeight }]}>
-                Hesaplar & Bütçeler
-              </Text>
-              <Text style={[styles.profileSubtitle, { color: colors.text, opacity: 0.6, fontFamily: tStyles.fontFamily, fontSize: 12 * m, marginTop: 1 }]}>
-                Cüzdan Bakiyeleri & Bütçe Yönetimi
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                <Text style={[styles.screenHeaderTitle, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 19 * m, fontWeight: tStyles.titleWeight }]}>
+                  Cüzdan & Bütçe
+                </Text>
+                <View style={[styles.accountCountPill, { backgroundColor: colors.primary + '15' }]}>
+                  <Text style={{ color: colors.primary, fontFamily: tStyles.fontFamily, fontSize: 10 * m, fontWeight: 'bold' }}>
+                    {accounts.length} Hesap
+                  </Text>
+                </View>
+              </View>
+              <Text style={[styles.screenHeaderSubtitle, { color: colors.text, opacity: 0.6, fontFamily: tStyles.fontFamily, fontSize: 11.5 * m, marginTop: 2 }]}>
+                Varlık bakiyeleri, bütçe limitleri & düzenli ödemeler
               </Text>
             </View>
           </View>
@@ -1326,12 +1307,12 @@ const styles = StyleSheet.create({
   zeroProgressBarFill: { height: '100%', borderRadius: 4 },
   zeroFooterRow: { flexDirection: 'row', justifyContent: 'space-between' },
 
-  // Paisa Profil & Hızlı Eylemler (Paisa 003245)
+  // Cüzdan & Bütçe Header Stilleri
   paisaProfileHeader: { marginBottom: 14 },
-  profileAvatarCircle: { width: 44, height: 44, borderRadius: 22, justifyContent: 'center', alignItems: 'center' },
-  profileAvatarLetter: {},
-  profileGreeting: {},
-  profileSubtitle: {},
+  moduleIconBadge: { width: 44, height: 44, justifyContent: 'center', alignItems: 'center' },
+  screenHeaderTitle: {},
+  screenHeaderSubtitle: {},
+  accountCountPill: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8 },
   profileSettingsBtn: { width: 40, height: 40, justifyContent: 'center', alignItems: 'center' },
   quickActionRow: { flexDirection: 'row', gap: 8, marginTop: 12 },
   quickActionChip: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 9, paddingHorizontal: 4 },
