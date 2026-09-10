@@ -217,10 +217,8 @@ export default function OnboardingScreen({ navigation }: any) {
         savingsTargetPercent,
       });
 
-      setTimeout(() => {
-        setIsFinishing(false);
-        navigation.replace('Home');
-      }, 600);
+      setIsFinishing(false);
+      navigation.replace('Home');
     } catch (e) {
       console.warn(e);
       setIsFinishing(false);
@@ -1454,9 +1452,7 @@ export default function OnboardingScreen({ navigation }: any) {
           {step === 6 && (
             <View style={[styles.slide, { alignItems: 'center', justifyContent: 'center' }]}>
               <View style={[styles.celebrationCircle, { backgroundColor: avatarPreset ? avatarPreset.bg : colors.primary, overflow: 'hidden' }]}>
-                {isFinishing ? (
-                  <ActivityIndicator size="large" color={colors.onPrimary} />
-                ) : avatarUri && !avatarUri.startsWith('preset:') ? (
+                {avatarUri && !avatarUri.startsWith('preset:') ? (
                   <Image source={{ uri: avatarUri }} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
                 ) : avatarPreset ? (
                   <Ionicons name={avatarPreset.icon as any} size={44} color="#FFF" />
@@ -1466,7 +1462,7 @@ export default function OnboardingScreen({ navigation }: any) {
               </View>
 
               <Text style={[styles.readyTitle, { color: colors.text, fontFamily: tStyles.fontFamily, fontWeight: tStyles.titleWeight, fontSize: 30 * m }]}>
-                {isFinishing ? 'TrioTrack Kuruluyor...' : 'Her Şey Hazır!'}
+                Her Şey Hazır!
               </Text>
               <Text style={[styles.readySubtitle, { color: colors.text, opacity: 0.7, fontFamily: tStyles.fontFamily, fontSize: 14 * m, textAlign: 'center' }]}>
                 {name ? `Tebrikler ${name}! ` : ''}TrioTrack finansal tercihlerinize göre yapılandırıldı.
