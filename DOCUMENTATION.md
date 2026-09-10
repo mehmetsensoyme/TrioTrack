@@ -193,6 +193,7 @@ Tüm veriler cihaz üzerinde yerel olarak saklanır.
 ### Kullanılan Kararlı Animasyonlar:
 1. **Lazer Tarama Animasyonu:** OCR ekranında 60/120fps native thread üzerinde çalışan `Animated.loop` tarama efekti.
 4. **Evrensel Modal Kapanışı (Backdrop Dismiss):** Tüm modalların siyah/saydam boş alanına dokunulduğunda (`TouchableWithoutFeedback`) anında ve yumuşak kapanma.
+5. **Tamamen Şeffaf Yüzen Üst Navigasyon Barı:** Üst 'Geri' ve 'Atla' buton alanı arka plansız ve tamamen şeffaf (`transparent`) yapıya kavuşturulmuştur (`pointerEvents="box-none"`). Sayfa kaydırıldığında içerik bu butonların arkasından kesintisizce akar. Alt buton çubuğu ise formun altında sabit, kararlı ve güvenli orijinal yerinde korunur.
 
 ---
 
@@ -204,7 +205,7 @@ flowchart TD
     Step2["✅ 2. Adım: Simge Kataloğu & 13 Kategori Sentezi"]
     Step3["✅ 3. Adım: Karşılama Ekranı (Slide 0) & Çok Kanallı Yedek"]
     Step4["✅ 4. Adım: Özellik Turu (Slide 1) Onayı"]
-    Step5["✅ 5. Adım: Kişiselleştirme, Profil Fotoğrafı & Tipografi (Slide 2)"]
+    Step5["✅ 5. Adım: Kişiselleştirme, Profil Fotoğrafı & Tipografi & Şeffaf Üst Bar (Slide 2)"]
     Step6["⏳ 6. Adım: Para Birimi & Finansal Hedef (Slide 3)"]
     Step7["⏳ 7. Adım: Varsayılan Cüzdanlar & Bakiyeler (Slide 4)"]
     Step8["⏳ 8. Adım: Buckwheat Harçlık Motoru Kurulumu (Slide 5)"]
@@ -213,6 +214,10 @@ flowchart TD
 ```
 
 ### Değişiklik Günlüğü (Changelog):
+* **v1.6.3 (10 Eylül 2026):**
+  * **Tamamen Şeffaf Yüzen Üst Navigasyon Barı:** Onboarding ekranında üst 'Geri' ve 'Atla' butonları tamamen şeffaf (`backgroundColor: 'transparent'`) ve `pointerEvents="box-none"` yapısına getirilerek içeriğin butonların arkasından akması sağlandı.
+  * **Kararlı Alt Bar Korunması:** Alt buton çubuğu ('İLERİ' ve adım göstergesi) orijinal, sabit ve taşmayan yapısında muhafaza edildi.
+  * **Avatar Düğme Temizliği:** Profil fotoğrafı seçim dairesinin altındaki mükerrer metin butonu kaldırılarak doğrudan daireye dokunarak seçim yapılması sağlandı.
 * **v1.6.2 (10 Eylül 2026):**
   * **Kullanıcı Fotoğrafı Yükleme:** Onboarding 3. adım (Slide 2) ve Ayarlar ekranına `expo-image-picker` ile Galeri ve Kamera üzerinden profil fotoğrafı yükleme ve kırpma yeteneği eklendi.
   * **Avatar Düğme & Arayüz Sadeleştirmesi:** Profil dairesinin altındaki mükerrer metin butonu kaldırılarak doğrudan profil dairesine ve kamera rozetine dokunularak seçim yapılması sağlandı.

@@ -344,29 +344,17 @@ export default function OnboardingScreen({ navigation }: any) {
   );
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background, paddingTop: Math.max(insets.top, 16), paddingBottom: Math.max(insets.bottom, 12) }]}>
+    <View style={[styles.container, { backgroundColor: colors.background, paddingBottom: Math.max(insets.bottom, 12) }]}>
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         
-        {/* TOP BAR */}
-        <View style={styles.topBar}>
-          {step > 0 ? (
-            <TouchableOpacity onPress={prevStep} style={styles.navTextBtn} activeOpacity={0.7}>
-              <Ionicons name="chevron-back" size={20} color={colors.primary} />
-              <Text style={[styles.navText, { color: colors.primary, fontFamily: tStyles.fontFamily, fontSize: 14 * m }]}>Geri</Text>
-            </TouchableOpacity>
-          ) : (
-            <View style={{ width: 60 }} />
-          )}
-
-          {step > 0 && step < TOTAL_STEPS - 1 && (
-            <TouchableOpacity onPress={handleFinish} style={styles.navTextBtn} activeOpacity={0.7}>
-              <Text style={[styles.navText, { color: colors.text, opacity: 0.5, fontFamily: tStyles.fontFamily, fontSize: 13 * m }]}>Atla →</Text>
-            </TouchableOpacity>
-          )}
-        </View>
-
         <ScrollView
-          contentContainerStyle={styles.scrollContent}
+          contentContainerStyle={[
+            styles.scrollContent,
+            {
+              paddingTop: Math.max(insets.top, 16) + (step === 0 ? 12 : 52),
+              paddingBottom: 24,
+            }
+          ]}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
@@ -1063,6 +1051,39 @@ export default function OnboardingScreen({ navigation }: any) {
           )}
 
         </ScrollView>
+
+        {/* TOP BAR (Floating Completely Transparent) */}
+        {step > 0 && (
+          <View
+            style={[
+              styles.topBar,
+              {
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                paddingTop: Math.max(insets.top, 14),
+                height: Math.max(insets.top, 14) + 48,
+                backgroundColor: 'transparent',
+                zIndex: 10,
+              }
+            ]}
+            pointerEvents="box-none"
+          >
+            <TouchableOpacity onPress={prevStep} style={styles.navTextBtn} activeOpacity={0.7}>
+              <Ionicons name="chevron-back" size={20} color={colors.primary} />
+              <Text style={[styles.navText, { color: colors.primary, fontFamily: tStyles.fontFamily, fontSize: 14 * m }]}>Geri</Text>
+            </TouchableOpacity>
+
+            {step < TOTAL_STEPS - 1 ? (
+              <TouchableOpacity onPress={handleFinish} style={styles.navTextBtn} activeOpacity={0.7}>
+                <Text style={[styles.navText, { color: colors.text, opacity: 0.5, fontFamily: tStyles.fontFamily, fontSize: 13 * m }]}>Atla →</Text>
+              </TouchableOpacity>
+            ) : (
+              <View style={{ width: 40 }} />
+            )}
+          </View>
+        )}
 
         {/* BOTTOM NAV BAR & STEP INDICATOR */}
         <View style={styles.bottomBar}>
