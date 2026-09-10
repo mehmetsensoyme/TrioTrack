@@ -182,9 +182,9 @@ const HomeScreen = ({ navigation }: any) => {
         }}
       >
         
-        {/* Karşılama, Profil Avatarı, Zero Ay Seçici ve Aksiyon Butonları */}
+        {/* Karşılama, Profil Avatarı, Nizami Ay Seçici ve Aksiyon Butonları */}
         <View style={styles.headerRow}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1, minHeight: 46 }}>
             {/* Kullanıcı Profil Avatarı (Dokunulduğunda Ayarlar / Profile gider) */}
             <TouchableOpacity 
               style={[
@@ -210,26 +210,35 @@ const HomeScreen = ({ navigation }: any) => {
               )}
             </TouchableOpacity>
 
-            <View style={{ marginLeft: 12, flex: 1 }}>
+            <View style={{ marginLeft: 12, flex: 1, justifyContent: 'center' }}>
               <Text 
-                style={[styles.greeting, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 18 * m, fontWeight: tStyles.titleWeight }]}
+                style={[styles.greeting, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 17 * m, fontWeight: tStyles.titleWeight }]}
                 numberOfLines={1}
               >
                 Merhaba, {userName} 👋
               </Text>
               
-              {/* Zero Ay Seçici Hap Buton */}
+              {/* Nizami Zero Ay Seçici Hap Buton */}
               <TouchableOpacity 
-                style={[styles.zeroMonthBadge, { backgroundColor: colors.card, borderRadius: tStyles.roundness }]}
+                style={[
+                  styles.zeroMonthBadge, 
+                  { 
+                    backgroundColor: colors.card, 
+                    borderColor: isDark ? '#374151' : '#E2E8F0', 
+                    borderWidth: 1, 
+                    borderRadius: 8 
+                  }
+                ]}
                 onPress={() => {
                   setPickerYear(parseInt(currentYear, 10));
                   setShowMonthModal(true);
                 }}
               >
-                <Text style={{ color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 11.5 * m, fontWeight: 'bold' }}>
+                <Ionicons name="calendar-outline" size={12} color={colors.primary} style={{ marginRight: 4 }} />
+                <Text style={{ color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 11 * m, fontWeight: '600' }}>
                   {MONTH_NAMES[selectedMonthIndex]} {currentYear}
                 </Text>
-                <Ionicons name="chevron-down" size={13} color={colors.primary} style={{ marginLeft: 4 }} />
+                <Ionicons name="chevron-down" size={11} color={colors.primary} style={{ marginLeft: 4 }} />
               </TouchableOpacity>
             </View>
           </View>
@@ -241,7 +250,7 @@ const HomeScreen = ({ navigation }: any) => {
                 style={[styles.whatsNewPillBtn, { backgroundColor: colors.card, borderColor: '#F59E0B60', borderRadius: tStyles.roundness }]}
                 onPress={handleOpenWhatsNew}
               >
-                <Ionicons name="sparkles" size={14} color="#F59E0B" />
+                <Ionicons name="sparkles" size={13} color="#F59E0B" />
                 <Text style={{ color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 11 * m, fontWeight: 'bold', marginLeft: 4 }}>
                   v{APP_VERSION}
                 </Text>
@@ -253,14 +262,14 @@ const HomeScreen = ({ navigation }: any) => {
               style={[styles.settingsBtn, { backgroundColor: colors.card, borderRadius: tStyles.roundness }]}
               onPress={() => setShowSearchModal(true)}
             >
-              <Ionicons name="search-outline" size={20} color={colors.text} />
+              <Ionicons name="search-outline" size={19} color={colors.text} />
             </TouchableOpacity>
 
             <TouchableOpacity 
               style={[styles.settingsBtn, { backgroundColor: colors.card, borderRadius: tStyles.roundness }]}
               onPress={() => navigation.navigate('Settings')}
             >
-              <Ionicons name="settings-outline" size={20} color={colors.text} />
+              <Ionicons name="settings-outline" size={19} color={colors.text} />
             </TouchableOpacity>
           </View>
         </View>
@@ -1245,7 +1254,7 @@ export default function App() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, marginTop: 8 },
+  headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14, minHeight: 48 },
   homeAvatarCircle: {
     width: 44,
     height: 44,
@@ -1303,9 +1312,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row', 
     alignItems: 'center', 
     alignSelf: 'flex-start', 
-    paddingHorizontal: 10, 
-    paddingVertical: 5, 
-    marginTop: 6 
+    paddingHorizontal: 8, 
+    paddingVertical: 3, 
+    marginTop: 3 
   },
 
   // Paisa 2x2 Overview Grid

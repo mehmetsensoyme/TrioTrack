@@ -87,25 +87,24 @@ export default function ReportsScreen({ navigation }: any) {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background, paddingTop: Math.max(insets.top, 16) }]}>
-      <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 110 }} showsVerticalScrollIndicator={false}>
-        
-        {/* 🌟 FİNANSAL ANALİZ STANDART MODÜL HEADER */}
-        <View style={styles.headerRow}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
-            <View 
-              style={[
-                styles.moduleIconBadge, 
-                { 
-                  backgroundColor: colors.primary + '18', 
-                  borderColor: colors.primary + '30',
-                  borderWidth: 1,
-                  borderRadius: Math.max(tStyles.roundness / 2, 12) 
-                }
-              ]}
-            >
-              <Ionicons name="pie-chart-outline" size={24} color={colors.primary} />
-            </View>
-            <View style={{ marginLeft: 12, flex: 1 }}>
+      {/* 🌟 FİNANSAL ANALİZ STANDART MODÜL HEADER */}
+      <View style={styles.headerRow}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1, minHeight: 46 }}>
+          <View 
+            style={[
+              styles.moduleIconBadge, 
+              { 
+                backgroundColor: colors.primary + '18', 
+                borderColor: colors.primary + '30',
+                borderWidth: 1,
+                borderRadius: Math.max(tStyles.roundness / 2, 12) 
+              }
+            ]}
+          >
+            <Ionicons name="pie-chart-outline" size={24} color={colors.primary} />
+          </View>
+          <View style={{ marginLeft: 12, flex: 1 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
               <Text 
                 style={[
                   styles.screenHeaderTitle, 
@@ -120,32 +119,49 @@ export default function ReportsScreen({ navigation }: any) {
               >
                 Finansal Analiz
               </Text>
-              
-              {/* Zero Ay Seçici Hap Buton (Ana Sayfa ile Birebir Standart) */}
               <TouchableOpacity 
-                style={[styles.zeroMonthBadge, { backgroundColor: colors.card, borderRadius: tStyles.roundness }]}
+                style={[styles.countBadge, { backgroundColor: colors.primary + '15' }]}
                 onPress={() => {
                   setPickerYear(parseInt(currentYear, 10));
                   setShowMonthModal(true);
                 }}
               >
-                <Text style={{ color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 11.5 * m, fontWeight: 'bold' }}>
+                <Text style={{ color: colors.primary, fontFamily: tStyles.fontFamily, fontSize: 10 * m, fontWeight: 'bold' }}>
                   {MONTH_NAMES[selectedMonthIndex]} {currentYear}
                 </Text>
-                <Ionicons name="chevron-down" size={13} color={colors.primary} style={{ marginLeft: 4 }} />
               </TouchableOpacity>
             </View>
+            <Text 
+              style={[
+                styles.screenHeaderSubtitle, 
+                { 
+                  color: colors.text, 
+                  opacity: 0.6, 
+                  fontFamily: tStyles.fontFamily, 
+                  fontSize: 11.5 * m, 
+                  marginTop: 2 
+                }
+              ]}
+              numberOfLines={1}
+            >
+              Aylık nakit akışı ve harcama dağılımı
+            </Text>
           </View>
-
-          {/* Ayarlar İkon Butonu (⚙️) */}
-          <TouchableOpacity 
-            style={[styles.headerActionBtn, { backgroundColor: colors.card, borderRadius: tStyles.roundness }]}
-            onPress={() => navigation?.navigate('Settings')}
-          >
-            <Ionicons name="settings-outline" size={20} color={colors.text} />
-          </TouchableOpacity>
         </View>
 
+        {/* Ay Seçici (📅) Aksiyon Butonu - Çark (⚙️) kaldırıldı */}
+        <TouchableOpacity 
+          style={[styles.headerActionBtn, { backgroundColor: colors.card, borderRadius: tStyles.roundness }]}
+          onPress={() => {
+            setPickerYear(parseInt(currentYear, 10));
+            setShowMonthModal(true);
+          }}
+        >
+          <Ionicons name="calendar-outline" size={20} color={colors.primary} />
+        </TouchableOpacity>
+      </View>
+
+      <ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 4, paddingBottom: 110 }} showsVerticalScrollIndicator={false}>
         {/* Net Tasarruf & Nakit Akışı Kartı */}
         <View style={[styles.flowCard, { backgroundColor: colors.card, borderRadius: tStyles.roundness, elevation: tStyles.elevation }]}>
           <Text style={[styles.flowLabel, { color: colors.text, opacity: 0.6, fontFamily: tStyles.fontFamily, fontSize: 11 * m }]}>
@@ -482,8 +498,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row', 
     justifyContent: 'space-between', 
     alignItems: 'center', 
-    marginBottom: 16, 
-    marginTop: 4 
+    paddingHorizontal: 16,
+    marginBottom: 14, 
+    minHeight: 46 
   },
   moduleIconBadge: { 
     width: 44, 
@@ -492,13 +509,11 @@ const styles = StyleSheet.create({
     alignItems: 'center' 
   },
   screenHeaderTitle: {},
-  zeroMonthBadge: { 
-    flexDirection: 'row', 
-    alignItems: 'center', 
-    alignSelf: 'flex-start', 
-    paddingHorizontal: 10, 
-    paddingVertical: 5, 
-    marginTop: 5 
+  screenHeaderSubtitle: {},
+  countBadge: { 
+    paddingHorizontal: 8, 
+    paddingVertical: 3, 
+    borderRadius: 8 
   },
   headerActionBtn: { 
     width: 40, 

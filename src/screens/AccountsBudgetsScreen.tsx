@@ -227,7 +227,7 @@ export default function AccountsBudgetsScreen({ navigation }: any) {
     <View style={[styles.container, { backgroundColor: colors.background, paddingTop: Math.max(insets.top, 16) }]}>
       {/* 🌟 CÜZDAN & BÜTÇE KONTROL MERKEZİ HEADER */}
       <View style={[styles.paisaProfileHeader, { paddingHorizontal: 16 }]}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', minHeight: 46 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
             <View 
               style={[
@@ -259,21 +259,13 @@ export default function AccountsBudgetsScreen({ navigation }: any) {
             </View>
           </View>
 
-          {/* Hızlı Ekle (+) ve Ayarlar (⚙️) Aksiyon Butonları */}
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-            <TouchableOpacity 
-              style={[styles.profileSettingsBtn, { backgroundColor: colors.card, borderRadius: tStyles.roundness }]}
-              onPress={() => setShowAddAccountModal(true)}
-            >
-              <Ionicons name="add" size={20} color={colors.primary} />
-            </TouchableOpacity>
-            <TouchableOpacity 
-              style={[styles.profileSettingsBtn, { backgroundColor: colors.card, borderRadius: tStyles.roundness }]}
-              onPress={() => navigation?.navigate('Settings')}
-            >
-              <Ionicons name="settings-outline" size={20} color={colors.text} />
-            </TouchableOpacity>
-          </View>
+          {/* Hızlı Ekle (+) Aksiyon Butonu */}
+          <TouchableOpacity 
+            style={[styles.profileSettingsBtn, { backgroundColor: colors.card, borderRadius: tStyles.roundness }]}
+            onPress={() => setShowAddAccountModal(true)}
+          >
+            <Ionicons name="add" size={20} color={colors.primary} />
+          </TouchableOpacity>
         </View>
 
         {/* Paisa Hızlı Eylemler Çubuğu */}

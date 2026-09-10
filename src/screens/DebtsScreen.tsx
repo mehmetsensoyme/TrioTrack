@@ -176,21 +176,13 @@ export default function DebtsScreen({ navigation }: any) {
           </View>
         </View>
 
-        {/* Aksiyon Butonları: Hızlı Ekle (+) ve Ayarlar (⚙️) */}
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-          <TouchableOpacity 
-            style={[styles.headerActionBtn, { backgroundColor: colors.card, borderRadius: tStyles.roundness }]}
-            onPress={() => setShowAddModal(true)}
-          >
-            <Ionicons name="add" size={20} color={colors.primary} />
-          </TouchableOpacity>
-          <TouchableOpacity 
-            style={[styles.headerActionBtn, { backgroundColor: colors.card, borderRadius: tStyles.roundness }]}
-            onPress={() => navigation?.navigate('Settings')}
-          >
-            <Ionicons name="settings-outline" size={20} color={colors.text} />
-          </TouchableOpacity>
-        </View>
+        {/* Hızlı Ekle (+) Aksiyon Butonu */}
+        <TouchableOpacity 
+          style={[styles.headerActionBtn, { backgroundColor: colors.card, borderRadius: tStyles.roundness }]}
+          onPress={() => setShowAddModal(true)}
+        >
+          <Ionicons name="add" size={20} color={colors.primary} />
+        </TouchableOpacity>
       </View>
 
       {/* Zero Tarzı Özet Kartları */}
@@ -716,7 +708,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', 
     paddingHorizontal: 16, 
     marginBottom: 14, 
-    marginTop: 4 
+    minHeight: 46 
   },
   moduleIconBadge: { 
     width: 44, 
