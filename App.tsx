@@ -638,11 +638,19 @@ const HomeScreen = ({ navigation }: any) => {
       </ScrollView>
 
       {/* PAISA & ZERO TARZI ARAMA VE FİLTRELEME MODALI */}
-      <Modal visible={showSearchModal} animationType="slide" transparent onRequestClose={() => setShowSearchModal(false)}>
+      <Modal 
+        visible={showSearchModal} 
+        animationType="slide" 
+        transparent 
+        statusBarTranslucent={true}
+        onRequestClose={() => setShowSearchModal(false)}
+      >
         <View style={styles.modalBackdrop}>
-          <TouchableWithoutFeedback onPress={() => setShowSearchModal(false)}>
-            <View style={StyleSheet.absoluteFill} />
-          </TouchableWithoutFeedback>
+          <TouchableOpacity 
+            style={styles.backdropDismissArea} 
+            activeOpacity={1} 
+            onPress={() => setShowSearchModal(false)} 
+          />
 
           <View style={[styles.searchModalCard, { backgroundColor: colors.card, borderTopLeftRadius: tStyles.roundness * 1.5, borderTopRightRadius: tStyles.roundness * 1.5 }]}>
             <View style={styles.sheetPill} />
@@ -774,11 +782,19 @@ const HomeScreen = ({ navigation }: any) => {
       </Modal>
 
       {/* İŞLEM DETAY & DÜZENLEME MODALI (PAISA & ZERO) */}
-      <Modal visible={selectedTxForDetail !== null} transparent animationType="fade" onRequestClose={() => setSelectedTxForDetail(null)}>
-        <View style={styles.modalBackdrop}>
-          <TouchableWithoutFeedback onPress={() => setSelectedTxForDetail(null)}>
-            <View style={StyleSheet.absoluteFill} />
-          </TouchableWithoutFeedback>
+      <Modal 
+        visible={selectedTxForDetail !== null} 
+        transparent 
+        animationType="fade" 
+        statusBarTranslucent={true}
+        onRequestClose={() => setSelectedTxForDetail(null)}
+      >
+        <View style={styles.centeredModalBackdrop}>
+          <TouchableOpacity 
+            style={StyleSheet.absoluteFill} 
+            activeOpacity={1} 
+            onPress={() => setSelectedTxForDetail(null)} 
+          />
 
           <View style={[styles.txDetailCard, { backgroundColor: colors.card, borderRadius: tStyles.roundness * 1.2 }]}>
             {selectedTxForDetail && (() => {
@@ -965,11 +981,19 @@ const HomeScreen = ({ navigation }: any) => {
       </Modal>
 
       {/* ZERO TARZI AY VE YIL SEÇİCİ MODALI */}
-      <Modal visible={showMonthModal} transparent animationType="slide" onRequestClose={() => setShowMonthModal(false)}>
+      <Modal 
+        visible={showMonthModal} 
+        transparent 
+        animationType="slide" 
+        statusBarTranslucent={true}
+        onRequestClose={() => setShowMonthModal(false)}
+      >
         <View style={styles.modalBackdrop}>
-          <TouchableWithoutFeedback onPress={() => setShowMonthModal(false)}>
-            <View style={StyleSheet.absoluteFill} />
-          </TouchableWithoutFeedback>
+          <TouchableOpacity 
+            style={styles.backdropDismissArea} 
+            activeOpacity={1} 
+            onPress={() => setShowMonthModal(false)} 
+          />
 
           <View style={[styles.monthModalCard, { backgroundColor: colors.card, borderTopLeftRadius: tStyles.roundness * 1.5, borderTopRightRadius: tStyles.roundness * 1.5 }]}>
             <View style={styles.sheetPill} />
@@ -1042,11 +1066,19 @@ const HomeScreen = ({ navigation }: any) => {
       </Modal>
 
       {/* 🌟 NELER YENİ? / SÜRÜM YENİLİKLERİ MERKEZİ (v1.6.0) */}
-      <Modal visible={showWhatsNewModal} transparent animationType="slide" onRequestClose={() => setShowWhatsNewModal(false)}>
+      <Modal 
+        visible={showWhatsNewModal} 
+        transparent 
+        animationType="slide" 
+        statusBarTranslucent={true}
+        onRequestClose={() => setShowWhatsNewModal(false)}
+      >
         <View style={styles.modalBackdrop}>
-          <TouchableWithoutFeedback onPress={() => setShowWhatsNewModal(false)}>
-            <View style={StyleSheet.absoluteFill} />
-          </TouchableWithoutFeedback>
+          <TouchableOpacity 
+            style={styles.backdropDismissArea} 
+            activeOpacity={1} 
+            onPress={() => setShowWhatsNewModal(false)} 
+          />
 
           <View style={[styles.whatsNewCard, { backgroundColor: colors.card, borderTopLeftRadius: tStyles.roundness * 1.5, borderTopRightRadius: tStyles.roundness * 1.5 }]}>
             <View style={styles.whatsNewHeader}>
@@ -1331,8 +1363,19 @@ const styles = StyleSheet.create({
   // Zero Month/Year Picker Modal
   modalBackdrop: { 
     flex: 1, 
-    backgroundColor: 'rgba(0,0,0,0.5)', 
-    justifyContent: 'flex-end' 
+    backgroundColor: 'rgba(0,0,0,0.65)', 
+    justifyContent: 'flex-end',
+  },
+  backdropDismissArea: {
+    flex: 1,
+    width: '100%',
+  },
+  centeredModalBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.65)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
   },
   monthModalCard: { 
     padding: 20, 

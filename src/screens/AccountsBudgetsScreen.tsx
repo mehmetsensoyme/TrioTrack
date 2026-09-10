@@ -796,11 +796,19 @@ export default function AccountsBudgetsScreen({ navigation }: any) {
       </ScrollView>
 
       {/* Hesap Ekleme Modalı */}
-      <Modal visible={showAddAccountModal} transparent animationType="slide" onRequestClose={() => setShowAddAccountModal(false)}>
+      <Modal 
+        visible={showAddAccountModal} 
+        transparent 
+        animationType="slide" 
+        statusBarTranslucent={true}
+        onRequestClose={() => setShowAddAccountModal(false)}
+      >
         <View style={styles.modalOverlay}>
-          <TouchableWithoutFeedback onPress={() => setShowAddAccountModal(false)}>
-            <View style={StyleSheet.absoluteFill} />
-          </TouchableWithoutFeedback>
+          <TouchableOpacity 
+            style={StyleSheet.absoluteFill} 
+            activeOpacity={1} 
+            onPress={() => setShowAddAccountModal(false)} 
+          />
           <View style={[styles.modalContent, { backgroundColor: colors.card, borderRadius: tStyles.roundness }]}>
             <Text style={[styles.modalTitle, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 18 * m }]}>Yeni Hesap / Cüzdan</Text>
             
@@ -855,11 +863,19 @@ export default function AccountsBudgetsScreen({ navigation }: any) {
       </Modal>
 
       {/* Bütçe Belirleme Modalı */}
-      <Modal visible={showBudgetModal} transparent animationType="slide" onRequestClose={() => setShowBudgetModal(false)}>
+      <Modal 
+        visible={showBudgetModal} 
+        transparent 
+        animationType="slide" 
+        statusBarTranslucent={true}
+        onRequestClose={() => setShowBudgetModal(false)}
+      >
         <View style={styles.modalOverlay}>
-          <TouchableWithoutFeedback onPress={() => setShowBudgetModal(false)}>
-            <View style={StyleSheet.absoluteFill} />
-          </TouchableWithoutFeedback>
+          <TouchableOpacity 
+            style={StyleSheet.absoluteFill} 
+            activeOpacity={1} 
+            onPress={() => setShowBudgetModal(false)} 
+          />
           <View style={[styles.modalContent, { backgroundColor: colors.card, borderRadius: tStyles.roundness }]}>
             <Text style={[styles.modalTitle, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 18 * m }]}>Kategori Bütçesi Belirle</Text>
             
@@ -902,11 +918,19 @@ export default function AccountsBudgetsScreen({ navigation }: any) {
       </Modal>
 
       {/* PAISA CÜZDAN DETAY & BAKİYE DÜZENLEME MODALI */}
-      <Modal visible={showAccountDetailModal} transparent animationType="slide" onRequestClose={() => setShowAccountDetailModal(false)}>
+      <Modal 
+        visible={showAccountDetailModal} 
+        transparent 
+        animationType="slide" 
+        statusBarTranslucent={true}
+        onRequestClose={() => setShowAccountDetailModal(false)}
+      >
         <View style={styles.modalOverlay}>
-          <TouchableWithoutFeedback onPress={() => setShowAccountDetailModal(false)}>
-            <View style={StyleSheet.absoluteFill} />
-          </TouchableWithoutFeedback>
+          <TouchableOpacity 
+            style={StyleSheet.absoluteFill} 
+            activeOpacity={1} 
+            onPress={() => setShowAccountDetailModal(false)} 
+          />
           <View style={[styles.modalContent, { backgroundColor: colors.card, borderRadius: tStyles.roundness, maxHeight: '85%' }]}>
             <View style={styles.modalHeader}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
@@ -1027,11 +1051,19 @@ export default function AccountsBudgetsScreen({ navigation }: any) {
       </Modal>
 
       {/* YENİ KATEGORİ EKLEME MODALI (PAISA & ZERO) */}
-      <Modal visible={showAddCatModal} transparent animationType="slide" onRequestClose={() => setShowAddCatModal(false)}>
+      <Modal 
+        visible={showAddCatModal} 
+        transparent 
+        animationType="slide" 
+        statusBarTranslucent={true}
+        onRequestClose={() => setShowAddCatModal(false)}
+      >
         <View style={styles.modalOverlay}>
-          <TouchableWithoutFeedback onPress={() => setShowAddCatModal(false)}>
-            <View style={StyleSheet.absoluteFill} />
-          </TouchableWithoutFeedback>
+          <TouchableOpacity 
+            style={StyleSheet.absoluteFill} 
+            activeOpacity={1} 
+            onPress={() => setShowAddCatModal(false)} 
+          />
           <View style={[styles.modalContent, { backgroundColor: colors.card, borderRadius: tStyles.roundness }]}>
             <View style={styles.modalHeader}>
               <Text style={[styles.modalTitle, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 18 * m, marginBottom: 0 }]}>
@@ -1112,11 +1144,19 @@ export default function AccountsBudgetsScreen({ navigation }: any) {
       </Modal>
 
       {/* YENİ DÜZENLİ İŞLEM / ABONELİK MODALI (PAISA) */}
-      <Modal visible={showAddRecurringModal} transparent animationType="slide" onRequestClose={() => setShowAddRecurringModal(false)}>
+      <Modal 
+        visible={showAddRecurringModal} 
+        transparent 
+        animationType="slide" 
+        statusBarTranslucent={true}
+        onRequestClose={() => setShowAddRecurringModal(false)}
+      >
         <View style={styles.modalOverlay}>
-          <TouchableWithoutFeedback onPress={() => setShowAddRecurringModal(false)}>
-            <View style={StyleSheet.absoluteFill} />
-          </TouchableWithoutFeedback>
+          <TouchableOpacity 
+            style={StyleSheet.absoluteFill} 
+            activeOpacity={1} 
+            onPress={() => setShowAddRecurringModal(false)} 
+          />
           <View style={[styles.modalContent, { backgroundColor: colors.card, borderRadius: tStyles.roundness, maxHeight: '90%' }]}>
             <View style={styles.modalHeader}>
               <Text style={[styles.modalTitle, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 18 * m, marginBottom: 0 }]}>
@@ -1253,7 +1293,7 @@ const styles = StyleSheet.create({
   emptyTitle: { fontSize: 16, fontWeight: 'bold', marginTop: 12, marginBottom: 6 },
   emptySubtitle: { fontSize: 13, opacity: 0.6, textAlign: 'center' },
 
-  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', padding: 20 },
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.65)', justifyContent: 'center', padding: 20 },
   modalContent: { padding: 20 },
   modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
   modalTitle: { fontWeight: 'bold', marginBottom: 16 },

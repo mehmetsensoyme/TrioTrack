@@ -213,7 +213,7 @@ Tüm veriler cihaz üzerinde yerel olarak saklanır.
 
 ### Kullanılan Kararlı Animasyonlar:
 1. **Lazer Tarama Animasyonu:** OCR ekranında 60/120fps native thread üzerinde çalışan `Animated.loop` tarama efekti.
-4. **Evrensel Modal Kapanışı (Backdrop Dismiss):** Tüm modalların siyah/saydam boş alanına dokunulduğunda (`TouchableWithoutFeedback`) anında ve yumuşak kapanma.
+4. **Evrensel Modal & Status Bar Bütünlüğü (`statusBarTranslucent` & `TouchableOpacity`):** Tüm modallarda (`Modal`) Android durum çubuğunun beyaz kalarak karartmayı kesmesini önleyen `statusBarTranslucent={true}` ve Android dokunma algılayıcısının (hit-testing) boş görünümleri atlamasını engelleyen garantili `TouchableOpacity` arka plan kapatma alanı (`backdropDismissArea`) entegrasyonu.
 5. **Tamamen Şeffaf Yüzen Üst Navigasyon Barı:** Üst 'Geri' ve 'Atla' buton alanı arka plansız ve tamamen şeffaf (`transparent`) yapıya kavuşturulmuştur (`pointerEvents="box-none"`). Sayfa kaydırıldığında içerik bu butonların arkasından kesintisizce akar. Alt buton çubuğu ise formun altında sabit, kararlı ve güvenli orijinal yerinde korunur.
 
 ---
@@ -246,6 +246,9 @@ flowchart TD
       5. 4 adet aylık gelir birikim oranı hedef seçeneği (%10, %20, %30, %50).
     * `DataContext.tsx` içine `financialGoal` ve `savingsTargetPercent` durumları, AsyncStorage anahtarları, `completeOnboarding` parametreleri ve JSON yedekleme desteği eklendi.
     * Onboarding Slide 6 (Özet Kartı) içine seçilen finansal hedef ve tasarruf oranı canlı olarak entegre edildi.
+* **v1.6.4 (10 Eylül 2026):**
+  * **Android Status Bar & Modal Karartma Bütünlüğü (`statusBarTranslucent={true}`):** Android işletim sisteminde varsayılan modal pencerelerinin üst durum çubuğunun (saat, pil, wifi göstergesi) arkasına geçememesi ve tepeyi çiğ beyaz bırakması sorunu, uygulamadaki tüm 22 modala `statusBarTranslucent={true}` özelliği eklenerek kökten çözüldü. Karartma artık ekranın en tepesinden en altına kadar kesintisiz ve homojen uygulanır.
+  * **Kusursuz ve Kararlı Arka Plan Dokunarak Kapatma (Backdrop Dismiss):** Android üzerinde `TouchableWithoutFeedback` içine konan arka plansız boş `View` elemanlarının dokunma olaylarını (touch hit-testing) ıskalaması ve modalı kapatmaması sorunu; yerine in-flow `TouchableOpacity` (`activeOpacity={1}`) kapatma bileşenleri ve `rgba(0, 0, 0, 0.65)` derin arka plan gölgesi yerleştirilerek %100 güvenilir hale getirildi.
 * **v1.6.3 (10 Eylül 2026):**
   * **Tamamen Şeffaf Yüzen Üst Navigasyon Barı:** Onboarding ekranında üst 'Geri' ve 'Atla' butonları tamamen şeffaf (`backgroundColor: 'transparent'`) ve `pointerEvents="box-none"` yapısına getirilerek içeriğin butonların arkasından akması sağlandı.
   * **Kararlı Alt Bar Korunması:** Alt buton çubuğu ('İLERİ' ve adım göstergesi) orijinal, sabit ve taşmayan yapısında muhafaza edildi.

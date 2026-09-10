@@ -359,11 +359,19 @@ export default function ReportsScreen() {
       </ScrollView>
 
       {/* ZERO TARZI AY VE YIL SEÇİCİ BOTTOM SHEET MODALI */}
-      <Modal visible={showMonthModal} transparent animationType="slide" onRequestClose={() => setShowMonthModal(false)}>
+      <Modal 
+        visible={showMonthModal} 
+        transparent 
+        animationType="slide" 
+        statusBarTranslucent={true}
+        onRequestClose={() => setShowMonthModal(false)}
+      >
         <View style={styles.modalBackdrop}>
-          <TouchableWithoutFeedback onPress={() => setShowMonthModal(false)}>
-            <View style={StyleSheet.absoluteFill} />
-          </TouchableWithoutFeedback>
+          <TouchableOpacity 
+            style={styles.backdropDismissArea} 
+            activeOpacity={1} 
+            onPress={() => setShowMonthModal(false)} 
+          />
           <View style={[styles.monthModalCard, { backgroundColor: colors.card, borderTopLeftRadius: tStyles.roundness * 1.5, borderTopRightRadius: tStyles.roundness * 1.5 }]}>
             <View style={styles.sheetPill} />
 
@@ -495,7 +503,8 @@ const styles = StyleSheet.create({
   emptyText: { marginTop: 8, opacity: 0.6 },
 
   // Modal
-  modalBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
+  modalBackdrop: { flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.65)', justifyContent: 'flex-end' },
+  backdropDismissArea: { flex: 1, width: '100%' },
   monthModalCard: { padding: 20, paddingBottom: 40 },
   sheetPill: { width: 40, height: 4, borderRadius: 2, backgroundColor: 'rgba(128,128,128,0.4)', alignSelf: 'center', marginBottom: 16 },
   monthHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },

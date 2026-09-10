@@ -1608,11 +1608,13 @@ export default function OnboardingScreen({ navigation }: any) {
       </KeyboardAvoidingView>
 
       {/* ÇOK KANALLI YEDEKTEN GERİ YÜKLEME MODALI (BOTTOM SHEET) */}
-      <Modal visible={showRestoreModal} transparent animationType="slide" onRequestClose={() => setShowRestoreModal(false)}>
+      <Modal visible={showRestoreModal} transparent animationType="slide" onRequestClose={() => setShowRestoreModal(false)} statusBarTranslucent={true}>
         <View style={styles.modalBackdrop}>
-          <TouchableWithoutFeedback onPress={() => setShowRestoreModal(false)}>
-            <View style={styles.backdropDismissArea} />
-          </TouchableWithoutFeedback>
+          <TouchableOpacity
+            style={styles.backdropDismissArea}
+            activeOpacity={1}
+            onPress={() => setShowRestoreModal(false)}
+          />
           <View style={[
             styles.modalCard,
             { 
@@ -1855,11 +1857,13 @@ export default function OnboardingScreen({ navigation }: any) {
       </Modal>
 
       {/* PROFİL FOTOĞRAFI & AVATAR SEÇİM BOTTOM SHEET'İ */}
-      <Modal visible={showAvatarSheet} transparent animationType="slide" onRequestClose={() => setShowAvatarSheet(false)}>
+      <Modal visible={showAvatarSheet} transparent animationType="slide" onRequestClose={() => setShowAvatarSheet(false)} statusBarTranslucent={true}>
         <View style={styles.modalBackdrop}>
-          <TouchableWithoutFeedback onPress={() => setShowAvatarSheet(false)}>
-            <View style={styles.backdropDismissArea} />
-          </TouchableWithoutFeedback>
+          <TouchableOpacity
+            style={styles.backdropDismissArea}
+            activeOpacity={1}
+            onPress={() => setShowAvatarSheet(false)}
+          />
           <View style={[
             styles.modalCard,
             { 
@@ -2151,11 +2155,12 @@ const styles = StyleSheet.create({
 
   modalBackdrop: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.55)',
+    backgroundColor: 'rgba(0, 0, 0, 0.65)',
     justifyContent: 'flex-end',
   },
   backdropDismissArea: {
     flex: 1,
+    width: '100%',
   },
   modalCard: {
     width: '100%',

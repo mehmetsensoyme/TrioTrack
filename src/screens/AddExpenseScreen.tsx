@@ -994,11 +994,19 @@ export default function AddExpenseScreen({ navigation }: any) {
       </ScrollView>
 
       {/* 🌟 1. AKILLI FİŞ VE FATURA OCR MODALI */}
-      <Modal visible={showReceiptScanner} animationType="slide" transparent onRequestClose={() => setShowReceiptScanner(false)}>
+      <Modal 
+        visible={showReceiptScanner} 
+        animationType="slide" 
+        transparent 
+        statusBarTranslucent={true}
+        onRequestClose={() => setShowReceiptScanner(false)}
+      >
         <View style={styles.modalBackdrop}>
-          <TouchableWithoutFeedback onPress={() => setShowReceiptScanner(false)}>
-            <View style={StyleSheet.absoluteFill} />
-          </TouchableWithoutFeedback>
+          <TouchableOpacity 
+            style={styles.backdropDismissArea} 
+            activeOpacity={1} 
+            onPress={() => setShowReceiptScanner(false)} 
+          />
 
           <View style={[styles.ocrModalCard, { backgroundColor: colors.card, borderTopLeftRadius: tStyles.roundness * 1.5, borderTopRightRadius: tStyles.roundness * 1.5 }]}>
             <View style={styles.calcHeader}>
@@ -1141,11 +1149,19 @@ export default function AddExpenseScreen({ navigation }: any) {
       </Modal>
 
       {/* 🌟 2. PAISA BİREBİR VEKTÖREL SİMGE & LOGO SEÇİCİ MODALI */}
-      <Modal visible={showIconModal} animationType="slide" transparent onRequestClose={() => setShowIconModal(false)}>
+      <Modal 
+        visible={showIconModal} 
+        animationType="slide" 
+        transparent 
+        statusBarTranslucent={true}
+        onRequestClose={() => setShowIconModal(false)}
+      >
         <View style={styles.modalBackdrop}>
-          <TouchableWithoutFeedback onPress={() => setShowIconModal(false)}>
-            <View style={StyleSheet.absoluteFill} />
-          </TouchableWithoutFeedback>
+          <TouchableOpacity 
+            style={styles.backdropDismissArea} 
+            activeOpacity={1} 
+            onPress={() => setShowIconModal(false)} 
+          />
 
           <View style={[styles.calcModalCard, { backgroundColor: colors.card, borderTopLeftRadius: tStyles.roundness * 1.5, borderTopRightRadius: tStyles.roundness * 1.5, maxHeight: '90%' }]}>
             {/* Üst Bar: Sol Geri/Kapat, Başlık ('Simge ve Logo Seçimi'), Sağda 'Daha fazla' butonu */}
@@ -1435,11 +1451,19 @@ export default function AddExpenseScreen({ navigation }: any) {
       </Modal>
 
       {/* 3. ENTEGRE HESAP MAKİNESİ BOTTOM SHEET MODALI */}
-      <Modal visible={showCalculator} animationType="slide" transparent onRequestClose={() => setShowCalculator(false)}>
+      <Modal 
+        visible={showCalculator} 
+        animationType="slide" 
+        transparent 
+        statusBarTranslucent={true}
+        onRequestClose={() => setShowCalculator(false)}
+      >
         <View style={styles.modalBackdrop}>
-          <TouchableWithoutFeedback onPress={() => setShowCalculator(false)}>
-            <View style={StyleSheet.absoluteFill} />
-          </TouchableWithoutFeedback>
+          <TouchableOpacity 
+            style={styles.backdropDismissArea} 
+            activeOpacity={1} 
+            onPress={() => setShowCalculator(false)} 
+          />
 
           <View style={[styles.calcModalCard, { backgroundColor: colors.card, borderTopLeftRadius: tStyles.roundness * 1.5, borderTopRightRadius: tStyles.roundness * 1.5 }]}>
             {/* Modal Başlık */}
@@ -1606,7 +1630,8 @@ const styles = StyleSheet.create({
   confirmIconBtn: { flex: 1.4, alignItems: 'center', paddingVertical: 12 },
 
   // Modal Stilleri
-  modalBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
+  modalBackdrop: { flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.65)', justifyContent: 'flex-end' },
+  backdropDismissArea: { flex: 1, width: '100%' },
   calcModalCard: { padding: 20, maxHeight: '85%' },
   calcHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 },
   calcModalTitle: {},

@@ -363,11 +363,19 @@ export default function DebtsScreen() {
       </ScrollView>
 
       {/* Zero Borç Ekleme Modalı (Kategori Seçicili) */}
-      <Modal visible={showAddModal} transparent animationType="slide" onRequestClose={() => setShowAddModal(false)}>
+      <Modal 
+        visible={showAddModal} 
+        transparent 
+        animationType="slide" 
+        statusBarTranslucent={true}
+        onRequestClose={() => setShowAddModal(false)}
+      >
         <View style={styles.modalOverlay}>
-          <TouchableWithoutFeedback onPress={() => setShowAddModal(false)}>
-            <View style={StyleSheet.absoluteFill} />
-          </TouchableWithoutFeedback>
+          <TouchableOpacity 
+            style={StyleSheet.absoluteFill} 
+            activeOpacity={1} 
+            onPress={() => setShowAddModal(false)} 
+          />
           <View style={[styles.modalContent, { backgroundColor: colors.card, borderRadius: tStyles.roundness }]}>
             <View style={styles.modalHeader}>
               <Text style={[styles.modalTitle, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 18 * m, fontWeight: tStyles.titleWeight }]}>
@@ -503,11 +511,19 @@ export default function DebtsScreen() {
       </Modal>
 
       {/* ZERO KISMİ ÖDEME MODALI */}
-      <Modal visible={showPayModal} transparent animationType="slide" onRequestClose={() => setShowPayModal(false)}>
+      <Modal 
+        visible={showPayModal} 
+        transparent 
+        animationType="slide" 
+        statusBarTranslucent={true}
+        onRequestClose={() => setShowPayModal(false)}
+      >
         <View style={styles.modalOverlay}>
-          <TouchableWithoutFeedback onPress={() => setShowPayModal(false)}>
-            <View style={StyleSheet.absoluteFill} />
-          </TouchableWithoutFeedback>
+          <TouchableOpacity 
+            style={StyleSheet.absoluteFill} 
+            activeOpacity={1} 
+            onPress={() => setShowPayModal(false)} 
+          />
           <View style={[styles.modalContent, { backgroundColor: colors.card, borderRadius: tStyles.roundness }]}>
             <View style={styles.modalHeader}>
               <Text style={[styles.modalTitle, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 17 * m, fontWeight: tStyles.titleWeight }]}>
@@ -557,11 +573,19 @@ export default function DebtsScreen() {
       </Modal>
 
       {/* ÖDEME GEÇMİŞİ MODALI */}
-      <Modal visible={showHistoryModal} transparent animationType="slide" onRequestClose={() => setShowHistoryModal(false)}>
+      <Modal 
+        visible={showHistoryModal} 
+        transparent 
+        animationType="slide" 
+        statusBarTranslucent={true}
+        onRequestClose={() => setShowHistoryModal(false)}
+      >
         <View style={styles.modalOverlay}>
-          <TouchableWithoutFeedback onPress={() => setShowHistoryModal(false)}>
-            <View style={StyleSheet.absoluteFill} />
-          </TouchableWithoutFeedback>
+          <TouchableOpacity 
+            style={StyleSheet.absoluteFill} 
+            activeOpacity={1} 
+            onPress={() => setShowHistoryModal(false)} 
+          />
           <View style={[styles.modalContent, { backgroundColor: colors.card, borderRadius: tStyles.roundness, maxHeight: '80%' }]}>
             <View style={styles.modalHeader}>
               <Text style={[styles.modalTitle, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 17 * m, fontWeight: tStyles.titleWeight }]}>
@@ -651,7 +675,7 @@ const styles = StyleSheet.create({
   emptyTitle: { fontSize: 16, fontWeight: 'bold', marginTop: 12, marginBottom: 6 },
   emptySubtitle: { fontSize: 13, textAlign: 'center' },
 
-  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', padding: 20 },
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.65)', justifyContent: 'center', padding: 20 },
   modalContent: { padding: 20 },
   modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
   modalTitle: {},

@@ -834,11 +834,19 @@ export default function SettingsScreen({ navigation }: any) {
       </ScrollView>
 
       {/* AYLIK BÜTÇE HEDEFİ AYARLAMA MODALI (BUCKWHEAT) */}
-      <Modal visible={showGoalModal} transparent animationType="slide" onRequestClose={() => setShowGoalModal(false)}>
+      <Modal 
+        visible={showGoalModal} 
+        transparent 
+        animationType="slide" 
+        statusBarTranslucent={true}
+        onRequestClose={() => setShowGoalModal(false)}
+      >
         <View style={styles.modalOverlay}>
-          <TouchableWithoutFeedback onPress={() => setShowGoalModal(false)}>
-            <View style={{ flex: 1 }} />
-          </TouchableWithoutFeedback>
+          <TouchableOpacity 
+            style={{ flex: 1, width: '100%' }} 
+            activeOpacity={1} 
+            onPress={() => setShowGoalModal(false)} 
+          />
           <View style={[styles.modalContent, { backgroundColor: colors.card, borderTopLeftRadius: 28, borderTopRightRadius: 28, paddingBottom: Math.max(insets.bottom + 14, 26) }]}>
             <View style={[styles.sheetHandle, { backgroundColor: colors.text + '25' }]} />
             
@@ -890,11 +898,19 @@ export default function SettingsScreen({ navigation }: any) {
       </Modal>
 
       {/* ÇOK KANALLI YEDEK ALMA (DIŞA AKTARMA) MODALI */}
-      <Modal visible={showExportModal} transparent animationType="slide" onRequestClose={() => setShowExportModal(false)}>
+      <Modal 
+        visible={showExportModal} 
+        transparent 
+        animationType="slide" 
+        statusBarTranslucent={true}
+        onRequestClose={() => setShowExportModal(false)}
+      >
         <View style={styles.modalOverlay}>
-          <TouchableWithoutFeedback onPress={() => setShowExportModal(false)}>
-            <View style={{ flex: 1 }} />
-          </TouchableWithoutFeedback>
+          <TouchableOpacity 
+            style={{ flex: 1, width: '100%' }} 
+            activeOpacity={1} 
+            onPress={() => setShowExportModal(false)} 
+          />
           <View style={[styles.modalContent, { backgroundColor: colors.card, borderTopLeftRadius: 28, borderTopRightRadius: 28, paddingBottom: Math.max(insets.bottom + 14, 26), maxHeight: '88%' }]}>
             <View style={[styles.sheetHandle, { backgroundColor: colors.text + '25' }]} />
 
@@ -1006,11 +1022,19 @@ export default function SettingsScreen({ navigation }: any) {
       </Modal>
 
       {/* ÇOK KANALLI YEDEKTEN GERİ YÜKLEME (İÇE AKTARMA) MODALI */}
-      <Modal visible={showImportModal} transparent animationType="slide" onRequestClose={() => setShowImportModal(false)}>
+      <Modal 
+        visible={showImportModal} 
+        transparent 
+        animationType="slide" 
+        statusBarTranslucent={true}
+        onRequestClose={() => setShowImportModal(false)}
+      >
         <View style={styles.modalOverlay}>
-          <TouchableWithoutFeedback onPress={() => setShowImportModal(false)}>
-            <View style={{ flex: 1 }} />
-          </TouchableWithoutFeedback>
+          <TouchableOpacity 
+            style={{ flex: 1, width: '100%' }} 
+            activeOpacity={1} 
+            onPress={() => setShowImportModal(false)} 
+          />
           <View style={[styles.modalContent, { backgroundColor: colors.card, borderTopLeftRadius: 28, borderTopRightRadius: 28, paddingBottom: Math.max(insets.bottom + 14, 26), maxHeight: '88%' }]}>
             <View style={[styles.sheetHandle, { backgroundColor: colors.text + '25' }]} />
             
@@ -1240,11 +1264,13 @@ export default function SettingsScreen({ navigation }: any) {
       </Modal>
 
       {/* PROFİL FOTOĞRAFI & AVATAR SEÇİM BOTTOM SHEET'İ */}
-      <Modal visible={showAvatarSheet} transparent animationType="slide" onRequestClose={() => setShowAvatarSheet(false)}>
+      <Modal visible={showAvatarSheet} transparent animationType="slide" onRequestClose={() => setShowAvatarSheet(false)} statusBarTranslucent={true}>
         <View style={styles.modalOverlay}>
-          <TouchableWithoutFeedback onPress={() => setShowAvatarSheet(false)}>
-            <View style={{ flex: 1 }} />
-          </TouchableWithoutFeedback>
+          <TouchableOpacity
+            style={{ flex: 1, width: '100%' }}
+            activeOpacity={1}
+            onPress={() => setShowAvatarSheet(false)}
+          />
           <View style={[styles.modalContent, { backgroundColor: colors.card, borderTopLeftRadius: 28, borderTopRightRadius: 28, paddingBottom: Math.max(insets.bottom + 14, 26), maxHeight: '88%' }]}>
             <View style={[styles.sheetHandle, { backgroundColor: colors.text + '25' }]} />
 
@@ -1451,7 +1477,7 @@ const styles = StyleSheet.create({
 
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.55)',
+    backgroundColor: 'rgba(0, 0, 0, 0.65)',
     justifyContent: 'flex-end',
   },
   modalContent: {
