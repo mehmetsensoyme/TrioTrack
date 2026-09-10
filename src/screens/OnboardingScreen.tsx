@@ -351,9 +351,10 @@ export default function OnboardingScreen({ navigation }: any) {
           contentContainerStyle={[
             styles.scrollContent,
             {
-              paddingTop: Math.max(insets.top, 16) + (step === 0 ? 14 : 54),
-              paddingBottom: Math.max(insets.bottom, 12) + 78,
-              justifyContent: step === 0 ? 'center' : 'flex-start',
+              paddingTop: Math.max(insets.top, 16) + (step === 0 ? 16 : 54),
+              paddingBottom: Math.max(insets.bottom, 16) + 20,
+              justifyContent: 'space-between',
+              flexGrow: 1,
             }
           ]}
           showsVerticalScrollIndicator={false}
@@ -1051,6 +1052,38 @@ export default function OnboardingScreen({ navigation }: any) {
             </View>
           )}
 
+          {/* GÖMÜLÜ ALT NAVİGASYON BARI (EMBEDDED BOTTOM BAR) */}
+          <View style={[styles.bottomBar, { marginTop: 28, marginBottom: 4 }]}>
+            {renderStepIndicator()}
+
+            <TouchableOpacity
+              style={[
+                styles.primaryActionBtn,
+                { backgroundColor: colors.primary, borderRadius: tStyles.roundness },
+                (step === 1 && (!agreedLocal || !agreedPrivacy || !agreedBackup)) && { opacity: 0.5 }
+              ]}
+              disabled={step === 1 && (!agreedLocal || !agreedPrivacy || !agreedBackup)}
+              onPress={nextStep}
+              activeOpacity={0.8}
+            >
+              {isFinishing ? (
+                <ActivityIndicator size="small" color={colors.onPrimary} />
+              ) : (
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <Text style={[styles.primaryActionBtnText, { color: colors.onPrimary, fontFamily: tStyles.fontFamily, fontSize: 15 * m }]}>
+                    {step === TOTAL_STEPS - 1 ? 'BAŞLA' : 'İLERİ'}
+                  </Text>
+                  <Ionicons
+                    name={step === TOTAL_STEPS - 1 ? 'rocket-outline' : 'arrow-forward'}
+                    size={16}
+                    color={colors.onPrimary}
+                    style={{ marginLeft: 8 }}
+                  />
+                </View>
+              )}
+            </TouchableOpacity>
+          </View>
+
         </ScrollView>
 
         {/* TOP BAR (Floating Completely Transparent) */}
@@ -1085,53 +1118,6 @@ export default function OnboardingScreen({ navigation }: any) {
             )}
           </View>
         )}
-
-        {/* BOTTOM NAV BAR & STEP INDICATOR (Floating Completely Transparent) */}
-        <View
-          style={[
-            styles.bottomBar,
-            {
-              position: 'absolute',
-              bottom: 0,
-              left: 0,
-              right: 0,
-              paddingBottom: Math.max(insets.bottom, 12),
-              paddingTop: 12,
-              backgroundColor: 'transparent',
-              zIndex: 10,
-            }
-          ]}
-          pointerEvents="box-none"
-        >
-          {renderStepIndicator()}
-
-          <TouchableOpacity
-            style={[
-              styles.primaryActionBtn,
-              { backgroundColor: colors.primary, borderRadius: tStyles.roundness },
-              (step === 1 && (!agreedLocal || !agreedPrivacy || !agreedBackup)) && { opacity: 0.5 }
-            ]}
-            disabled={step === 1 && (!agreedLocal || !agreedPrivacy || !agreedBackup)}
-            onPress={nextStep}
-            activeOpacity={0.8}
-          >
-            {isFinishing ? (
-              <ActivityIndicator size="small" color={colors.onPrimary} />
-            ) : (
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <Text style={[styles.primaryActionBtnText, { color: colors.onPrimary, fontFamily: tStyles.fontFamily, fontSize: 15 * m }]}>
-                  {step === TOTAL_STEPS - 1 ? 'BAŞLA' : 'İLERİ'}
-                </Text>
-                <Ionicons
-                  name={step === TOTAL_STEPS - 1 ? 'rocket-outline' : 'arrow-forward'}
-                  size={16}
-                  color={colors.onPrimary}
-                  style={{ marginLeft: 8 }}
-                />
-              </View>
-            )}
-          </TouchableOpacity>
-        </View>
 
       </KeyboardAvoidingView>
 
@@ -1668,9 +1654,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 22,
+    paddingHorizontal: 0,
     paddingTop: 12,
-    paddingBottom: 8
+    paddingBottom: 8,
+    width: '100%',
   },
   indicatorContainer: { flexDirection: 'row', gap: 6, alignItems: 'center' },
   indicator: { height: 6, borderRadius: 3 },
