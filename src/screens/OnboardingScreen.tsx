@@ -1053,7 +1053,7 @@ export default function OnboardingScreen({ navigation }: any) {
 
         </ScrollView>
 
-        {/* TOP BAR (Translucent & Floating) */}
+        {/* TOP BAR (Floating Completely Transparent) */}
         {step > 0 && (
           <View
             style={[
@@ -1065,12 +1065,11 @@ export default function OnboardingScreen({ navigation }: any) {
                 right: 0,
                 paddingTop: Math.max(insets.top, 14),
                 height: Math.max(insets.top, 14) + 48,
-                backgroundColor: colors.background + 'D9',
-                borderBottomWidth: StyleSheet.hairlineWidth,
-                borderBottomColor: colors.text + '15',
+                backgroundColor: 'transparent',
                 zIndex: 10,
               }
             ]}
+            pointerEvents="box-none"
           >
             <TouchableOpacity onPress={prevStep} style={styles.navTextBtn} activeOpacity={0.7}>
               <Ionicons name="chevron-back" size={20} color={colors.primary} />
@@ -1087,7 +1086,7 @@ export default function OnboardingScreen({ navigation }: any) {
           </View>
         )}
 
-        {/* BOTTOM NAV BAR & STEP INDICATOR (Translucent & Floating) */}
+        {/* BOTTOM NAV BAR & STEP INDICATOR (Floating Completely Transparent) */}
         <View
           style={[
             styles.bottomBar,
@@ -1098,12 +1097,11 @@ export default function OnboardingScreen({ navigation }: any) {
               right: 0,
               paddingBottom: Math.max(insets.bottom, 12),
               paddingTop: 12,
-              backgroundColor: colors.background + 'D9',
-              borderTopWidth: StyleSheet.hairlineWidth,
-              borderTopColor: colors.text + '15',
+              backgroundColor: 'transparent',
               zIndex: 10,
             }
           ]}
+          pointerEvents="box-none"
         >
           {renderStepIndicator()}
 
@@ -1676,7 +1674,15 @@ const styles = StyleSheet.create({
   },
   indicatorContainer: { flexDirection: 'row', gap: 6, alignItems: 'center' },
   indicator: { height: 6, borderRadius: 3 },
-  primaryActionBtn: { paddingVertical: 14, paddingHorizontal: 26, elevation: 3 },
+  primaryActionBtn: {
+    paddingVertical: 14,
+    paddingHorizontal: 26,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.22,
+    shadowRadius: 5,
+  },
   primaryActionBtnText: { fontWeight: 'bold', letterSpacing: 0.8 },
 
   modalBackdrop: {
