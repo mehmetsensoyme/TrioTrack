@@ -531,7 +531,7 @@ export default function AddExpenseScreen({ navigation }: any) {
             Yeni İşlem Ekle
           </Text>
           <Text style={{ color: colors.text, opacity: 0.5, fontSize: 11 * m, fontFamily: tStyles.fontFamily }}>
-            TrioTrack v1.5.9 Hibrit Finans
+            TrioTrack v1.6.0 Hibrit Finans
           </Text>
         </View>
 

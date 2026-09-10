@@ -4,6 +4,30 @@ Tüm önemli değişiklikler bu dosyada belgelenmektedir. Proje [SemVer](https:/
 
 ---
 
+## [v1.6.0] - 2026-09-10 (Derleme: 2026.09.10)
+### 🌟 Yeni Nesil Hibrit Karşılama Akışı (Onboarding), Tema Kontrast Kusursuzluğu & Avatar Seçici
+- **Kişiselleştirilmiş Karşılama & Profil Ekranı (Onboarding Slide 2):**
+  - Üst gezinme çubuğu şeffaf, yüzen ve dokunma olaylarını engelleyen (`pointerEvents="box-none"`) modern bir yapıya kavuşturuldu.
+  - Avatar altındaki gereksiz "Fotoğrafı / Stili Değiştir" metni kaldırıldı; avatarın kendisine dokunulduğunda açılan şık alt menü ile doğrudan fotoğraf seçimi sağlandı.
+  - Galeri fotoğraf seçimi, kamera entegrasyonu ve yüksek kontrastlı minimalist karakter/rozet avatarları optimize edildi.
+- **Para Birimi & Finansal Hedefler Ekranı (Slide 3):**
+  - Para birimleri 2 satır x 3 sütun eşit genişlikli chipler ve canlı format önizleme kartı ile donatıldı.
+  - 5 öncelikli finansal hedef kartı (`daily_pocket`, `saving`, `debt_free`, `zero_budget`, `investing`) net bir içerik hiyerarşisiyle sunuldu.
+  - 4'lü segmented birikim oranı hapları (`%10`, `%20` Önerilen, `%30`, `%50` FIRE) ve dinamik açıklama kartı eklendi.
+  - Sabit rozet kapsayıcısı ile tüm yüzde metinlerinin baselinesı milimetrik olarak hizalandı.
+- **Aydınlık & Koyu Tema Kusursuzluğu (Light Theme Polish):**
+  - Aydınlık temada silik kalan beyaz kartlar için standart, net `#E2E8F0` (Slate-200) kenarlıklar uygulandı.
+  - Seçili kart arka planında kirli leke oluşturan düşük alfalı renkler kaldırılarak 2px canlı birincil renk kenarlığı ve temiz kontrast getirildi.
+  - Hedef ikon kutuları seçildiğinde hedefin kendi canlı rengi ve beyaz ikonla dinamik olarak dolarak net geri bildirim sağlandı.
+  - Seçilmemiş radyo butonları zarif `#CBD5E1` halka rengine kavuşturuldu.
+- **Kesintisiz Başlatma & Geçiş (Slide 6):**
+  - "Her Şey Hazır!" ekranında "BAŞLA" butonuna basıldığında logonun dönen bir yükleme simgesine dönüşmesi sorunu tamamen kaldırıldı; avatar ve başlık sabit tutuldu.
+  - Yapay 600ms bekleme süresi kaldırılarak ana ekrana anında geçiş sağlandı.
+- **Sürüm Yükseltmesi:**
+  - `v1.6.0` (Build `2026.09.10`, `versionCode 5`) olarak tüm yapılandırma dosyaları güncellendi.
+
+---
+
 ## [v1.5.9] - 2026-09-10 (Derleme: 2026.09.10)
 ### 🌟 Canlı Kamera & OCR Motoru, CDN Marka Logoları & Evrensel Modal Backdrop Dismiss
 - **Gerçek Kamera ve Galeri Entegrasyonu ile Canlı OCR:**

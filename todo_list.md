@@ -1,5 +1,13 @@
 # TrioTrack - Görev ve Yol Haritası (TODO List)
 
+## ✅ Tamamlanan Özellikler (v1.6.0)
+- [x] Sürüm numarası `v1.6.0` (Derleme: `2026.09.10`, `versionCode: 5`) olarak tüm konfigürasyonlara (`app.json`, `package.json`, `version.ts`, `changelog.md`, `todo_list.md`, `App.tsx`, `AddExpenseScreen.tsx`) uygulandı.
+- [x] **Yeni Nesil Hibrit Karşılama Akışı (Onboarding Revizyonu):** 7 adımlı akıllı karşılama akışının başlık hizalamaları, şeffaf gezinme çubuğu, tek dokunuşla çok kanallı yedekten anında geri yükleme ve canlı para birimi önizlemesi tamamlandı.
+- [x] **Kişiselleştirme & Profil Ekranı (Slide 2):** Avatar altındaki fazlalık metin kaldırıldı, doğrudan avatara tıklanarak açılan şık alt menü ile galeri, kamera veya minimalist karakter/rozet avatarları seçimi optimize edildi.
+- [x] **Para Birimi & Finansal Hedefler (Slide 3):** 2x3 eşit genişlikte para birimi chipleri, 5 öncelikli finansal hedef kartı ve 4'lü segmented birikim oranı hapları eklendi.
+- [x] **Aydınlık Tema Kontrast Mükemmelliği:** Açık temadaki silik kart sınırları `#E2E8F0` ile netleştirildi, kirli 4.7% arka plan lekeleri kaldırıldı, 2px canlı aktif sınır ve dinamik renkli dolu aktif ikon kutuları entegre edildi.
+- [x] **Kesintisiz Başlatma (Slide 6):** "Her Şey Hazır!" ekranındaki dönen yükleme simgesi kaldırılarak avatar ve başlık sabit tutuldu; yapay gecikme olmaksızın anında ana ekrana geçiş sağlandı.
+
 ## ✅ Tamamlanan Özellikler (v1.5.9)
 - [x] Sürüm numarası `v1.5.9` (Derleme: `2026.09.10`, `versionCode: 4`) olarak tüm konfigürasyonlara (`app.json`, `package.json`, `version.ts`, `build.gradle`, `changelog.md`) uygulandı.
 - [x] **Canlı Kamera & Galeri Entegrasyonu ile Gerçek OCR:** `expo-image-picker` ile cihaz kamerasından doğrudan fotoğraf çekme, galeriden görsel seçme, `CAMERA` ve `STORAGE` izinleri, `ocrService.ts` OCR Space API motoru ve regex Türkçe fiş ayrıştırıcı entegre edildi.

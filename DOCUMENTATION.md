@@ -262,14 +262,14 @@ flowchart TD
   * Karşılama ekranına 3 uygulamanın felsefi birleşimini yansıtan ilham verici manifesto metni eklendi.
   * Karşılama ve Ayarlar ekranlarındaki tüm pencereler masaüstü tarzı yapay ortalanmış kutudan, modern mobil **Bottom Sheet (Alt Çekmece)** yapısına dönüştürüldü (`sheetHandle`, safe-area alt padding, pürüzsüz dokunarak kapanış).
   * Google Drive API maliyeti (0 TL, ücretsiz) ve bulut yedekleme alternatifleri dokümante edildi.
-* **v1.6.0 (10 Eylül 2026):**
-  * Karşılama ekranı başlığı sadeleştirildi.
-  * Çok kanallı yedekleme ve geri yükleme servisi (`backupService.ts`) yazıldı.
-  * Karşılama ve Ayarlar ekranlarına Cihaz Dosyası, Pano, Yerel Snapshot ve Manuel seçenekleri eklendi.
-  * Zero ve Paisa formatlarını otomatik tanıyan akıllı normalizasyon motoru kuruldu.
+* **v1.6.0 (10 Eylül 2026 - versionCode: 5):**
+  * Yeni nesil 7 adımlı hibrit karşılama akışı (Onboarding), şeffaf yüzen navigasyon çubuğu ve çok kanallı anında yedekten geri yükleme merkezi.
+  * Kişiselleştirilebilir profil fotoğrafı seçici (Kamera, Galeri ve minimalist karakter/rozet avatarları).
+  * Para birimi canlı önizlemesi ve 2x3 eşit genişlikte chip ızgarası.
+  * 5 öncelikli finansal hedef kartı ve 4'lü segmented birikim oranı hapları.
+  * Aydınlık temada silik kalan tüm kartlar için `#E2E8F0` net kenarlıklar, 2px canlı aktif vurgu, dinamik renkli dolu ikon kutuları ve kusursuz tipografik hiyerarşi.
+  * "Her Şey Hazır!" ekranında dönen yükleme simgeleri ve yapay gecikmeler kaldırılarak ana ekrana anında geçiş sağlandı.
 * **v1.5.9:**
-  * Paisa, Zero ve Buckwheat simge kütüphanesi sentezi tamamlandı (13 kategori, 270+ simge, çift dilli arama).
-  * Evrensel modal backdrop dokunarak kapatma özelliği eklendi.
-* **v1.5.8:**
-  * Akıllı Fiş/Fatura OCR motoru ve canlı kamera desteği eklendi.
-  * Popüler CDN marka logoları ve akıllı rozet fallback sistemi entegre edildi.
+  * Canlı kamera ve galeri entegrasyonu ile akıllı fiş/fatura OCR ayrıştırıcı motoru.
+  * 35+ popüler CDN marka logoları kataloğu (`brands.ts`).
+  * Evrensel modal backdrop (karartılmış alana dokunarak) kapatma özelliği.

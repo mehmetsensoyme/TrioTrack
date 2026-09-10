@@ -176,7 +176,7 @@ const HomeScreen = ({ navigation }: any) => {
             >
               <Ionicons name="sparkles" size={14} color="#F59E0B" />
               <Text style={{ color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 11 * m, fontWeight: 'bold', marginLeft: 4 }}>
-                v1.5.9
+                v1.6.0
               </Text>
               <View style={[styles.pulsingDot, { backgroundColor: '#F59E0B' }]} />
             </TouchableOpacity>
@@ -1041,7 +1041,7 @@ const HomeScreen = ({ navigation }: any) => {
         </View>
       </Modal>
 
-      {/* 🌟 NELER YENİ? / SÜRÜM YENİLİKLERİ MERKEZİ (v1.5.9) */}
+      {/* 🌟 NELER YENİ? / SÜRÜM YENİLİKLERİ MERKEZİ (v1.6.0) */}
       <Modal visible={showWhatsNewModal} transparent animationType="slide" onRequestClose={() => setShowWhatsNewModal(false)}>
         <View style={styles.modalBackdrop}>
           <TouchableWithoutFeedback onPress={() => setShowWhatsNewModal(false)}>
@@ -1056,14 +1056,14 @@ const HomeScreen = ({ navigation }: any) => {
               <View style={{ flex: 1, marginLeft: 12 }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
                   <Text style={[styles.whatsNewTitle, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 18 * m, fontWeight: 'bold' }]}>
-                    TrioTrack v1.5.9
+                    TrioTrack v1.6.0
                   </Text>
                   <View style={{ backgroundColor: '#10B981', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 8 }}>
                     <Text style={{ color: '#FFF', fontSize: 9 * m, fontWeight: 'bold' }}>YENİ</Text>
                   </View>
                 </View>
                 <Text style={{ color: colors.text, opacity: 0.6, fontSize: 11 * m, fontFamily: tStyles.fontFamily }}>
-                  Build 2026.09.10 • Akıllı Kamera & Marka CDN Sürümü
+                  Build 2026.09.10 • Yeni Karşılama Akışı & Tasarım Sürümü
                 </Text>
               </View>
               <TouchableOpacity onPress={() => setShowWhatsNewModal(false)}>
@@ -1072,62 +1072,62 @@ const HomeScreen = ({ navigation }: any) => {
             </View>
 
             <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 420, marginVertical: 12 }}>
-              {/* Madde 1: Gerçek Kamera & OCR */}
+              {/* Madde 1: Yeni Nesil Karşılama Akışı */}
               <View style={styles.whatsNewItem}>
                 <View style={[styles.tagBadge, { backgroundColor: '#10B98120' }]}>
                   <Text style={{ color: '#10B981', fontSize: 10 * m, fontWeight: 'bold', fontFamily: tStyles.fontFamily }}>ÖZELLİK</Text>
                 </View>
                 <View style={{ flex: 1, marginLeft: 10 }}>
                   <Text style={[styles.whatsNewItemTitle, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 13 * m, fontWeight: 'bold' }]}>
-                    Gerçek Kamera & Canlı OCR Ayrıştırıcı
+                    Yeni Nesil Hibrit Karşılama Akışı (Onboarding)
                   </Text>
                   <Text style={[styles.whatsNewItemDesc, { color: colors.text, opacity: 0.65, fontFamily: tStyles.fontFamily, fontSize: 11 * m }]}>
-                    Kamera izni ile fiş veya faturalarınızı doğrudan cihazdan fotoğraflayın. Tutar, fiş no, tarih ve mağaza adı yapay zeka ile otomatik doldurulur ve fotoğraf belgesi işleme iliştirilir.
+                    Paisa, Zero ve Buckwheat felsefelerini birleştiren 7 adımlı akıllı kurulum: Şeffaf gezinme çubuğu, tek dokunuşla çok kanallı yedekten anında geri yükleme ve canlı para birimi önizlemesi.
                   </Text>
                 </View>
               </View>
 
-              {/* Madde 2: CDN Marka Logoları */}
+              {/* Madde 2: Aydınlık & Koyu Tema Kusursuzluğu */}
               <View style={styles.whatsNewItem}>
                 <View style={[styles.tagBadge, { backgroundColor: '#3B82F620' }]}>
-                  <Text style={{ color: '#3B82F6', fontSize: 10 * m, fontWeight: 'bold', fontFamily: tStyles.fontFamily }}>ÖZELLİK</Text>
+                  <Text style={{ color: '#3B82F6', fontSize: 10 * m, fontWeight: 'bold', fontFamily: tStyles.fontFamily }}>TASARIM</Text>
                 </View>
                 <View style={{ flex: 1, marginLeft: 10 }}>
                   <Text style={[styles.whatsNewItemTitle, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 13 * m, fontWeight: 'bold' }]}>
-                    Paisa Marka CDN Logoları Kataloğu
+                    Aydınlık & Koyu Tema Kusursuzluğu
                   </Text>
                   <Text style={[styles.whatsNewItemDesc, { color: colors.text, opacity: 0.65, fontFamily: tStyles.fontFamily, fontSize: 11 * m }]}>
-                    Netflix, Spotify, Starbucks, Migros, BİM, Shell, Trendyol, Apple vb. onlarca popüler markanın gerçek logoları tek dokunuşla harcama ikonu olarak seçilebilir.
+                    Aydınlık temada silik kalan kartlar için net Slate-200 kenarlıklar, 2px canlı aktif seçim vurguları, dinamik renkli aktif ikon kutuları ve matematiksel rozet hizalaması.
                   </Text>
                 </View>
               </View>
 
-              {/* Madde 3: Dış Boşluğa Dokununca Kapanma */}
+              {/* Madde 3: Profil & Fotoğraf Seçici */}
               <View style={styles.whatsNewItem}>
                 <View style={[styles.tagBadge, { backgroundColor: '#8B5CF620' }]}>
-                  <Text style={{ color: '#8B5CF6', fontSize: 10 * m, fontWeight: 'bold', fontFamily: tStyles.fontFamily }}>KULLANILABİLİRLİK</Text>
+                  <Text style={{ color: '#8B5CF6', fontSize: 10 * m, fontWeight: 'bold', fontFamily: tStyles.fontFamily }}>KİŞİSELLEŞTİRME</Text>
                 </View>
                 <View style={{ flex: 1, marginLeft: 10 }}>
                   <Text style={[styles.whatsNewItemTitle, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 13 * m, fontWeight: 'bold' }]}>
-                    Siyah Boş Alanlara Dokununca Kapanma
+                    Kişiselleştirilebilir Profil & Fotoğraf Seçici
                   </Text>
                   <Text style={[styles.whatsNewItemDesc, { color: colors.text, opacity: 0.65, fontFamily: tStyles.fontFamily, fontSize: 11 * m }]}>
-                    Hesap makinesi, fiş tarayıcı, ikon seçici, filtre ve işlem detay pencerelerinde ekranın karartılmış boş alanlarına dokunulduğunda pencere anında kapanır.
+                    Cihaz galerisinden fotoğraf yükleme, canlı baş harf rozeti veya renkli minimalist avatarlarla profilinizi kolayca tasarlayın.
                   </Text>
                 </View>
               </View>
 
-              {/* Madde 4: Mahremiyet Modu */}
+              {/* Madde 4: Canlı Fiş OCR & Marka CDN */}
               <View style={styles.whatsNewItem}>
                 <View style={[styles.tagBadge, { backgroundColor: '#F59E0B20' }]}>
-                  <Text style={{ color: '#F59E0B', fontSize: 10 * m, fontWeight: 'bold', fontFamily: tStyles.fontFamily }}>GELİŞTİRME</Text>
+                  <Text style={{ color: '#F59E0B', fontSize: 10 * m, fontWeight: 'bold', fontFamily: tStyles.fontFamily }}>YAPAY ZEKA</Text>
                 </View>
                 <View style={{ flex: 1, marginLeft: 10 }}>
                   <Text style={[styles.whatsNewItemTitle, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 13 * m, fontWeight: 'bold' }]}>
-                    Bakiye Gizleme (Göz Simgesi)
+                    Canlı Fiş OCR Tarayıcı & Marka CDN Logoları
                   </Text>
                   <Text style={[styles.whatsNewItemDesc, { color: colors.text, opacity: 0.65, fontFamily: tStyles.fontFamily, fontSize: 11 * m }]}>
-                    Ana ekrandaki bakiye kartında göz simgesiyle tek dokunuşta cüzdan bakiyelerini ve toplam tutarı gizleyebilme.
+                    Kamerayla fiş fotoğrafı çekip harcamalara iliştirme, OCR ile otomatik tutar/mağaza ayrıştırma ve onlarca CDN marka ikonu.
                   </Text>
                 </View>
               </View>
