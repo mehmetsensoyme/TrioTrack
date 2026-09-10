@@ -564,16 +564,6 @@ export default function OnboardingScreen({ navigation }: any) {
                     <Ionicons name="camera" size={13} color={colors.onPrimary} />
                   </View>
                 </TouchableOpacity>
-
-                <TouchableOpacity
-                  onPress={() => setShowAvatarSheet(true)}
-                  style={{ marginTop: 8, paddingHorizontal: 10, paddingVertical: 4 }}
-                  activeOpacity={0.7}
-                >
-                  <Text style={{ color: colors.primary, fontSize: 13 * m, fontWeight: 'bold', fontFamily: tStyles.fontFamily }}>
-                    {avatarUri ? 'Fotoğrafı / Stili Değiştir' : '+ Fotoğraf veya Avatar Seç'}
-                  </Text>
-                </TouchableOpacity>
               </View>
 
               <Text style={[styles.slideTitle, { color: colors.text, fontFamily: tStyles.fontFamily, fontWeight: tStyles.titleWeight, fontSize: 24 * m }]}>

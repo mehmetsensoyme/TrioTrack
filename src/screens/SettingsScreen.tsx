@@ -370,11 +370,9 @@ export default function SettingsScreen({ navigation }: any) {
               placeholder="Adınız"
               placeholderTextColor={colors.text + '50'}
             />
-            <TouchableOpacity onPress={() => setShowAvatarSheet(true)} style={{ marginTop: 2 }}>
-              <Text style={[styles.profileRole, { color: colors.primary, fontFamily: tStyles.fontFamily, fontSize: 12 * m }]}>
-                {userAvatar ? 'Fotoğrafı / Stili Değiştir' : '+ Profil Fotoğrafı Ekle'}
-              </Text>
-            </TouchableOpacity>
+            <Text style={[styles.profileRole, { color: colors.text, opacity: 0.6, fontFamily: tStyles.fontFamily, fontSize: 12 * m, marginTop: 2 }]}>
+              {userAvatar && !userAvatar.startsWith('preset:') ? 'Özel Profil Fotoğrafı' : avatarPreset ? `${avatarPreset.name} Rozeti` : 'TrioTrack Profili'}
+            </Text>
           </View>
           <TouchableOpacity onPress={() => setShowAvatarSheet(true)} style={{ padding: 6 }}>
             <Ionicons name="camera-outline" size={20} color={colors.primary} />
