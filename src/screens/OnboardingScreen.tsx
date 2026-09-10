@@ -344,29 +344,18 @@ export default function OnboardingScreen({ navigation }: any) {
   );
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background, paddingTop: Math.max(insets.top, 16), paddingBottom: Math.max(insets.bottom, 12) }]}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         
-        {/* TOP BAR */}
-        <View style={styles.topBar}>
-          {step > 0 ? (
-            <TouchableOpacity onPress={prevStep} style={styles.navTextBtn} activeOpacity={0.7}>
-              <Ionicons name="chevron-back" size={20} color={colors.primary} />
-              <Text style={[styles.navText, { color: colors.primary, fontFamily: tStyles.fontFamily, fontSize: 14 * m }]}>Geri</Text>
-            </TouchableOpacity>
-          ) : (
-            <View style={{ width: 60 }} />
-          )}
-
-          {step > 0 && step < TOTAL_STEPS - 1 && (
-            <TouchableOpacity onPress={handleFinish} style={styles.navTextBtn} activeOpacity={0.7}>
-              <Text style={[styles.navText, { color: colors.text, opacity: 0.5, fontFamily: tStyles.fontFamily, fontSize: 13 * m }]}>Atla →</Text>
-            </TouchableOpacity>
-          )}
-        </View>
-
         <ScrollView
-          contentContainerStyle={styles.scrollContent}
+          contentContainerStyle={[
+            styles.scrollContent,
+            {
+              paddingTop: Math.max(insets.top, 16) + (step === 0 ? 14 : 54),
+              paddingBottom: Math.max(insets.bottom, 12) + 78,
+              justifyContent: step === 0 ? 'center' : 'flex-start',
+            }
+          ]}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
@@ -1064,8 +1053,58 @@ export default function OnboardingScreen({ navigation }: any) {
 
         </ScrollView>
 
-        {/* BOTTOM NAV BAR & STEP INDICATOR */}
-        <View style={styles.bottomBar}>
+        {/* TOP BAR (Translucent & Floating) */}
+        {step > 0 && (
+          <View
+            style={[
+              styles.topBar,
+              {
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                paddingTop: Math.max(insets.top, 14),
+                height: Math.max(insets.top, 14) + 48,
+                backgroundColor: colors.background + 'D9',
+                borderBottomWidth: StyleSheet.hairlineWidth,
+                borderBottomColor: colors.text + '15',
+                zIndex: 10,
+              }
+            ]}
+          >
+            <TouchableOpacity onPress={prevStep} style={styles.navTextBtn} activeOpacity={0.7}>
+              <Ionicons name="chevron-back" size={20} color={colors.primary} />
+              <Text style={[styles.navText, { color: colors.primary, fontFamily: tStyles.fontFamily, fontSize: 14 * m }]}>Geri</Text>
+            </TouchableOpacity>
+
+            {step < TOTAL_STEPS - 1 ? (
+              <TouchableOpacity onPress={handleFinish} style={styles.navTextBtn} activeOpacity={0.7}>
+                <Text style={[styles.navText, { color: colors.text, opacity: 0.5, fontFamily: tStyles.fontFamily, fontSize: 13 * m }]}>Atla →</Text>
+              </TouchableOpacity>
+            ) : (
+              <View style={{ width: 40 }} />
+            )}
+          </View>
+        )}
+
+        {/* BOTTOM NAV BAR & STEP INDICATOR (Translucent & Floating) */}
+        <View
+          style={[
+            styles.bottomBar,
+            {
+              position: 'absolute',
+              bottom: 0,
+              left: 0,
+              right: 0,
+              paddingBottom: Math.max(insets.bottom, 12),
+              paddingTop: 12,
+              backgroundColor: colors.background + 'D9',
+              borderTopWidth: StyleSheet.hairlineWidth,
+              borderTopColor: colors.text + '15',
+              zIndex: 10,
+            }
+          ]}
+        >
           {renderStepIndicator()}
 
           <TouchableOpacity
@@ -1496,8 +1535,8 @@ const styles = StyleSheet.create({
   },
   navTextBtn: { flexDirection: 'row', alignItems: 'center', padding: 6 },
   navText: { fontWeight: '600' },
-  scrollContent: { paddingHorizontal: 22, paddingVertical: 12, flexGrow: 1, justifyContent: 'center' },
-  slide: { flex: 1, justifyContent: 'center' },
+  scrollContent: { paddingHorizontal: 22, flexGrow: 1 },
+  slide: { flex: 1, width: '100%' },
 
   brandHeaderBadge: {
     alignSelf: 'center',
