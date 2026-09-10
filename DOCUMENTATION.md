@@ -193,7 +193,6 @@ Tüm veriler cihaz üzerinde yerel olarak saklanır.
 ### Kullanılan Kararlı Animasyonlar:
 1. **Lazer Tarama Animasyonu:** OCR ekranında 60/120fps native thread üzerinde çalışan `Animated.loop` tarama efekti.
 4. **Evrensel Modal Kapanışı (Backdrop Dismiss):** Tüm modalların siyah/saydam boş alanına dokunulduğunda (`TouchableWithoutFeedback`) anında ve yumuşak kapanma.
-5. **Şeffaf Yüzen Üst Bar & Gömülü Alt Navigasyon (Transparent Floating Top & Embedded Bottom Bar):** Onboarding ekranında üst 'Geri' ve 'Atla' alanı tamamen şeffaf ve havada yüzen yapıda bırakılırken; alt navigasyon çubuğu (adım noktaları ve 'İleri/Başla' butonu) doğrudan kaydırılabilir sayfa içeriğine gömülü (`embedded`) hale getirilmiştir. Bu sayede form öğeleri ve kartlar hiçbir zaman alt butonlar tarafından örtülmez; kullanıcı seçenekleri inceleyip aşağı indikçe butonlar doğal bir şekilde formun en altında belirir.
 
 ---
 
@@ -205,7 +204,7 @@ flowchart TD
     Step2["✅ 2. Adım: Simge Kataloğu & 13 Kategori Sentezi"]
     Step3["✅ 3. Adım: Karşılama Ekranı (Slide 0) & Çok Kanallı Yedek"]
     Step4["✅ 4. Adım: Özellik Turu (Slide 1) Onayı"]
-    Step5["✅ 5. Adım: Kişiselleştirme, Fotoğraf & Tipografi & Gömülü Alt Bar (Slide 2)"]
+    Step5["✅ 5. Adım: Kişiselleştirme, Profil Fotoğrafı & Tipografi (Slide 2)"]
     Step6["⏳ 6. Adım: Para Birimi & Finansal Hedef (Slide 3)"]
     Step7["⏳ 7. Adım: Varsayılan Cüzdanlar & Bakiyeler (Slide 4)"]
     Step8["⏳ 8. Adım: Buckwheat Harçlık Motoru Kurulumu (Slide 5)"]
@@ -214,12 +213,9 @@ flowchart TD
 ```
 
 ### Değişiklik Günlüğü (Changelog):
-* **v1.6.3 (10 Eylül 2026):**
-  * **Gömülü Alt Navigasyon Çubuğu (Embedded In-Flow Bottom Bar):** Alt navigasyon alanı kaydırılabilir sayfa akışına doğrudan gömülü (`flexGrow: 1`, `justifyContent: 'space-between'`) hale getirildi. Uzun formlarda (Slide 2 gibi) butonlar sayfa içeriğinin üzerine binmez, en alta kaydırıldığında doğal olarak görünür.
-  * **Tamamen Şeffaf Yüzen Üst Bar:** Üst 'Geri' ve 'Atla' buton alanı arka plansız ve şeffaf yapıda bırakıldı.
-  * **Avatar Düğme Temizliği:** Profil fotoğrafı seçim dairesinin altındaki mükerrer metin butonu kaldırıldı.
 * **v1.6.2 (10 Eylül 2026):**
   * **Kullanıcı Fotoğrafı Yükleme:** Onboarding 3. adım (Slide 2) ve Ayarlar ekranına `expo-image-picker` ile Galeri ve Kamera üzerinden profil fotoğrafı yükleme ve kırpma yeteneği eklendi.
+  * **Avatar Düğme & Arayüz Sadeleştirmesi:** Profil dairesinin altındaki mükerrer metin butonu kaldırılarak doğrudan profil dairesine ve kamera rozetine dokunularak seçim yapılması sağlandı.
   * **Ham Emoji Probleminin Çözümü:** Mor temada ve diğer seçeneklerde yapay/soluk duran `'👤'` emojisi kaldırıldı; yerine seçilen gerçek fotoğraf, 6 şık tematik avatar rozeti veya yüksek kontrastlı monogram harf getirildi.
   * **Hazır Karakter Rozetleri (`avatarUtils.ts`):** Finansör, Gizlilik, Enerjik, Girişimci, Minimalist ve Vizyoner olmak üzere 6 tematik hazır avatar seçeneği eklendi.
   * **Yazı Tipi (Tipografi) & Boyutu Seçimi:** Onboarding Slide 2'ye canlı font önizlemeli Modern (Sans-serif), Klasik (Serif/Georgia) ve Teknik (Monospace/Menlo) yazı tipi ile Kompakt/Standart/Geniş punto kontrolleri entegre edildi.

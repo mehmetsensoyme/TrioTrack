@@ -344,19 +344,29 @@ export default function OnboardingScreen({ navigation }: any) {
   );
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
+    <View style={[styles.container, { backgroundColor: colors.background, paddingTop: Math.max(insets.top, 16), paddingBottom: Math.max(insets.bottom, 12) }]}>
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         
+        {/* TOP BAR */}
+        <View style={styles.topBar}>
+          {step > 0 ? (
+            <TouchableOpacity onPress={prevStep} style={styles.navTextBtn} activeOpacity={0.7}>
+              <Ionicons name="chevron-back" size={20} color={colors.primary} />
+              <Text style={[styles.navText, { color: colors.primary, fontFamily: tStyles.fontFamily, fontSize: 14 * m }]}>Geri</Text>
+            </TouchableOpacity>
+          ) : (
+            <View style={{ width: 60 }} />
+          )}
+
+          {step > 0 && step < TOTAL_STEPS - 1 && (
+            <TouchableOpacity onPress={handleFinish} style={styles.navTextBtn} activeOpacity={0.7}>
+              <Text style={[styles.navText, { color: colors.text, opacity: 0.5, fontFamily: tStyles.fontFamily, fontSize: 13 * m }]}>Atla →</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+
         <ScrollView
-          contentContainerStyle={[
-            styles.scrollContent,
-            {
-              paddingTop: Math.max(insets.top, 16) + (step === 0 ? 16 : 54),
-              paddingBottom: Math.max(insets.bottom, 16) + 20,
-              justifyContent: 'space-between',
-              flexGrow: 1,
-            }
-          ]}
+          contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
@@ -1052,72 +1062,39 @@ export default function OnboardingScreen({ navigation }: any) {
             </View>
           )}
 
-          {/* GÖMÜLÜ ALT NAVİGASYON BARI (EMBEDDED BOTTOM BAR) */}
-          <View style={[styles.bottomBar, { marginTop: 28, marginBottom: 4 }]}>
-            {renderStepIndicator()}
-
-            <TouchableOpacity
-              style={[
-                styles.primaryActionBtn,
-                { backgroundColor: colors.primary, borderRadius: tStyles.roundness },
-                (step === 1 && (!agreedLocal || !agreedPrivacy || !agreedBackup)) && { opacity: 0.5 }
-              ]}
-              disabled={step === 1 && (!agreedLocal || !agreedPrivacy || !agreedBackup)}
-              onPress={nextStep}
-              activeOpacity={0.8}
-            >
-              {isFinishing ? (
-                <ActivityIndicator size="small" color={colors.onPrimary} />
-              ) : (
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <Text style={[styles.primaryActionBtnText, { color: colors.onPrimary, fontFamily: tStyles.fontFamily, fontSize: 15 * m }]}>
-                    {step === TOTAL_STEPS - 1 ? 'BAŞLA' : 'İLERİ'}
-                  </Text>
-                  <Ionicons
-                    name={step === TOTAL_STEPS - 1 ? 'rocket-outline' : 'arrow-forward'}
-                    size={16}
-                    color={colors.onPrimary}
-                    style={{ marginLeft: 8 }}
-                  />
-                </View>
-              )}
-            </TouchableOpacity>
-          </View>
-
         </ScrollView>
 
-        {/* TOP BAR (Floating Completely Transparent) */}
-        {step > 0 && (
-          <View
-            style={[
-              styles.topBar,
-              {
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                paddingTop: Math.max(insets.top, 14),
-                height: Math.max(insets.top, 14) + 48,
-                backgroundColor: 'transparent',
-                zIndex: 10,
-              }
-            ]}
-            pointerEvents="box-none"
-          >
-            <TouchableOpacity onPress={prevStep} style={styles.navTextBtn} activeOpacity={0.7}>
-              <Ionicons name="chevron-back" size={20} color={colors.primary} />
-              <Text style={[styles.navText, { color: colors.primary, fontFamily: tStyles.fontFamily, fontSize: 14 * m }]}>Geri</Text>
-            </TouchableOpacity>
+        {/* BOTTOM NAV BAR & STEP INDICATOR */}
+        <View style={styles.bottomBar}>
+          {renderStepIndicator()}
 
-            {step < TOTAL_STEPS - 1 ? (
-              <TouchableOpacity onPress={handleFinish} style={styles.navTextBtn} activeOpacity={0.7}>
-                <Text style={[styles.navText, { color: colors.text, opacity: 0.5, fontFamily: tStyles.fontFamily, fontSize: 13 * m }]}>Atla →</Text>
-              </TouchableOpacity>
+          <TouchableOpacity
+            style={[
+              styles.primaryActionBtn,
+              { backgroundColor: colors.primary, borderRadius: tStyles.roundness },
+              (step === 1 && (!agreedLocal || !agreedPrivacy || !agreedBackup)) && { opacity: 0.5 }
+            ]}
+            disabled={step === 1 && (!agreedLocal || !agreedPrivacy || !agreedBackup)}
+            onPress={nextStep}
+            activeOpacity={0.8}
+          >
+            {isFinishing ? (
+              <ActivityIndicator size="small" color={colors.onPrimary} />
             ) : (
-              <View style={{ width: 40 }} />
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Text style={[styles.primaryActionBtnText, { color: colors.onPrimary, fontFamily: tStyles.fontFamily, fontSize: 15 * m }]}>
+                  {step === TOTAL_STEPS - 1 ? 'BAŞLA' : 'İLERİ'}
+                </Text>
+                <Ionicons
+                  name={step === TOTAL_STEPS - 1 ? 'rocket-outline' : 'arrow-forward'}
+                  size={16}
+                  color={colors.onPrimary}
+                  style={{ marginLeft: 8 }}
+                />
+              </View>
             )}
-          </View>
-        )}
+          </TouchableOpacity>
+        </View>
 
       </KeyboardAvoidingView>
 
@@ -1519,8 +1496,8 @@ const styles = StyleSheet.create({
   },
   navTextBtn: { flexDirection: 'row', alignItems: 'center', padding: 6 },
   navText: { fontWeight: '600' },
-  scrollContent: { paddingHorizontal: 22, flexGrow: 1 },
-  slide: { flex: 1, width: '100%' },
+  scrollContent: { paddingHorizontal: 22, paddingVertical: 12, flexGrow: 1, justifyContent: 'center' },
+  slide: { flex: 1, justifyContent: 'center' },
 
   brandHeaderBadge: {
     alignSelf: 'center',
@@ -1654,22 +1631,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 0,
+    paddingHorizontal: 22,
     paddingTop: 12,
-    paddingBottom: 8,
-    width: '100%',
+    paddingBottom: 8
   },
   indicatorContainer: { flexDirection: 'row', gap: 6, alignItems: 'center' },
   indicator: { height: 6, borderRadius: 3 },
-  primaryActionBtn: {
-    paddingVertical: 14,
-    paddingHorizontal: 26,
-    elevation: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.22,
-    shadowRadius: 5,
-  },
+  primaryActionBtn: { paddingVertical: 14, paddingHorizontal: 26, elevation: 3 },
   primaryActionBtnText: { fontWeight: 'bold', letterSpacing: 0.8 },
 
   modalBackdrop: {
