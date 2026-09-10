@@ -137,6 +137,25 @@ Yedekleme sistemi tek bir metin kutusundan çıkarılmış, hem karşılama ekra
 * **Evrensel Senkronizasyon:**
   * Seçilen avatar ve yazı tipi Onboarding sonrasında hem **Ayarlar (`SettingsScreen`)** profil kartında hem de **Cüzdanlar & Bütçeler (`AccountsBudgetsScreen`)** selamlama başlığında anında canlı olarak görünür.
 
+### 3.5. Para Birimi & Finansal Hedef Mimarisi (Slide 3)
+Kullanıcının harcama ve bütçeleme motivasyonunu şekillendiren Slide 3, üç temel bileşenden meydana gelir:
+1. **Canlı Önizlemeli Ana Para Birimi Seçicisi:**
+   * **Hero Canlı Önizleme Kartı:** Seçili para biriminin bayrağını, kodunu, adını ve dinamik olarak formatlanan örnek bakiye görünümünü (`15.450,00 ₺`, `$ 1,250.00`, `25,50 gr` vb.) anlık gösterir.
+   * **Popüler Hızlı Çipler (Quick-Chips):** En sık kullanılan 6 para birimi (`TRY ₺`, `USD $`, `EUR €`, `GBP £`, `Gram Altın 🪙`, `Bitcoin ₿`) tek dokunuşla seçilebilir.
+   * **Genişletilebilir Dünya Listesi (20+):** Akordeon menü ile açılıp kapanan, anlık arama (search) kutusu içeren tam para birimi listesi.
+2. **Öncelikli Finansal Hedef (5 Hibrit Vizyon - `goalUtils.ts`):**
+   * ☕ **Günlük Harçlığımı Bilmek (Buckwheat Zekası):** Günlük net harcanabilir limiti bilerek stressiz harcama yapma.
+   * 📈 **Gereksiz Harcamaları Kısıp Birikim Yapmak (Tasarruf & Varlık):** Acil durum fonu ve düzenli birikim oluşturma.
+   * 🛡️ **Borçları Adım Adım Kapatmak (Sıfır Borç):** Kredi kartı ve şahıs borçlarını kapatma disiplini.
+   * ⚖️ **Gelir-Gider Dengesini Sıfır Tabanlı Tutmak (Sıfır Tabanlı - Zero):** Her kuruşa görev verme ve bütçeyi dengeleme.
+   * 🚀 **Yatırım ve Net Varlık Büyütme (Net Varlık - Paisa):** Toplam net değeri ve portföyü büyütme odağı.
+3. **Aylık Gelirden Birikim Oranı Hedefi (%):**
+   * `%10` (Rahat Başlangıç), `%20` (50/30/20 Kuralı - Popüler), `%30` (Hızlı Birikim), `%50` (Finansal Özgürlük / FIRE).
+4. **Veri Kalıcılığı ve Özet:**
+   * `DataContext.tsx` içinde `@triotrack_financial_goal` ve `@triotrack_savings_target` anahtarlarıyla saklanır.
+   * Onboarding tamamlama özet kartında (Slide 6) canlı olarak listelenir.
+   * JSON tam yedekleme (`exportDataAsJSON` / `importDataFromJSON`) ve sıfırlama işlemlerine eksiksiz entegre edilmiştir.
+
 ---
 
 ## 4. Veri Modeli ve Depolama Mimarisi
@@ -206,7 +225,7 @@ flowchart TD
     Step3["✅ 3. Adım: Karşılama Ekranı (Slide 0) & Çok Kanallı Yedek"]
     Step4["✅ 4. Adım: Özellik Turu (Slide 1) Onayı"]
     Step5["✅ 5. Adım: Kişiselleştirme, Profil Fotoğrafı & Tipografi & Şeffaf Üst Bar (Slide 2)"]
-    Step6["⏳ 6. Adım: Para Birimi & Finansal Hedef (Slide 3)"]
+    Step6["✅ 6. Adım: Para Birimi & Finansal Hedef (Slide 3)"]
     Step7["⏳ 7. Adım: Varsayılan Cüzdanlar & Bakiyeler (Slide 4)"]
     Step8["⏳ 8. Adım: Buckwheat Harçlık Motoru Kurulumu (Slide 5)"]
     
@@ -214,6 +233,17 @@ flowchart TD
 ```
 
 ### Değişiklik Günlüğü (Changelog):
+* **v1.6.4 (10 Eylül 2026):**
+  * **Roadmap 6. Adım Tamamlandı (Para Birimi & Finansal Hedefler):**
+    * `goalUtils.ts` modülü oluşturuldu: 5 hibrit finansal hedef (`daily_pocket`, `saving`, `debt_free`, `zero_budget`, `investing`) ve 4 birikim oranı tier'ı (%10, %20, %30, %50) tanımlandı.
+    * Slide 3 arayüzü tamamen yeniden tasarlandı:
+      1. Hero Canlı Bakiye Önizleme Kartı (seçilen kura göre canlı örnek tutar biçimlendirmesi).
+      2. 6 Popüler Para Birimi Hızlı Çipi (`TRY`, `USD`, `EUR`, `GBP`, `Gram Altın 🪙`, `Bitcoin ₿`).
+      3. Akordeon açılır-kapanır "Tüm Dünya Para Birimleri (20+)" listesi ve canlı arama kutusu.
+      4. Renkli rozetli ve radyo düğmeli 5 öncelikli finansal hedef kartı.
+      5. 4 adet aylık gelir birikim oranı hedef seçeneği (%10, %20, %30, %50).
+    * `DataContext.tsx` içine `financialGoal` ve `savingsTargetPercent` durumları, AsyncStorage anahtarları, `completeOnboarding` parametreleri ve JSON yedekleme desteği eklendi.
+    * Onboarding Slide 6 (Özet Kartı) içine seçilen finansal hedef ve tasarruf oranı canlı olarak entegre edildi.
 * **v1.6.3 (10 Eylül 2026):**
   * **Tamamen Şeffaf Yüzen Üst Navigasyon Barı:** Onboarding ekranında üst 'Geri' ve 'Atla' butonları tamamen şeffaf (`backgroundColor: 'transparent'`) ve `pointerEvents="box-none"` yapısına getirilerek içeriğin butonların arkasından akması sağlandı.
   * **Kararlı Alt Bar Korunması:** Alt buton çubuğu ('İLERİ' ve adım göstergesi) orijinal, sabit ve taşmayan yapısında muhafaza edildi.

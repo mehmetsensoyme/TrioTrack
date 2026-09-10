@@ -122,6 +122,10 @@ interface DataContextProps {
   setUserName: (name: string) => void;
   userAvatar: string | null;
   setUserAvatar: (avatar: string | null) => Promise<void>;
+  financialGoal: string;
+  setFinancialGoal: (goal: string) => Promise<void>;
+  savingsTargetPercent: number;
+  setSavingsTargetPercent: (pct: number) => Promise<void>;
   weekStartMonday: boolean;
   setWeekStartMonday: (val: boolean) => Promise<void>;
   selectedMonth: string;
@@ -136,6 +140,8 @@ interface DataContextProps {
     budgetCycleDay?: number;
     selectedCategoryIds?: string[];
     userAvatar?: string | null;
+    financialGoal?: string;
+    savingsTargetPercent?: number;
   }) => Promise<void>;
   
   // Eylemler
@@ -203,6 +209,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isOnboarded, setIsOnboarded] = useState<boolean>(false);
   const [userName, setUserName] = useState<string>('Mehmet Şensoy');
   const [userAvatar, setUserAvatarState] = useState<string | null>(null);
+  const [financialGoal, setFinancialGoalState] = useState<string>('daily_pocket');
+  const [savingsTargetPercent, setSavingsTargetPercentState] = useState<number>(20);
   const [weekStartMonday, setWeekStartMondayState] = useState<boolean>(true);
   const [isBalanceHidden, setIsBalanceHidden] = useState<boolean>(false);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -222,6 +230,15 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const storedAvatar = await AsyncStorage.getItem('@triotrack_user_avatar');
         if (storedAvatar) {
           setUserAvatarState(storedAvatar);
+        }
+        const storedGoal = await AsyncStorage.getItem('@triotrack_financial_goal');
+        if (storedGoal) {
+          setFinancialGoalState(storedGoal);
+        }
+        const storedSavingsTarget = await AsyncStorage.getItem('@triotrack_savings_target');
+        if (storedSavingsTarget) {
+          const parsed = parseInt(storedSavingsTarget, 10);
+          if (!isNaN(parsed)) setSavingsTargetPercentState(parsed);
         }
         const storedWeekStart = await AsyncStorage.getItem('@triotrack_week_start');
         if (storedWeekStart !== null) {
@@ -662,6 +679,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       monthlyBudgetGoal,
       userName,
       userAvatar,
+      financialGoal,
+      savingsTargetPercent,
     };
     return JSON.stringify(exportObject, null, 2);
   };
@@ -673,6 +692,16 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } else {
       await AsyncStorage.removeItem('@triotrack_user_avatar');
     }
+  };
+
+  const setFinancialGoal = async (goal: string) => {
+    setFinancialGoalState(goal);
+    await AsyncStorage.setItem('@triotrack_financial_goal', goal);
+  };
+
+  const setSavingsTargetPercent = async (pct: number) => {
+    setSavingsTargetPercentState(pct);
+    await AsyncStorage.setItem('@triotrack_savings_target', String(pct));
   };
 
   const importDataFromJSON = async (jsonString: string): Promise<{ success: boolean; message: string }> => {
@@ -700,6 +729,12 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (parsed.userAvatar !== undefined) {
         await setUserAvatar(parsed.userAvatar);
       }
+      if (parsed.financialGoal) {
+        await setFinancialGoal(parsed.financialGoal);
+      }
+      if (typeof parsed.savingsTargetPercent === 'number') {
+        await setSavingsTargetPercent(parsed.savingsTargetPercent);
+      }
 
       // Anlık yerel cihaz snapshot'ını güncelle
       await saveLocalSnapshot(jsonString, {
@@ -724,6 +759,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     budgetCycleDay?: number;
     selectedCategoryIds?: string[];
     userAvatar?: string | null;
+    financialGoal?: string;
+    savingsTargetPercent?: number;
   }) => {
     if (params.name?.trim()) {
       setUserName(params.name.trim());
@@ -763,6 +800,15 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       await AsyncStorage.setItem('@triotrack_cycle_day', String(params.budgetCycleDay));
     }
 
+    if (params.financialGoal) {
+      setFinancialGoalState(params.financialGoal);
+      await AsyncStorage.setItem('@triotrack_financial_goal', params.financialGoal);
+    }
+    if (typeof params.savingsTargetPercent === 'number') {
+      setSavingsTargetPercentState(params.savingsTargetPercent);
+      await AsyncStorage.setItem('@triotrack_savings_target', String(params.savingsTargetPercent));
+    }
+
     if (typeof params.weekStartMonday === 'boolean') {
       setWeekStartMondayState(params.weekStartMonday);
       await AsyncStorage.setItem('@triotrack_week_start', String(params.weekStartMonday));
@@ -778,8 +824,10 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const resetAllData = async () => {
     try {
-      await AsyncStorage.multiRemove([STORAGE_KEY, '@triotrack_onboarded', '@triotrack_username', '@triotrack_user_avatar', '@triotrack_week_start', '@triotrack_recalc_mode', '@triotrack_cycle_day']);
+      await AsyncStorage.multiRemove([STORAGE_KEY, '@triotrack_onboarded', '@triotrack_username', '@triotrack_user_avatar', '@triotrack_financial_goal', '@triotrack_savings_target', '@triotrack_week_start', '@triotrack_recalc_mode', '@triotrack_cycle_day']);
       setUserAvatarState(null);
+      setFinancialGoalState('daily_pocket');
+      setSavingsTargetPercentState(20);
       setTransactions([]);
       setAccounts([
         { id: 'acc_cash', name: 'Nakit Cüzdan', type: 'cash', balance: 0, color: '#4CAF50', icon: 'wallet-outline' }
@@ -825,6 +873,10 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUserName,
         userAvatar,
         setUserAvatar,
+        financialGoal,
+        setFinancialGoal,
+        savingsTargetPercent,
+        setSavingsTargetPercent,
         weekStartMonday,
         setWeekStartMonday,
         selectedMonth,
