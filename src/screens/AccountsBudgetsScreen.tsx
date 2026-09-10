@@ -260,10 +260,10 @@ export default function AccountsBudgetsScreen({ navigation }: any) {
             </TouchableOpacity>
             <View style={{ marginLeft: 12, flex: 1 }}>
               <Text style={[styles.profileGreeting, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 18 * m, fontWeight: tStyles.titleWeight }]}>
-                Merhaba, {userName} 👋
+                Hesaplar & Bütçeler
               </Text>
-              <Text style={[styles.profileSubtitle, { color: colors.text, opacity: 0.6, fontFamily: tStyles.fontFamily, fontSize: 12 * m }]}>
-                Hesaplar & Finans Kontrol Merkezi
+              <Text style={[styles.profileSubtitle, { color: colors.text, opacity: 0.6, fontFamily: tStyles.fontFamily, fontSize: 12 * m, marginTop: 1 }]}>
+                Cüzdan Bakiyeleri & Bütçe Yönetimi
               </Text>
             </View>
           </View>
