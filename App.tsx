@@ -8,6 +8,9 @@ import { Ionicons } from '@expo/vector-icons';
 
 import { ThemeProvider, useTheme } from './src/theme/ThemeContext';
 import { DataProvider, useData } from './src/context/DataContext';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { APP_VERSION } from './src/constants/version';
+import { WhatsNewModal } from './src/components/WhatsNewModal';
 
 import OnboardingScreen from './src/screens/OnboardingScreen';
 import AddExpenseScreen from './src/screens/AddExpenseScreen';
@@ -33,6 +36,7 @@ const MONTH_ABBR = [
 const HomeScreen = ({ navigation }: any) => {
   const { colors, styles: tStyles, currency, isDark } = useTheme();
   const insets = useSafeAreaInsets();
+
   const { 
     totalBalance, 
     isBalanceHidden,
@@ -47,6 +51,8 @@ const HomeScreen = ({ navigation }: any) => {
     userName,
     selectedMonth,
     setSelectedMonth,
+    monthlyBudgetGoal,
+    budgetRecalcMode,
     deleteTransaction,
     editTransaction,
     setBudgetRecalcMode
@@ -54,6 +60,32 @@ const HomeScreen = ({ navigation }: any) => {
 
   const [showMonthModal, setShowMonthModal] = useState(false);
   const [showWhatsNewModal, setShowWhatsNewModal] = useState(false);
+  const [hasUnseenUpdate, setHasUnseenUpdate] = useState(false);
+
+  // Akıllı Sürüm Bildirim Rozeti (Seen / Unseen Kontrolü)
+  React.useEffect(() => {
+    const checkVersionSeen = async () => {
+      try {
+        const lastSeen = await AsyncStorage.getItem('@triotrack_last_seen_version');
+        if (lastSeen !== APP_VERSION) {
+          setHasUnseenUpdate(true);
+        } else {
+          setHasUnseenUpdate(false);
+        }
+      } catch {
+        setHasUnseenUpdate(false);
+      }
+    };
+    checkVersionSeen();
+  }, []);
+
+  const handleOpenWhatsNew = async () => {
+    setShowWhatsNewModal(true);
+    try {
+      await AsyncStorage.setItem('@triotrack_last_seen_version', APP_VERSION);
+      setHasUnseenUpdate(false);
+    } catch {}
+  };
   const [currentYear, currentMonthStr] = selectedMonth.split('-');
   const selectedMonthIndex = parseInt(currentMonthStr, 10) - 1;
   const [pickerYear, setPickerYear] = useState(parseInt(currentYear, 10));
@@ -169,17 +201,19 @@ const HomeScreen = ({ navigation }: any) => {
           </View>
 
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-            {/* 🌟 NELER YENİ? SÜRÜM YENİLİKLERİ ROZETİ */}
-            <TouchableOpacity 
-              style={[styles.whatsNewPillBtn, { backgroundColor: colors.card, borderColor: '#F59E0B60', borderRadius: tStyles.roundness }]}
-              onPress={() => setShowWhatsNewModal(true)}
-            >
-              <Ionicons name="sparkles" size={14} color="#F59E0B" />
-              <Text style={{ color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 11 * m, fontWeight: 'bold', marginLeft: 4 }}>
-                v1.6.0
-              </Text>
-              <View style={[styles.pulsingDot, { backgroundColor: '#F59E0B' }]} />
-            </TouchableOpacity>
+            {/* 🌟 NELER YENİ? SÜRÜM YENİLİKLERİ ROZETİ (Yalnızca yeni sürüm olduğunda görünür) */}
+            {hasUnseenUpdate && (
+              <TouchableOpacity 
+                style={[styles.whatsNewPillBtn, { backgroundColor: colors.card, borderColor: '#F59E0B60', borderRadius: tStyles.roundness }]}
+                onPress={handleOpenWhatsNew}
+              >
+                <Ionicons name="sparkles" size={14} color="#F59E0B" />
+                <Text style={{ color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 11 * m, fontWeight: 'bold', marginLeft: 4 }}>
+                  v{APP_VERSION}
+                </Text>
+                <View style={[styles.pulsingDot, { backgroundColor: '#F59E0B' }]} />
+              </TouchableOpacity>
+            )}
 
             <TouchableOpacity 
               style={[styles.settingsBtn, { backgroundColor: colors.card, borderRadius: tStyles.roundness }]}
@@ -1065,117 +1099,11 @@ const HomeScreen = ({ navigation }: any) => {
         </View>
       </Modal>
 
-      {/* 🌟 NELER YENİ? / SÜRÜM YENİLİKLERİ MERKEZİ (v1.6.0) */}
-      <Modal 
-        visible={showWhatsNewModal} 
-        transparent 
-        animationType="slide" 
-        statusBarTranslucent={true}
-        onRequestClose={() => setShowWhatsNewModal(false)}
-      >
-        <View style={styles.modalBackdrop}>
-          <TouchableOpacity 
-            style={styles.backdropDismissArea} 
-            activeOpacity={1} 
-            onPress={() => setShowWhatsNewModal(false)} 
-          />
-
-          <View style={[styles.whatsNewCard, { backgroundColor: colors.card, borderTopLeftRadius: tStyles.roundness * 1.5, borderTopRightRadius: tStyles.roundness * 1.5 }]}>
-            <View style={styles.whatsNewHeader}>
-              <View style={[styles.whatsNewIconCircle, { backgroundColor: colors.primary + '20' }]}>
-                <Ionicons name="sparkles" size={26} color={colors.primary} />
-              </View>
-              <View style={{ flex: 1, marginLeft: 12 }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                  <Text style={[styles.whatsNewTitle, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 18 * m, fontWeight: 'bold' }]}>
-                    TrioTrack v1.6.0
-                  </Text>
-                  <View style={{ backgroundColor: '#10B981', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 8 }}>
-                    <Text style={{ color: '#FFF', fontSize: 9 * m, fontWeight: 'bold' }}>YENİ</Text>
-                  </View>
-                </View>
-                <Text style={{ color: colors.text, opacity: 0.6, fontSize: 11 * m, fontFamily: tStyles.fontFamily }}>
-                  Build 2026.09.10 • Yeni Karşılama Akışı & Tasarım Sürümü
-                </Text>
-              </View>
-              <TouchableOpacity onPress={() => setShowWhatsNewModal(false)}>
-                <Ionicons name="close-circle-outline" size={26} color={colors.text} style={{ opacity: 0.5 }} />
-              </TouchableOpacity>
-            </View>
-
-            <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 420, marginVertical: 12 }}>
-              {/* Madde 1: Yeni Nesil Karşılama Akışı */}
-              <View style={styles.whatsNewItem}>
-                <View style={[styles.tagBadge, { backgroundColor: '#10B98120' }]}>
-                  <Text style={{ color: '#10B981', fontSize: 10 * m, fontWeight: 'bold', fontFamily: tStyles.fontFamily }}>ÖZELLİK</Text>
-                </View>
-                <View style={{ flex: 1, marginLeft: 10 }}>
-                  <Text style={[styles.whatsNewItemTitle, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 13 * m, fontWeight: 'bold' }]}>
-                    Yeni Nesil Hibrit Karşılama Akışı (Onboarding)
-                  </Text>
-                  <Text style={[styles.whatsNewItemDesc, { color: colors.text, opacity: 0.65, fontFamily: tStyles.fontFamily, fontSize: 11 * m }]}>
-                    Paisa, Zero ve Buckwheat felsefelerini birleştiren 7 adımlı akıllı kurulum: Şeffaf gezinme çubuğu, tek dokunuşla çok kanallı yedekten anında geri yükleme ve canlı para birimi önizlemesi.
-                  </Text>
-                </View>
-              </View>
-
-              {/* Madde 2: Aydınlık & Koyu Tema Kusursuzluğu */}
-              <View style={styles.whatsNewItem}>
-                <View style={[styles.tagBadge, { backgroundColor: '#3B82F620' }]}>
-                  <Text style={{ color: '#3B82F6', fontSize: 10 * m, fontWeight: 'bold', fontFamily: tStyles.fontFamily }}>TASARIM</Text>
-                </View>
-                <View style={{ flex: 1, marginLeft: 10 }}>
-                  <Text style={[styles.whatsNewItemTitle, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 13 * m, fontWeight: 'bold' }]}>
-                    Aydınlık & Koyu Tema Kusursuzluğu
-                  </Text>
-                  <Text style={[styles.whatsNewItemDesc, { color: colors.text, opacity: 0.65, fontFamily: tStyles.fontFamily, fontSize: 11 * m }]}>
-                    Aydınlık temada silik kalan kartlar için net Slate-200 kenarlıklar, 2px canlı aktif seçim vurguları, dinamik renkli aktif ikon kutuları ve matematiksel rozet hizalaması.
-                  </Text>
-                </View>
-              </View>
-
-              {/* Madde 3: Profil & Fotoğraf Seçici */}
-              <View style={styles.whatsNewItem}>
-                <View style={[styles.tagBadge, { backgroundColor: '#8B5CF620' }]}>
-                  <Text style={{ color: '#8B5CF6', fontSize: 10 * m, fontWeight: 'bold', fontFamily: tStyles.fontFamily }}>KİŞİSELLEŞTİRME</Text>
-                </View>
-                <View style={{ flex: 1, marginLeft: 10 }}>
-                  <Text style={[styles.whatsNewItemTitle, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 13 * m, fontWeight: 'bold' }]}>
-                    Kişiselleştirilebilir Profil & Fotoğraf Seçici
-                  </Text>
-                  <Text style={[styles.whatsNewItemDesc, { color: colors.text, opacity: 0.65, fontFamily: tStyles.fontFamily, fontSize: 11 * m }]}>
-                    Cihaz galerisinden fotoğraf yükleme, canlı baş harf rozeti veya renkli minimalist avatarlarla profilinizi kolayca tasarlayın.
-                  </Text>
-                </View>
-              </View>
-
-              {/* Madde 4: Canlı Fiş OCR & Marka CDN */}
-              <View style={styles.whatsNewItem}>
-                <View style={[styles.tagBadge, { backgroundColor: '#F59E0B20' }]}>
-                  <Text style={{ color: '#F59E0B', fontSize: 10 * m, fontWeight: 'bold', fontFamily: tStyles.fontFamily }}>YAPAY ZEKA</Text>
-                </View>
-                <View style={{ flex: 1, marginLeft: 10 }}>
-                  <Text style={[styles.whatsNewItemTitle, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 13 * m, fontWeight: 'bold' }]}>
-                    Canlı Fiş OCR Tarayıcı & Marka CDN Logoları
-                  </Text>
-                  <Text style={[styles.whatsNewItemDesc, { color: colors.text, opacity: 0.65, fontFamily: tStyles.fontFamily, fontSize: 11 * m }]}>
-                    Kamerayla fiş fotoğrafı çekip harcamalara iliştirme, OCR ile otomatik tutar/mağaza ayrıştırma ve onlarca CDN marka ikonu.
-                  </Text>
-                </View>
-              </View>
-            </ScrollView>
-
-            <TouchableOpacity 
-              style={[styles.whatsNewDismissBtn, { backgroundColor: colors.primary, borderRadius: tStyles.roundness }]}
-              onPress={() => setShowWhatsNewModal(false)}
-            >
-              <Text style={{ color: colors.onPrimary, fontFamily: tStyles.fontFamily, fontSize: 14 * m, fontWeight: 'bold' }}>
-                Harika, Keşfetmeye Başla!
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
+      {/* 🌟 NELER YENİ? / SÜRÜM YENİLİKLERİ MERKEZİ */}
+      <WhatsNewModal
+        visible={showWhatsNewModal}
+        onClose={() => setShowWhatsNewModal(false)}
+      />
     </View>
   );
 };

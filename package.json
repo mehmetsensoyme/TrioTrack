@@ -1,6 +1,6 @@
 {
   "name": "triotrack",
-  "version": "1.6.0",
+  "version": "1.6.5",
   "main": "index.ts",
   "dependencies": {
     "@expo/vector-icons": "^15.1.1",

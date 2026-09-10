@@ -235,6 +235,11 @@ flowchart TD
 ```
 
 ### Değişiklik Günlüğü (Changelog):
+* **v1.6.5 (11 Eylül 2026 - versionCode: 6):**
+  * **Kalıcı Tema & Tipografi Belleği (`AsyncStorage`):** Cihaz uzun süre beklemede kaldığında veya Expo Go arka plandan tekrar bağlandığında seçilen tema (Paisa, Zero, Buckwheat), tema modu (Aydınlık / Koyu), yazı tipi (Modern, Klasik, Kod), punto boyutu ve para biriminin sistem varsayılanına sıfırlanması sorunu `AsyncStorage` yerel depolama katmanıyla kalıcı olarak çözüldü.
+  * **Akıllı Sürüm Bildirim Rozeti (Seen/Unseen):** Ana ekrandaki üst barda yer alan "Neler Yeni? v1.6.5" butonu yalnızca yeni bir güncelleme çıktığında görünür. Kullanıcı butona dokunup sürüm notlarını incelediğinde rozet ana ekrandan otomatik olarak kaybolur. Sürüm notlarına ve geçmişe Ayarlar ekranından her an kesintisizce erişilebilir. Yeni bir güncelleme yapıldığında rozet ana ekranda kendiliğinden tekrar aktifleşir.
+  * **Mükemmelleştirilmiş Değişiklik Günlüğü Kartı (`WhatsNewModal`):** Farklı yazı tipi ve boyutlarında metin satırlarının birbiri üzerine binmesi ve kayması sorunu dinamik satır yüksekliği (`lineHeight`), sabit rozetli kart mimarisi ve pürüzsüz alt çekmece yapısıyla giderildi.
+  * **Tüm Sürüm Geçmişi (v1.0.0 - v1.6.5):** İlk sürümlerden itibaren yayınlanan tüm çekirdek özellikler, yapay zeka OCR, marka CDN'leri, tema yenilikleri ve hata düzeltmeleri yatay kaydırılabilir sürüm sekmeleriyle eksiksiz olarak günlüğe eklendi.
 * **v1.6.4 (10 Eylül 2026):**
   * **Roadmap 6. Adım Tamamlandı (Para Birimi & Finansal Hedefler):**
     * `goalUtils.ts` modülü oluşturuldu: 5 hibrit finansal hedef (`daily_pocket`, `saving`, `debt_free`, `zero_budget`, `investing`) ve 4 birikim oranı tier'ı (%10, %20, %30, %50) tanımlandı.

@@ -1,10 +1,17 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useColorScheme, Appearance, Platform } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export type ThemeName = 'paisa' | 'zero' | 'buckwheat';
 export type ThemeMode = 'light' | 'dark' | 'system';
 export type TextSize = 'small' | 'medium' | 'large';
 export type FontFamilyChoice = 'modern' | 'classic' | 'code';
+
+const STORAGE_THEME_NAME = '@triotrack_theme_name';
+const STORAGE_THEME_MODE = '@triotrack_theme_mode';
+const STORAGE_TEXT_SIZE = '@triotrack_text_size';
+const STORAGE_FONT_CHOICE = '@triotrack_font_choice';
+const STORAGE_CURRENCY = '@triotrack_currency';
 
 export interface ThemeColors {
   primary: string;
@@ -64,12 +71,70 @@ export const ThemeProvider: React.FC<{children: React.ReactNode}> = ({ children 
   
   const [systemColorScheme, setSystemColorScheme] = useState(Appearance.getColorScheme());
 
+  // AsyncStorage'dan kayıtlı tema ve tipografi tercihlerini açılışta yükle (Kalıcı Bellek)
+  useEffect(() => {
+    const loadPreferences = async () => {
+      try {
+        const [savedTheme, savedMode, savedSize, savedFont, savedCurr] = await Promise.all([
+          AsyncStorage.getItem(STORAGE_THEME_NAME),
+          AsyncStorage.getItem(STORAGE_THEME_MODE),
+          AsyncStorage.getItem(STORAGE_TEXT_SIZE),
+          AsyncStorage.getItem(STORAGE_FONT_CHOICE),
+          AsyncStorage.getItem(STORAGE_CURRENCY),
+        ]);
+        if (savedTheme && (savedTheme === 'paisa' || savedTheme === 'zero' || savedTheme === 'buckwheat')) {
+          setThemeName(savedTheme as ThemeName);
+        }
+        if (savedMode && (savedMode === 'light' || savedMode === 'dark' || savedMode === 'system')) {
+          setThemeMode(savedMode as ThemeMode);
+        }
+        if (savedSize && (savedSize === 'small' || savedSize === 'medium' || savedSize === 'large')) {
+          setTextSize(savedSize as TextSize);
+        }
+        if (savedFont && (savedFont === 'modern' || savedFont === 'classic' || savedFont === 'code')) {
+          setFontChoice(savedFont as FontFamilyChoice);
+        }
+        if (savedCurr) {
+          setCurrency(savedCurr);
+        }
+      } catch (e) {
+        console.warn('ThemeContext: Tercihler AsyncStorage\'dan okunurken hata:', e);
+      }
+    };
+    loadPreferences();
+  }, []);
+
   useEffect(() => {
     const subscription = Appearance.addChangeListener(({ colorScheme }) => {
       setSystemColorScheme(colorScheme);
     });
     return () => subscription.remove();
   }, []);
+
+  const handleSetTheme = (name: ThemeName) => {
+    setThemeName(name);
+    AsyncStorage.setItem(STORAGE_THEME_NAME, name).catch(() => {});
+  };
+
+  const handleSetThemeMode = (mode: ThemeMode) => {
+    setThemeMode(mode);
+    AsyncStorage.setItem(STORAGE_THEME_MODE, mode).catch(() => {});
+  };
+
+  const handleSetTextSize = (size: TextSize) => {
+    setTextSize(size);
+    AsyncStorage.setItem(STORAGE_TEXT_SIZE, size).catch(() => {});
+  };
+
+  const handleSetFontChoice = (font: FontFamilyChoice) => {
+    setFontChoice(font);
+    AsyncStorage.setItem(STORAGE_FONT_CHOICE, font).catch(() => {});
+  };
+
+  const handleSetCurrency = (curr: string) => {
+    setCurrency(curr);
+    AsyncStorage.setItem(STORAGE_CURRENCY, curr).catch(() => {});
+  };
 
   const isDark = themeMode === 'system' ? systemColorScheme === 'dark' : themeMode === 'dark';
 
@@ -145,8 +210,13 @@ export const ThemeProvider: React.FC<{children: React.ReactNode}> = ({ children 
     <ThemeContext.Provider value={{ 
       themeName, themeMode, textSize, fontChoice, 
       colors, styles, 
-      setTheme: setThemeName, setThemeMode, setTextSize, setFontChoice, 
-      currency, setCurrency, isDark 
+      setTheme: handleSetTheme, 
+      setThemeMode: handleSetThemeMode, 
+      setTextSize: handleSetTextSize, 
+      setFontChoice: handleSetFontChoice, 
+      currency, 
+      setCurrency: handleSetCurrency, 
+      isDark 
     }}>
       {children}
     </ThemeContext.Provider>

@@ -7,6 +7,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme } from '../theme/ThemeContext';
 import { useData } from '../context/DataContext';
 import { APP_VERSION, APP_BUILD } from '../constants/version';
+import { WhatsNewModal } from '../components/WhatsNewModal';
 import { AVATAR_PRESETS, getAvatarPreset } from '../utils/avatarUtils';
 import { 
   pickBackupFile, 
@@ -78,6 +79,14 @@ export default function SettingsScreen({ navigation }: any) {
   const [showExportModal, setShowExportModal] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
   const [showAvatarSheet, setShowAvatarSheet] = useState(false);
+  const [showWhatsNewModal, setShowWhatsNewModal] = useState(false);
+
+  const handleOpenWhatsNewFromSettings = async () => {
+    setShowWhatsNewModal(true);
+    try {
+      await AsyncStorage.setItem('@triotrack_last_seen_version', APP_VERSION);
+    } catch {}
+  };
   const [importMode, setImportMode] = useState<'options' | 'manual' | 'preview'>('options');
   const [importJsonText, setImportJsonText] = useState('');
   const [isImporting, setIsImporting] = useState(false);
@@ -736,7 +745,41 @@ export default function SettingsScreen({ navigation }: any) {
           </TouchableOpacity>
         </View>
 
-        {/* 8. CREDITS & AÇIK KAYNAK TEŞEKKÜRLERİ */}
+        {/* 8. SÜRÜM & NELER YENİ? DEĞİŞİKLİK GÜNLÜĞÜ */}
+        <View style={[styles.card, { backgroundColor: colors.card, borderRadius: tStyles.roundness, elevation: tStyles.elevation }]}>
+          <View style={styles.cardHeaderRow}>
+            <Ionicons name="sparkles" size={18} color="#F59E0B" />
+            <Text style={[styles.cardTitle, { color: '#F59E0B', fontFamily: tStyles.fontFamily, fontSize: 13 * m }]}>
+              SÜRÜM & DEĞİŞİKLİK GÜNLÜĞÜ
+            </Text>
+          </View>
+
+          <TouchableOpacity 
+            style={styles.menuActionRow} 
+            onPress={handleOpenWhatsNewFromSettings}
+            activeOpacity={0.7}
+          >
+            <View style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: '#F59E0B18', justifyContent: 'center', alignItems: 'center', marginRight: 12 }}>
+              <Ionicons name="sparkles" size={20} color="#F59E0B" />
+            </View>
+            <View style={{ flex: 1 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                <Text style={[styles.menuActionText, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 14 * m }]}>
+                  Neler Yeni? (Sürüm Notları)
+                </Text>
+                <View style={{ backgroundColor: '#10B981', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6 }}>
+                  <Text style={{ color: '#FFF', fontSize: 9 * m, fontWeight: 'bold' }}>v{APP_VERSION}</Text>
+                </View>
+              </View>
+              <Text style={{ color: colors.text, opacity: 0.5, fontSize: 11 * m, marginTop: 2, fontFamily: tStyles.fontFamily }}>
+                Tüm sürümler, güncellemeler ve geçmiş değişiklikler
+              </Text>
+            </View>
+            <Ionicons name="chevron-forward" size={16} color={colors.text} style={{ opacity: 0.4 }} />
+          </TouchableOpacity>
+        </View>
+
+        {/* 9. CREDITS & AÇIK KAYNAK TEŞEKKÜRLERİ */}
         <View style={[styles.card, { backgroundColor: colors.card, borderRadius: tStyles.roundness, elevation: tStyles.elevation }]}>
           <View style={styles.cardHeaderRow}>
             <Ionicons name="heart-outline" size={18} color={colors.primary} />
@@ -1392,6 +1435,12 @@ export default function SettingsScreen({ navigation }: any) {
           </View>
         </View>
       </Modal>
+
+      {/* 🌟 NELER YENİ? SÜRÜM NOTLARI & DEĞİŞİKLİK GÜNLÜĞÜ */}
+      <WhatsNewModal
+        visible={showWhatsNewModal}
+        onClose={() => setShowWhatsNewModal(false)}
+      />
     </View>
   );
 }
