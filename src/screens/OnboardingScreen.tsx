@@ -18,6 +18,14 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../theme/ThemeContext';
 import { useData } from '../context/DataContext';
+import { 
+  pickBackupFile, 
+  readClipboardBackup, 
+  getLocalSnapshot, 
+  parseAndNormalizeBackup,
+  NormalizedBackupResult,
+  LocalSnapshotMeta 
+} from '../utils/backupService';
 
 const CURRENCIES = [
   { code: 'TRY', symbol: '₺', name: 'Türk Lirası', flag: '🇹🇷' },
@@ -107,10 +115,14 @@ export default function OnboardingScreen({ navigation }: any) {
   // Step 6: Completing spinner
   const [isFinishing, setIsFinishing] = useState(false);
 
-  // Backup restore modal state (Zero/Paisa)
+  // Backup restore modal state (Çok Kanallı: Dosya, Pano, Yerel Snapshot, Manuel)
   const [showRestoreModal, setShowRestoreModal] = useState(false);
+  const [restoreMode, setRestoreMode] = useState<'options' | 'manual' | 'preview'>('options');
   const [backupInput, setBackupInput] = useState('');
   const [isRestoring, setIsRestoring] = useState(false);
+  const [parsedPreview, setParsedPreview] = useState<NormalizedBackupResult | null>(null);
+  const [localSnapshotMeta, setLocalSnapshotMeta] = useState<LocalSnapshotMeta | null>(null);
+  const [localSnapshotContent, setLocalSnapshotContent] = useState<string | null>(null);
 
   // Filtered currencies
   const filteredCurrencies = useMemo(() => {
@@ -175,9 +187,71 @@ export default function OnboardingScreen({ navigation }: any) {
     }
   };
 
-  const handleRestoreBackup = async () => {
+  const handleOpenRestoreOptions = async () => {
+    setIsRestoring(true);
+    try {
+      const snap = await getLocalSnapshot();
+      if (snap.exists && snap.meta) {
+        setLocalSnapshotMeta(snap.meta);
+        setLocalSnapshotContent(snap.content || null);
+      } else {
+        setLocalSnapshotMeta(null);
+        setLocalSnapshotContent(null);
+      }
+    } catch {
+      setLocalSnapshotMeta(null);
+      setLocalSnapshotContent(null);
+    }
+    setIsRestoring(false);
+    setRestoreMode('options');
+    setParsedPreview(null);
+    setBackupInput('');
+    setShowRestoreModal(true);
+  };
+
+  const processBackupContent = (content: string) => {
+    const normalized = parseAndNormalizeBackup(content);
+    if (!normalized.success) {
+      Alert.alert('Geçersiz Yedek Dosyası', normalized.message);
+      return;
+    }
+    setBackupInput(content);
+    setParsedPreview(normalized);
+    setRestoreMode('preview');
+  };
+
+  const handlePickFile = async () => {
+    setIsRestoring(true);
+    const res = await pickBackupFile();
+    setIsRestoring(false);
+    if (res.canceled) return;
+    if (res.error) {
+      Alert.alert('Dosya Hatası', res.error);
+      return;
+    }
+    if (res.content) {
+      processBackupContent(res.content);
+    }
+  };
+
+  const handlePasteClipboard = async () => {
+    const text = await readClipboardBackup();
+    if (!text || !text.trim()) {
+      Alert.alert('Pano Boş', 'Panonuzda kopyalanmış bir yedek verisi bulunamadı.');
+      return;
+    }
+    processBackupContent(text.trim());
+  };
+
+  const handleRestoreLocalSnapshot = () => {
+    if (localSnapshotContent) {
+      processBackupContent(localSnapshotContent);
+    }
+  };
+
+  const handleExecuteRestore = async () => {
     if (!backupInput.trim()) {
-      Alert.alert('Eksik Bilgi', 'Lütfen JSON yedek içeriğini yapıştırın.');
+      Alert.alert('Eksik Bilgi', 'Lütfen geçerli bir yedek verisi seçin veya yapıştırın.');
       return;
     }
     setIsRestoring(true);
@@ -186,11 +260,11 @@ export default function OnboardingScreen({ navigation }: any) {
       setIsRestoring(false);
       if (res.success) {
         setShowRestoreModal(false);
-        Alert.alert('Başarılı', 'Yedek başarıyla geri yüklendi! TrioTrack açılıyor.', [
-          { text: 'Tamam', onPress: () => navigation.replace('Home') }
+        Alert.alert('Başarılı 🎉', res.message || 'Yedek başarıyla geri yüklendi!', [
+          { text: 'TrioTrack’e Başla', onPress: () => navigation.replace('Home') }
         ]);
       } else {
-        Alert.alert('Hata', res.message || 'Yedek dosyası okunamadı.');
+        Alert.alert('Hata', res.message || 'Yedek dosyası içe aktarılamadı.');
       }
     } catch (err: any) {
       setIsRestoring(false);
@@ -247,24 +321,15 @@ export default function OnboardingScreen({ navigation }: any) {
           {/* SLIDE 0: Welcome & Hybrid Architecture Showcase */}
           {step === 0 && (
             <View style={styles.slide}>
-              <View style={[styles.brandHeaderBadge, { backgroundColor: colors.primary + '18' }]}>
-                <View style={[styles.logoIconCircle, { backgroundColor: colors.primary }]}>
-                  <Ionicons name="pie-chart" size={28} color={colors.onPrimary} />
-                </View>
-                <Text style={[styles.brandTitle, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 26 * m }]}>
+              {/* Sade ve Şık TrioTrack Başlığı */}
+              <View style={{ alignItems: 'center', marginBottom: 22, marginTop: 12 }}>
+                <Text style={[styles.brandTitle, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 32 * m, textAlign: 'center', marginBottom: 6 }]}>
                   TrioTrack
                 </Text>
-                <Text style={[styles.brandSubtitle, { color: colors.primary, fontFamily: tStyles.fontFamily, fontSize: 12 * m }]}>
-                  Paisa • Zero • Buckwheat Hibrit Mimarisi
+                <Text style={[styles.heroLead, { color: colors.text, opacity: 0.7, fontFamily: tStyles.fontFamily, fontSize: 14.5 * m, textAlign: 'center', marginBottom: 0 }]}>
+                  Kişisel finansında kontrol sende.
                 </Text>
               </View>
-
-              <Text style={[styles.heroHeadline, { color: colors.text, fontFamily: tStyles.fontFamily, fontWeight: tStyles.titleWeight, fontSize: 28 * m }]}>
-                Kişisel Finansında{'\n'}Kontrol Sende.
-              </Text>
-              <Text style={[styles.heroLead, { color: colors.text, opacity: 0.7, fontFamily: tStyles.fontFamily, fontSize: 14 * m }]}>
-                Üç güçlü felsefenin en iyi yönleri tek bir uygulamada buluştu.
-              </Text>
 
               {/* 3 Pillars Cards */}
               <View style={styles.pillarsList}>
@@ -314,7 +379,7 @@ export default function OnboardingScreen({ navigation }: any) {
               {/* Secondary Option: Restore from Backup */}
               <TouchableOpacity
                 style={[styles.restoreBtn, { borderColor: colors.primary + '50', borderRadius: tStyles.roundness }]}
-                onPress={() => setShowRestoreModal(true)}
+                onPress={handleOpenRestoreOptions}
                 activeOpacity={0.7}
               >
                 <Ionicons name="cloud-download-outline" size={18} color={colors.primary} style={{ marginRight: 8 }} />
@@ -862,63 +927,227 @@ export default function OnboardingScreen({ navigation }: any) {
 
       </KeyboardAvoidingView>
 
-      {/* YEDEKTEN GERİ YÜKLEME MODALI (Zero / Paisa) */}
+      {/* ÇOK KANALLI YEDEKTEN GERİ YÜKLEME MODALI */}
       <Modal visible={showRestoreModal} transparent animationType="slide" onRequestClose={() => setShowRestoreModal(false)}>
         <View style={styles.modalBackdrop}>
           <TouchableWithoutFeedback onPress={() => setShowRestoreModal(false)}>
             <View style={StyleSheet.absoluteFill} />
           </TouchableWithoutFeedback>
-          <View style={[styles.modalCard, { backgroundColor: colors.card, borderRadius: tStyles.roundness }]}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
-              <Ionicons name="cloud-download-outline" size={22} color={colors.primary} style={{ marginRight: 8 }} />
-              <Text style={[styles.modalTitle, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 18 * m }]}>
-                Yedekten Geri Yükle
-              </Text>
-            </View>
-            <Text style={{ color: colors.text, opacity: 0.6, fontSize: 12 * m, fontFamily: tStyles.fontFamily, marginBottom: 12 }}>
-              Daha önce dışa aktardığınız TrioTrack JSON yedek metnini aşağıdaki kutuya yapıştırın:
-            </Text>
-            <TextInput
-              style={[
-                styles.backupInputBox,
-                {
-                  backgroundColor: colors.background,
-                  color: colors.text,
-                  borderRadius: Math.max(tStyles.roundness / 2, 8),
-                  borderColor: 'rgba(0,0,0,0.1)',
-                  fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
-                  fontSize: 11 * m
-                }
-              ]}
-              multiline
-              numberOfLines={8}
-              textAlignVertical="top"
-              value={backupInput}
-              onChangeText={setBackupInput}
-              placeholder='{"app": "TrioTrack", "transactions": [...] }'
-              placeholderTextColor={colors.text + '40'}
-            />
-            <View style={styles.modalActionsRow}>
-              <TouchableOpacity
-                style={[styles.modalCancelBtn, { backgroundColor: colors.background, borderRadius: Math.max(tStyles.roundness / 2, 8) }]}
-                onPress={() => setShowRestoreModal(false)}
-              >
-                <Text style={{ color: colors.text, fontFamily: tStyles.fontFamily, fontWeight: '600' }}>Vazgeç</Text>
+          <View style={[styles.modalCard, { backgroundColor: colors.card, borderRadius: tStyles.roundness * 1.2, maxHeight: '88%' }]}>
+            
+            {/* Modal Başlığı */}
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Ionicons name="cloud-download-outline" size={22} color={colors.primary} style={{ marginRight: 8 }} />
+                <Text style={[styles.modalTitle, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 18 * m }]}>
+                  {restoreMode === 'preview' ? 'Yedek Önizlemesi' : 'Yedekten Geri Yükle'}
+                </Text>
+              </View>
+              <TouchableOpacity onPress={() => setShowRestoreModal(false)} style={{ padding: 4 }}>
+                <Ionicons name="close" size={22} color={colors.text} />
               </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.modalConfirmBtn, { backgroundColor: colors.primary, borderRadius: Math.max(tStyles.roundness / 2, 8) }]}
-                onPress={handleRestoreBackup}
-                disabled={isRestoring}
-              >
-                {isRestoring ? (
-                  <ActivityIndicator size="small" color={colors.onPrimary} />
-                ) : (
-                  <Text style={{ color: colors.onPrimary, fontFamily: tStyles.fontFamily, fontWeight: 'bold' }}>
-                    Yükle ve Başla
+            </View>
+
+            <ScrollView showsVerticalScrollIndicator={false}>
+              {restoreMode === 'options' && (
+                <View style={{ gap: 10 }}>
+                  <Text style={{ color: colors.text, opacity: 0.6, fontSize: 12.5 * m, fontFamily: tStyles.fontFamily, marginBottom: 4 }}>
+                    Daha önce aldığınız yedeği geri yüklemek için bir yöntem seçin:
                   </Text>
-                )}
-              </TouchableOpacity>
-            </View>
+
+                  {/* Seçenek 1: Cihazdan Dosya Seç */}
+                  <TouchableOpacity
+                    style={[styles.restoreChannelBtn, { backgroundColor: colors.background, borderRadius: Math.max(tStyles.roundness / 2, 8) }]}
+                    onPress={handlePickFile}
+                    disabled={isRestoring}
+                  >
+                    <View style={[styles.restoreChannelIconBox, { backgroundColor: colors.primary + '18' }]}>
+                      <Ionicons name="document-text-outline" size={22} color={colors.primary} />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={[styles.restoreChannelTitle, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 14 * m }]}>
+                        Cihazdan .json Dosyası Seç
+                      </Text>
+                      <Text style={{ color: colors.text, opacity: 0.55, fontSize: 11 * m }}>
+                        İndirilenler veya dosya yöneticisinden yedek dosyasını açın
+                      </Text>
+                    </View>
+                    <Ionicons name="chevron-forward" size={16} color={colors.text} style={{ opacity: 0.3 }} />
+                  </TouchableOpacity>
+
+                  {/* Seçenek 2: Panodan Yapıştır */}
+                  <TouchableOpacity
+                    style={[styles.restoreChannelBtn, { backgroundColor: colors.background, borderRadius: Math.max(tStyles.roundness / 2, 8) }]}
+                    onPress={handlePasteClipboard}
+                    disabled={isRestoring}
+                  >
+                    <View style={[styles.restoreChannelIconBox, { backgroundColor: '#00968818' }]}>
+                      <Ionicons name="clipboard-outline" size={22} color="#009688" />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={[styles.restoreChannelTitle, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 14 * m }]}>
+                        Panodan Yapıştır (Tek Dokunuş)
+                      </Text>
+                      <Text style={{ color: colors.text, opacity: 0.55, fontSize: 11 * m }}>
+                        Kopyaladığınız JSON yedek metnini otomatik algılar
+                      </Text>
+                    </View>
+                    <Ionicons name="chevron-forward" size={16} color={colors.text} style={{ opacity: 0.3 }} />
+                  </TouchableOpacity>
+
+                  {/* Seçenek 3: Cihazdaki Yerel Snapshot (Varsa) */}
+                  {localSnapshotMeta && (
+                    <TouchableOpacity
+                      style={[styles.restoreChannelBtn, { backgroundColor: colors.background, borderRadius: Math.max(tStyles.roundness / 2, 8), borderColor: colors.primary, borderWidth: 1 }]}
+                      onPress={handleRestoreLocalSnapshot}
+                      disabled={isRestoring}
+                    >
+                      <View style={[styles.restoreChannelIconBox, { backgroundColor: '#4CAF5018' }]}>
+                        <Ionicons name="save-outline" size={22} color="#4CAF50" />
+                      </View>
+                      <View style={{ flex: 1 }}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                          <Text style={[styles.restoreChannelTitle, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 14 * m }]}>
+                            Cihazdaki Son Yerel Kayıt
+                          </Text>
+                          <View style={{ backgroundColor: '#4CAF5020', paddingHorizontal: 6, paddingVertical: 1, borderRadius: 6 }}>
+                            <Text style={{ color: '#4CAF50', fontSize: 9.5 * m, fontWeight: 'bold' }}>HAZIR</Text>
+                          </View>
+                        </View>
+                        <Text style={{ color: colors.text, opacity: 0.55, fontSize: 11 * m }}>
+                          {new Date(localSnapshotMeta.savedAt).toLocaleDateString('tr-TR')} • {localSnapshotMeta.transactionCount} İşlem, {localSnapshotMeta.accountCount} Cüzdan
+                        </Text>
+                      </View>
+                      <Ionicons name="chevron-forward" size={16} color={colors.text} style={{ opacity: 0.3 }} />
+                    </TouchableOpacity>
+                  )}
+
+                  {/* Seçenek 4: Manuel JSON Metni */}
+                  <TouchableOpacity
+                    style={[styles.restoreChannelBtn, { backgroundColor: colors.background, borderRadius: Math.max(tStyles.roundness / 2, 8) }]}
+                    onPress={() => setRestoreMode('manual')}
+                  >
+                    <View style={[styles.restoreChannelIconBox, { backgroundColor: '#F29F0518' }]}>
+                      <Ionicons name="code-slash-outline" size={22} color="#F29F05" />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={[styles.restoreChannelTitle, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 14 * m }]}>
+                        Manuel JSON Metni Girin
+                      </Text>
+                      <Text style={{ color: colors.text, opacity: 0.55, fontSize: 11 * m }}>
+                        Metin kutusuna doğrudan JSON kodu yapıştırın
+                      </Text>
+                    </View>
+                    <Ionicons name="chevron-forward" size={16} color={colors.text} style={{ opacity: 0.3 }} />
+                  </TouchableOpacity>
+                </View>
+              )}
+
+              {restoreMode === 'manual' && (
+                <View>
+                  <Text style={{ color: colors.text, opacity: 0.6, fontSize: 12 * m, fontFamily: tStyles.fontFamily, marginBottom: 10 }}>
+                    JSON yedek metnini aşağıdaki alana yapıştırın:
+                  </Text>
+                  <TextInput
+                    style={[
+                      styles.backupInputBox,
+                      {
+                        backgroundColor: colors.background,
+                        color: colors.text,
+                        borderRadius: Math.max(tStyles.roundness / 2, 8),
+                        borderColor: 'rgba(0,0,0,0.1)',
+                        fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
+                        fontSize: 11 * m
+                      }
+                    ]}
+                    multiline
+                    numberOfLines={8}
+                    textAlignVertical="top"
+                    value={backupInput}
+                    onChangeText={setBackupInput}
+                    placeholder='{"app": "TrioTrack", "transactions": [...] }'
+                    placeholderTextColor={colors.text + '40'}
+                  />
+                  <View style={{ flexDirection: 'row', gap: 10, marginTop: 14 }}>
+                    <TouchableOpacity
+                      style={[styles.modalCancelBtn, { backgroundColor: colors.background, borderRadius: Math.max(tStyles.roundness / 2, 8) }]}
+                      onPress={() => setRestoreMode('options')}
+                    >
+                      <Text style={{ color: colors.text, fontFamily: tStyles.fontFamily, fontWeight: '600' }}>← Geri</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={[styles.modalConfirmBtn, { backgroundColor: colors.primary, borderRadius: Math.max(tStyles.roundness / 2, 8) }]}
+                      onPress={() => processBackupContent(backupInput)}
+                    >
+                      <Text style={{ color: colors.onPrimary, fontFamily: tStyles.fontFamily, fontWeight: 'bold' }}>İncele ve Yükle</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              )}
+
+              {restoreMode === 'preview' && parsedPreview && (
+                <View>
+                  <View style={[styles.previewCard, { backgroundColor: colors.background, borderRadius: Math.max(tStyles.roundness / 2, 8), padding: 14, marginBottom: 14 }]}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10, gap: 8 }}>
+                      <Ionicons name="checkmark-circle" size={24} color="#4CAF50" />
+                      <View style={{ flex: 1 }}>
+                        <Text style={{ color: colors.text, fontFamily: tStyles.fontFamily, fontWeight: 'bold', fontSize: 15 * m }}>
+                          {parsedPreview.sourceType === 'zero' ? 'Zero Yedeği' : parsedPreview.sourceType === 'paisa' ? 'Paisa Yedeği' : 'TrioTrack Yedeği'}
+                        </Text>
+                        <Text style={{ color: colors.text, opacity: 0.6, fontSize: 11.5 * m }}>
+                          {parsedPreview.message}
+                        </Text>
+                      </View>
+                    </View>
+
+                    {parsedPreview.stats && (
+                      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 6, paddingTop: 10, borderTopWidth: 1, borderTopColor: 'rgba(0,0,0,0.06)' }}>
+                        <View style={[styles.statBadge, { backgroundColor: colors.card }]}>
+                          <Text style={{ color: colors.text, opacity: 0.5, fontSize: 10 * m }}>İşlemler</Text>
+                          <Text style={{ color: colors.primary, fontWeight: 'bold', fontSize: 14 * m }}>{parsedPreview.stats.transactions}</Text>
+                        </View>
+                        <View style={[styles.statBadge, { backgroundColor: colors.card }]}>
+                          <Text style={{ color: colors.text, opacity: 0.5, fontSize: 10 * m }}>Cüzdanlar</Text>
+                          <Text style={{ color: colors.primary, fontWeight: 'bold', fontSize: 14 * m }}>{parsedPreview.stats.accounts}</Text>
+                        </View>
+                        <View style={[styles.statBadge, { backgroundColor: colors.card }]}>
+                          <Text style={{ color: colors.text, opacity: 0.5, fontSize: 10 * m }}>Kategoriler</Text>
+                          <Text style={{ color: colors.primary, fontWeight: 'bold', fontSize: 14 * m }}>{parsedPreview.stats.categories}</Text>
+                        </View>
+                        {parsedPreview.stats.debtors > 0 && (
+                          <View style={[styles.statBadge, { backgroundColor: colors.card }]}>
+                            <Text style={{ color: colors.text, opacity: 0.5, fontSize: 10 * m }}>Borçlar</Text>
+                            <Text style={{ color: colors.primary, fontWeight: 'bold', fontSize: 14 * m }}>{parsedPreview.stats.debtors}</Text>
+                          </View>
+                        )}
+                      </View>
+                    )}
+                  </View>
+
+                  <View style={{ flexDirection: 'row', gap: 10 }}>
+                    <TouchableOpacity
+                      style={[styles.modalCancelBtn, { backgroundColor: colors.background, borderRadius: Math.max(tStyles.roundness / 2, 8) }]}
+                      onPress={() => setRestoreMode('options')}
+                    >
+                      <Text style={{ color: colors.text, fontFamily: tStyles.fontFamily, fontWeight: '600' }}>Farklı Seç</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={[styles.modalConfirmBtn, { backgroundColor: colors.primary, borderRadius: Math.max(tStyles.roundness / 2, 8) }]}
+                      onPress={handleExecuteRestore}
+                      disabled={isRestoring}
+                    >
+                      {isRestoring ? (
+                        <ActivityIndicator size="small" color={colors.onPrimary} />
+                      ) : (
+                        <Text style={{ color: colors.onPrimary, fontFamily: tStyles.fontFamily, fontWeight: 'bold' }}>
+                          Verileri İçe Aktar ve Başla
+                        </Text>
+                      )}
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              )}
+            </ScrollView>
           </View>
         </View>
       </Modal>
@@ -1035,4 +1264,11 @@ const styles = StyleSheet.create({
   modalActionsRow: { flexDirection: 'row', gap: 10, justifyContent: 'flex-end' },
   modalCancelBtn: { paddingVertical: 10, paddingHorizontal: 16, alignItems: 'center' },
   modalConfirmBtn: { paddingVertical: 10, paddingHorizontal: 20, alignItems: 'center' },
+
+  // Çok Kanallı Yedek Stilleri
+  restoreChannelBtn: { flexDirection: 'row', alignItems: 'center', padding: 12, marginBottom: 8 },
+  restoreChannelIconBox: { width: 40, height: 40, borderRadius: 20, justifyContent: 'center', alignItems: 'center', marginRight: 12 },
+  restoreChannelTitle: { fontWeight: 'bold', marginBottom: 2 },
+  previewCard: { borderWidth: 1, borderColor: 'rgba(0,0,0,0.06)' },
+  statBadge: { paddingVertical: 6, paddingHorizontal: 12, borderRadius: 8, alignItems: 'center', minWidth: 70 },
 });

@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useMemo } from '
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { database } from '../watermelondb/database';
 import { APP_VERSION } from '../constants/version';
+import { parseAndNormalizeBackup, saveLocalSnapshot } from '../utils/backupService';
 
 const STORAGE_KEY = '@triotrack_data_v1';
 
@@ -658,10 +659,11 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const importDataFromJSON = async (jsonString: string): Promise<{ success: boolean; message: string }> => {
     try {
-      const parsed = JSON.parse(jsonString);
-      if (!parsed || typeof parsed !== 'object') {
-        return { success: false, message: 'Geçersiz veri dosyası.' };
+      const normalized = parseAndNormalizeBackup(jsonString);
+      if (!normalized.success || !normalized.data) {
+        return { success: false, message: normalized.message || 'Geçersiz veri dosyası.' };
       }
+      const parsed = normalized.data;
       if (Array.isArray(parsed.transactions)) setTransactions(parsed.transactions);
       if (Array.isArray(parsed.accounts)) setAccounts(parsed.accounts);
       if (Array.isArray(parsed.categories)) setCategories(parsed.categories);
@@ -673,8 +675,19 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
       if (typeof parsed.budgetCycleDay === 'number') setBudgetCycleDayState(parsed.budgetCycleDay);
       if (typeof parsed.monthlyBudgetGoal === 'number') setMonthlyBudgetGoal(parsed.monthlyBudgetGoal);
-      if (typeof parsed.userName === 'string') setUserName(parsed.userName);
-      return { success: true, message: 'Veriler başarıyla içe aktarıldı.' };
+      if (typeof parsed.userName === 'string') {
+        setUserName(parsed.userName);
+        await AsyncStorage.setItem('@triotrack_username', parsed.userName);
+      }
+
+      // Anlık yerel cihaz snapshot'ını güncelle
+      await saveLocalSnapshot(jsonString, {
+        transactionCount: parsed.transactions?.length || 0,
+        accountCount: parsed.accounts?.length || 0,
+        userName: parsed.userName || 'Kullanıcı',
+      });
+
+      return { success: true, message: normalized.message || 'Veriler başarıyla içe aktarıldı.' };
     } catch (e: any) {
       return { success: false, message: 'İçe aktarma hatası: ' + (e?.message || 'Bilinmeyen hata') };
     }

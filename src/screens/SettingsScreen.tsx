@@ -1,11 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch, TextInput, Alert, Platform, Share, Modal, Linking, TouchableWithoutFeedback } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch, TextInput, Alert, Platform, Share, Modal, Linking, TouchableWithoutFeedback, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme } from '../theme/ThemeContext';
 import { useData } from '../context/DataContext';
 import { APP_VERSION, APP_BUILD } from '../constants/version';
+import { 
+  pickBackupFile, 
+  readClipboardBackup, 
+  copyToClipboard, 
+  shareBackupAsFile, 
+  saveLocalSnapshot, 
+  getLocalSnapshot, 
+  parseAndNormalizeBackup,
+  NormalizedBackupResult,
+  LocalSnapshotMeta 
+} from '../utils/backupService';
 
 const CURRENCIES = [
   { code: 'TRY', symbol: '₺', name: 'Türk Lirası' },
@@ -42,6 +53,7 @@ export default function SettingsScreen({ navigation }: any) {
 
   const { 
     transactions, 
+    accounts,
     monthlyBudgetGoal, 
     setMonthlyBudgetGoal, 
     budgetCycleDay,
@@ -59,8 +71,14 @@ export default function SettingsScreen({ navigation }: any) {
   const [biometricsEnabled, setBiometricsEnabled] = useState(false);
   const [showGoalModal, setShowGoalModal] = useState(false);
   const [newGoalInput, setNewGoalInput] = useState(String(monthlyBudgetGoal));
+  const [showExportModal, setShowExportModal] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
+  const [importMode, setImportMode] = useState<'options' | 'manual' | 'preview'>('options');
   const [importJsonText, setImportJsonText] = useState('');
+  const [isImporting, setIsImporting] = useState(false);
+  const [parsedPreview, setParsedPreview] = useState<NormalizedBackupResult | null>(null);
+  const [localSnapshotMeta, setLocalSnapshotMeta] = useState<LocalSnapshotMeta | null>(null);
+  const [localSnapshotContent, setLocalSnapshotContent] = useState<string | null>(null);
 
   const m = tStyles.fontSizeMultiplier;
 
@@ -87,32 +105,122 @@ export default function SettingsScreen({ navigation }: any) {
     Alert.alert('Başarılı', `Aylık bütçe hedefiniz ${currency} ${parsed.toLocaleString('tr-TR')} olarak güncellendi.`);
   };
 
-  // JSON Dışa Aktarma (Paisa esintisi)
-  const handleExportJSON = async () => {
-    try {
-      const jsonContent = exportDataAsJSON();
-      await Share.share({
-        title: `TrioTrack_Yedek_${new Date().toISOString().split('T')[0]}.json`,
-        message: jsonContent,
-      });
-    } catch (e) {
-      Alert.alert('Dışa Aktarma', 'Yedek verisi paylaşılamadı.');
+  // Çok Kanallı Dışa Aktarma
+  const handleShareAsFile = async () => {
+    setShowExportModal(false);
+    const json = exportDataAsJSON();
+    const res = await shareBackupAsFile(json);
+    if (!res.success && res.message) {
+      Alert.alert('Paylaşım Hatası', res.message);
     }
   };
 
-  // JSON İçe Aktarma (Paisa esintisi)
-  const handleImportJSON = async () => {
-    if (!importJsonText.trim()) {
-      Alert.alert('Hata', 'Lütfen geçerli bir JSON yedek verisi yapıştırın.');
+  const handleSaveSnapshot = async () => {
+    const json = exportDataAsJSON();
+    const ok = await saveLocalSnapshot(json, {
+      transactionCount: transactions.length,
+      accountCount: accounts.length,
+      userName: userName || 'Kullanıcı',
+    });
+    if (ok) {
+      setShowExportModal(false);
+      Alert.alert('Yerel Snapshot Kaydedildi 💾', 'Yedek cihazınızın güvenli yerel hafızasına başarıyla kaydedildi.');
+    } else {
+      Alert.alert('Hata', 'Yerel yedek kaydedilemedi.');
+    }
+  };
+
+  const handleCopyJsonToClipboard = async () => {
+    const json = exportDataAsJSON();
+    const ok = await copyToClipboard(json);
+    if (ok) {
+      setShowExportModal(false);
+      Alert.alert('Panoya Kopyalandı 📋', 'TrioTrack yedek JSON metni panoya kopyalandı.');
+    } else {
+      Alert.alert('Hata', 'Panoya kopyalanamadı.');
+    }
+  };
+
+  // Çok Kanallı İçe Aktarma
+  const handleOpenImportOptions = async () => {
+    try {
+      const snap = await getLocalSnapshot();
+      if (snap.exists && snap.meta) {
+        setLocalSnapshotMeta(snap.meta);
+        setLocalSnapshotContent(snap.content || null);
+      } else {
+        setLocalSnapshotMeta(null);
+        setLocalSnapshotContent(null);
+      }
+    } catch {
+      setLocalSnapshotMeta(null);
+      setLocalSnapshotContent(null);
+    }
+    setImportMode('options');
+    setParsedPreview(null);
+    setImportJsonText('');
+    setShowImportModal(true);
+  };
+
+  const processImportContent = (content: string) => {
+    const normalized = parseAndNormalizeBackup(content);
+    if (!normalized.success) {
+      Alert.alert('Geçersiz Yedek Dosyası', normalized.message);
       return;
     }
-    const result = await importDataFromJSON(importJsonText.trim());
-    if (result.success) {
-      setShowImportModal(false);
-      setImportJsonText('');
-      Alert.alert('Tebrikler', result.message);
-    } else {
-      Alert.alert('İçe Aktarma Başarısız', result.message);
+    setImportJsonText(content);
+    setParsedPreview(normalized);
+    setImportMode('preview');
+  };
+
+  const handlePickImportFile = async () => {
+    setIsImporting(true);
+    const res = await pickBackupFile();
+    setIsImporting(false);
+    if (res.canceled) return;
+    if (res.error) {
+      Alert.alert('Dosya Hatası', res.error);
+      return;
+    }
+    if (res.content) {
+      processImportContent(res.content);
+    }
+  };
+
+  const handlePasteImportClipboard = async () => {
+    const text = await readClipboardBackup();
+    if (!text || !text.trim()) {
+      Alert.alert('Pano Boş', 'Panonuzda kopyalanmış bir yedek verisi bulunamadı.');
+      return;
+    }
+    processImportContent(text.trim());
+  };
+
+  const handleRestoreImportSnapshot = () => {
+    if (localSnapshotContent) {
+      processImportContent(localSnapshotContent);
+    }
+  };
+
+  const handleExecuteImport = async () => {
+    if (!importJsonText.trim()) {
+      Alert.alert('Eksik Bilgi', 'Lütfen geçerli bir yedek verisi yapıştırın veya seçin.');
+      return;
+    }
+    setIsImporting(true);
+    try {
+      const result = await importDataFromJSON(importJsonText.trim());
+      setIsImporting(false);
+      if (result.success) {
+        setShowImportModal(false);
+        setImportJsonText('');
+        Alert.alert('Tebrikler 🎉', result.message);
+      } else {
+        Alert.alert('İçe Aktarma Başarısız', result.message);
+      }
+    } catch (e: any) {
+      setIsImporting(false);
+      Alert.alert('Hata', 'Geri yükleme hatası: ' + (e?.message || ''));
     }
   };
 
@@ -488,14 +596,14 @@ export default function SettingsScreen({ navigation }: any) {
           </View>
 
           {/* JSON Tam Yedekleme (Dışa Aktar) */}
-          <TouchableOpacity style={styles.menuActionRow} onPress={handleExportJSON}>
+          <TouchableOpacity style={styles.menuActionRow} onPress={() => setShowExportModal(true)}>
             <Ionicons name="cloud-upload-outline" size={20} color={colors.primary} style={{ marginRight: 12 }} />
             <View style={{ flex: 1 }}>
               <Text style={[styles.menuActionText, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 14 * m }]}>
-                JSON Tam Yedekleme (Dışa Aktar)
+                Yedek Al (Dışa Aktar & Kaydet)
               </Text>
               <Text style={{ color: colors.text, opacity: 0.5, fontSize: 11 * m }}>
-                Tüm işlemlerinizi, hesaplarınızı ve bütçelerinizi tek dosyada yedekleyin
+                Yerel cihaz snapshot'ı, .json dosyası veya pano ile yedekleyin
               </Text>
             </View>
             <Ionicons name="chevron-forward" size={16} color={colors.text} style={{ opacity: 0.4 }} />
@@ -504,18 +612,15 @@ export default function SettingsScreen({ navigation }: any) {
           {/* JSON Yedekten Geri Yükle (İçe Aktar) */}
           <TouchableOpacity 
             style={[styles.menuActionRow, { borderTopWidth: 1, borderTopColor: 'rgba(0,0,0,0.05)', marginTop: 10, paddingTop: 10 }]}
-            onPress={() => {
-              setImportJsonText('');
-              setShowImportModal(true);
-            }}
+            onPress={handleOpenImportOptions}
           >
             <Ionicons name="cloud-download-outline" size={20} color="#009688" style={{ marginRight: 12 }} />
             <View style={{ flex: 1 }}>
               <Text style={[styles.menuActionText, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 14 * m }]}>
-                JSON Yedekten Geri Yükle (İçe Aktar)
+                Yedek Geri Yükle (İçe Aktar)
               </Text>
               <Text style={{ color: colors.text, opacity: 0.5, fontSize: 11 * m }}>
-                Daha önce aldığınız yedek dosyasını uygulamaya geri yükleyin
+                Cihaz dosyası, pano veya yerel snapshot'tan geri yükleyin
               </Text>
             </View>
             <Ionicons name="chevron-forward" size={16} color={colors.text} style={{ opacity: 0.4 }} />
@@ -699,57 +804,335 @@ export default function SettingsScreen({ navigation }: any) {
         </View>
       </Modal>
 
-      {/* JSON YEDEKTEN GERİ YÜKLEME MODALI (PAISA) */}
+      {/* ÇOK KANALLI YEDEK ALMA (DIŞA AKTARMA) MODALI */}
+      <Modal visible={showExportModal} transparent animationType="slide" onRequestClose={() => setShowExportModal(false)}>
+        <View style={styles.modalOverlay}>
+          <TouchableWithoutFeedback onPress={() => setShowExportModal(false)}>
+            <View style={StyleSheet.absoluteFill} />
+          </TouchableWithoutFeedback>
+          <View style={[styles.modalContent, { backgroundColor: colors.card, borderRadius: tStyles.roundness, maxHeight: '85%' }]}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Ionicons name="cloud-upload-outline" size={22} color={colors.primary} style={{ marginRight: 8 }} />
+                <Text style={[styles.modalTitle, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 18 * m }]}>
+                  Yedekleme Seçenekleri
+                </Text>
+              </View>
+              <TouchableOpacity onPress={() => setShowExportModal(false)} style={{ padding: 4 }}>
+                <Ionicons name="close" size={22} color={colors.text} />
+              </TouchableOpacity>
+            </View>
+
+            <Text style={{ color: colors.text, opacity: 0.6, fontSize: 12.5 * m, fontFamily: tStyles.fontFamily, marginBottom: 12 }}>
+              Verilerinizi saklamak için tercih ettiğiniz yöntemi seçin:
+            </Text>
+
+            <View style={{ gap: 10 }}>
+              {/* Seçenek 1: .json Dosyası Olarak Kaydet / Paylaş */}
+              <TouchableOpacity
+                style={[styles.backupChannelBtn, { backgroundColor: colors.background, borderRadius: Math.max(tStyles.roundness / 2, 8) }]}
+                onPress={handleShareAsFile}
+              >
+                <View style={[styles.backupChannelIconBox, { backgroundColor: colors.primary + '18' }]}>
+                  <Ionicons name="share-outline" size={22} color={colors.primary} />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={[styles.backupChannelTitle, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 14 * m }]}>
+                    .json Dosyası Olarak Kaydet / Paylaş
+                  </Text>
+                  <Text style={{ color: colors.text, opacity: 0.55, fontSize: 11 * m }}>
+                    Telefon hafızasına indirin, Google Drive veya WhatsApp ile paylaşın
+                  </Text>
+                </View>
+                <Ionicons name="chevron-forward" size={16} color={colors.text} style={{ opacity: 0.3 }} />
+              </TouchableOpacity>
+
+              {/* Seçenek 2: Cihaz Hafızasına Hızlı Snapshot */}
+              <TouchableOpacity
+                style={[styles.backupChannelBtn, { backgroundColor: colors.background, borderRadius: Math.max(tStyles.roundness / 2, 8) }]}
+                onPress={handleSaveSnapshot}
+              >
+                <View style={[styles.backupChannelIconBox, { backgroundColor: '#4CAF5018' }]}>
+                  <Ionicons name="save-outline" size={22} color="#4CAF50" />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={[styles.backupChannelTitle, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 14 * m }]}>
+                    Cihaz Hafızasına Yerel Snapshot Kaydet
+                  </Text>
+                  <Text style={{ color: colors.text, opacity: 0.55, fontSize: 11 * m }}>
+                    Cihazınızda tek dokunuşla geri çağrılabilecek güvenli yerel kopya
+                  </Text>
+                </View>
+                <Ionicons name="chevron-forward" size={16} color={colors.text} style={{ opacity: 0.3 }} />
+              </TouchableOpacity>
+
+              {/* Seçenek 3: JSON Metnini Panoya Kopyala */}
+              <TouchableOpacity
+                style={[styles.backupChannelBtn, { backgroundColor: colors.background, borderRadius: Math.max(tStyles.roundness / 2, 8) }]}
+                onPress={handleCopyJsonToClipboard}
+              >
+                <View style={[styles.backupChannelIconBox, { backgroundColor: '#00968818' }]}>
+                  <Ionicons name="copy-outline" size={22} color="#009688" />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={[styles.backupChannelTitle, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 14 * m }]}>
+                    JSON Metnini Panoya Kopyala
+                  </Text>
+                  <Text style={{ color: colors.text, opacity: 0.55, fontSize: 11 * m }}>
+                    Metin olarak kopyalayıp notlarınıza veya e-postanıza yapıştırın
+                  </Text>
+                </View>
+                <Ionicons name="chevron-forward" size={16} color={colors.text} style={{ opacity: 0.3 }} />
+              </TouchableOpacity>
+
+              {/* Seçenek 4: Excel / CSV Tablosu Olarak Dışa Aktar */}
+              <TouchableOpacity
+                style={[styles.backupChannelBtn, { backgroundColor: colors.background, borderRadius: Math.max(tStyles.roundness / 2, 8) }]}
+                onPress={() => {
+                  setShowExportModal(false);
+                  handleExportCSV();
+                }}
+              >
+                <View style={[styles.backupChannelIconBox, { backgroundColor: '#F29F0518' }]}>
+                  <Ionicons name="grid-outline" size={22} color="#F29F05" />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={[styles.backupChannelTitle, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 14 * m }]}>
+                    Excel / CSV Tablosu Olarak Dışa Aktar
+                  </Text>
+                  <Text style={{ color: colors.text, opacity: 0.55, fontSize: 11 * m }}>
+                    Tablolama programlarında açmak için CSV dökümü alın
+                  </Text>
+                </View>
+                <Ionicons name="chevron-forward" size={16} color={colors.text} style={{ opacity: 0.3 }} />
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* ÇOK KANALLI YEDEKTEN GERİ YÜKLEME (İÇE AKTARMA) MODALI */}
       <Modal visible={showImportModal} transparent animationType="slide" onRequestClose={() => setShowImportModal(false)}>
         <View style={styles.modalOverlay}>
           <TouchableWithoutFeedback onPress={() => setShowImportModal(false)}>
             <View style={StyleSheet.absoluteFill} />
           </TouchableWithoutFeedback>
-          <View style={[styles.modalContent, { backgroundColor: colors.card, borderRadius: tStyles.roundness, maxHeight: '80%' }]}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
-              <Ionicons name="cloud-download-outline" size={22} color="#009688" style={{ marginRight: 8 }} />
-              <Text style={[styles.modalTitle, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 18 * m }]}>
-                JSON Yedek Geri Yükle
-              </Text>
-            </View>
-            <Text style={{ color: colors.text, opacity: 0.6, fontSize: 12 * m, fontFamily: tStyles.fontFamily, marginBottom: 12 }}>
-              Daha önce dışa aktardığınız TrioTrack JSON yedek metnini aşağıdaki alana yapıştırın:
-            </Text>
-            <TextInput
-              style={[
-                styles.jsonImportInput,
-                { 
-                  backgroundColor: colors.background, 
-                  color: colors.text, 
-                  borderColor: 'rgba(0,0,0,0.1)', 
-                  borderWidth: 1, 
-                  borderRadius: Math.max(tStyles.roundness / 2, 8),
-                  fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
-                  fontSize: 11 * m
-                }
-              ]}
-              multiline
-              numberOfLines={8}
-              textAlignVertical="top"
-              value={importJsonText}
-              onChangeText={setImportJsonText}
-              placeholder='{"app": "TrioTrack", "transactions": [...] }'
-              placeholderTextColor={colors.text + '40'}
-            />
-            <View style={[styles.modalBtnRow, { marginTop: 16 }]}>
-              <TouchableOpacity
-                style={[styles.modalCancelBtn, { backgroundColor: colors.background, borderRadius: Math.max(tStyles.roundness / 2, 8) }]}
-                onPress={() => setShowImportModal(false)}
-              >
-                <Text style={{ color: colors.text, fontFamily: tStyles.fontFamily, fontWeight: '600' }}>Vazgeç</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.modalSaveBtn, { backgroundColor: '#009688', borderRadius: Math.max(tStyles.roundness / 2, 8) }]}
-                onPress={handleImportJSON}
-              >
-                <Text style={{ color: '#FFF', fontFamily: tStyles.fontFamily, fontWeight: 'bold' }}>Geri Yükle</Text>
+          <View style={[styles.modalContent, { backgroundColor: colors.card, borderRadius: tStyles.roundness, maxHeight: '88%' }]}>
+            
+            {/* Başlık */}
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Ionicons name="cloud-download-outline" size={22} color="#009688" style={{ marginRight: 8 }} />
+                <Text style={[styles.modalTitle, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 18 * m }]}>
+                  {importMode === 'preview' ? 'Yedek Önizlemesi' : 'Yedekten Geri Yükle'}
+                </Text>
+              </View>
+              <TouchableOpacity onPress={() => setShowImportModal(false)} style={{ padding: 4 }}>
+                <Ionicons name="close" size={22} color={colors.text} />
               </TouchableOpacity>
             </View>
+
+            <ScrollView showsVerticalScrollIndicator={false}>
+              {importMode === 'options' && (
+                <View style={{ gap: 10 }}>
+                  <Text style={{ color: colors.text, opacity: 0.6, fontSize: 12.5 * m, fontFamily: tStyles.fontFamily, marginBottom: 4 }}>
+                    Daha önce aldığınız yedeği geri yüklemek için bir yöntem seçin:
+                  </Text>
+
+                  {/* Seçenek 1: Cihazdan Dosya Seç */}
+                  <TouchableOpacity
+                    style={[styles.backupChannelBtn, { backgroundColor: colors.background, borderRadius: Math.max(tStyles.roundness / 2, 8) }]}
+                    onPress={handlePickImportFile}
+                    disabled={isImporting}
+                  >
+                    <View style={[styles.backupChannelIconBox, { backgroundColor: colors.primary + '18' }]}>
+                      <Ionicons name="document-text-outline" size={22} color={colors.primary} />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={[styles.backupChannelTitle, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 14 * m }]}>
+                        Cihazdan .json Dosyası Seç
+                      </Text>
+                      <Text style={{ color: colors.text, opacity: 0.55, fontSize: 11 * m }}>
+                        İndirilenler veya dosya yöneticisinden yedek dosyasını açın
+                      </Text>
+                    </View>
+                    <Ionicons name="chevron-forward" size={16} color={colors.text} style={{ opacity: 0.3 }} />
+                  </TouchableOpacity>
+
+                  {/* Seçenek 2: Panodan Yapıştır */}
+                  <TouchableOpacity
+                    style={[styles.backupChannelBtn, { backgroundColor: colors.background, borderRadius: Math.max(tStyles.roundness / 2, 8) }]}
+                    onPress={handlePasteImportClipboard}
+                    disabled={isImporting}
+                  >
+                    <View style={[styles.backupChannelIconBox, { backgroundColor: '#00968818' }]}>
+                      <Ionicons name="clipboard-outline" size={22} color="#009688" />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={[styles.backupChannelTitle, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 14 * m }]}>
+                        Panodan Yapıştır (Tek Dokunuş)
+                      </Text>
+                      <Text style={{ color: colors.text, opacity: 0.55, fontSize: 11 * m }}>
+                        Kopyaladığınız JSON yedek metnini otomatik algılar
+                      </Text>
+                    </View>
+                    <Ionicons name="chevron-forward" size={16} color={colors.text} style={{ opacity: 0.3 }} />
+                  </TouchableOpacity>
+
+                  {/* Seçenek 3: Cihazdaki Yerel Snapshot (Varsa) */}
+                  {localSnapshotMeta && (
+                    <TouchableOpacity
+                      style={[styles.backupChannelBtn, { backgroundColor: colors.background, borderRadius: Math.max(tStyles.roundness / 2, 8), borderColor: colors.primary, borderWidth: 1 }]}
+                      onPress={handleRestoreImportSnapshot}
+                      disabled={isImporting}
+                    >
+                      <View style={[styles.backupChannelIconBox, { backgroundColor: '#4CAF5018' }]}>
+                        <Ionicons name="save-outline" size={22} color="#4CAF50" />
+                      </View>
+                      <View style={{ flex: 1 }}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                          <Text style={[styles.backupChannelTitle, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 14 * m }]}>
+                            Cihazdaki Son Yerel Kayıt
+                          </Text>
+                          <View style={{ backgroundColor: '#4CAF5020', paddingHorizontal: 6, paddingVertical: 1, borderRadius: 6 }}>
+                            <Text style={{ color: '#4CAF50', fontSize: 9.5 * m, fontWeight: 'bold' }}>HAZIR</Text>
+                          </View>
+                        </View>
+                        <Text style={{ color: colors.text, opacity: 0.55, fontSize: 11 * m }}>
+                          {new Date(localSnapshotMeta.savedAt).toLocaleDateString('tr-TR')} • {localSnapshotMeta.transactionCount} İşlem, {localSnapshotMeta.accountCount} Cüzdan
+                        </Text>
+                      </View>
+                      <Ionicons name="chevron-forward" size={16} color={colors.text} style={{ opacity: 0.3 }} />
+                    </TouchableOpacity>
+                  )}
+
+                  {/* Seçenek 4: Manuel JSON Metni */}
+                  <TouchableOpacity
+                    style={[styles.backupChannelBtn, { backgroundColor: colors.background, borderRadius: Math.max(tStyles.roundness / 2, 8) }]}
+                    onPress={() => setImportMode('manual')}
+                  >
+                    <View style={[styles.backupChannelIconBox, { backgroundColor: '#F29F0518' }]}>
+                      <Ionicons name="code-slash-outline" size={22} color="#F29F05" />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={[styles.backupChannelTitle, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 14 * m }]}>
+                        Manuel JSON Metni Girin
+                      </Text>
+                      <Text style={{ color: colors.text, opacity: 0.55, fontSize: 11 * m }}>
+                        Metin kutusuna doğrudan JSON kodu yapıştırın
+                      </Text>
+                    </View>
+                    <Ionicons name="chevron-forward" size={16} color={colors.text} style={{ opacity: 0.3 }} />
+                  </TouchableOpacity>
+                </View>
+              )}
+
+              {importMode === 'manual' && (
+                <View>
+                  <Text style={{ color: colors.text, opacity: 0.6, fontSize: 12 * m, fontFamily: tStyles.fontFamily, marginBottom: 10 }}>
+                    JSON yedek metnini aşağıdaki kutuya yapıştırın:
+                  </Text>
+                  <TextInput
+                    style={[
+                      styles.jsonImportInput,
+                      { 
+                        backgroundColor: colors.background, 
+                        color: colors.text, 
+                        borderColor: 'rgba(0,0,0,0.1)', 
+                        borderWidth: 1, 
+                        borderRadius: Math.max(tStyles.roundness / 2, 8),
+                        fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
+                        fontSize: 11 * m
+                      }
+                    ]}
+                    multiline
+                    numberOfLines={8}
+                    textAlignVertical="top"
+                    value={importJsonText}
+                    onChangeText={setImportJsonText}
+                    placeholder='{"app": "TrioTrack", "transactions": [...] }'
+                    placeholderTextColor={colors.text + '40'}
+                  />
+                  <View style={[styles.modalBtnRow, { marginTop: 14 }]}>
+                    <TouchableOpacity
+                      style={[styles.modalCancelBtn, { backgroundColor: colors.background, borderRadius: Math.max(tStyles.roundness / 2, 8) }]}
+                      onPress={() => setImportMode('options')}
+                    >
+                      <Text style={{ color: colors.text, fontFamily: tStyles.fontFamily, fontWeight: '600' }}>← Geri</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={[styles.modalSaveBtn, { backgroundColor: '#009688', borderRadius: Math.max(tStyles.roundness / 2, 8) }]}
+                      onPress={() => processImportContent(importJsonText)}
+                    >
+                      <Text style={{ color: '#FFF', fontFamily: tStyles.fontFamily, fontWeight: 'bold' }}>İncele ve Yükle</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              )}
+
+              {importMode === 'preview' && parsedPreview && (
+                <View>
+                  <View style={{ backgroundColor: colors.background, borderRadius: Math.max(tStyles.roundness / 2, 8), padding: 14, marginBottom: 14, borderWidth: 1, borderColor: 'rgba(0,0,0,0.06)' }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10, gap: 8 }}>
+                      <Ionicons name="checkmark-circle" size={24} color="#4CAF50" />
+                      <View style={{ flex: 1 }}>
+                        <Text style={{ color: colors.text, fontFamily: tStyles.fontFamily, fontWeight: 'bold', fontSize: 15 * m }}>
+                          {parsedPreview.sourceType === 'zero' ? 'Zero Yedeği' : parsedPreview.sourceType === 'paisa' ? 'Paisa Yedeği' : 'TrioTrack Yedeği'}
+                        </Text>
+                        <Text style={{ color: colors.text, opacity: 0.6, fontSize: 11.5 * m }}>
+                          {parsedPreview.message}
+                        </Text>
+                      </View>
+                    </View>
+
+                    {parsedPreview.stats && (
+                      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 6, paddingTop: 10, borderTopWidth: 1, borderTopColor: 'rgba(0,0,0,0.06)' }}>
+                        <View style={{ backgroundColor: colors.card, paddingVertical: 6, paddingHorizontal: 12, borderRadius: 8, alignItems: 'center', minWidth: 70 }}>
+                          <Text style={{ color: colors.text, opacity: 0.5, fontSize: 10 * m }}>İşlemler</Text>
+                          <Text style={{ color: colors.primary, fontWeight: 'bold', fontSize: 14 * m }}>{parsedPreview.stats.transactions}</Text>
+                        </View>
+                        <View style={{ backgroundColor: colors.card, paddingVertical: 6, paddingHorizontal: 12, borderRadius: 8, alignItems: 'center', minWidth: 70 }}>
+                          <Text style={{ color: colors.text, opacity: 0.5, fontSize: 10 * m }}>Cüzdanlar</Text>
+                          <Text style={{ color: colors.primary, fontWeight: 'bold', fontSize: 14 * m }}>{parsedPreview.stats.accounts}</Text>
+                        </View>
+                        <View style={{ backgroundColor: colors.card, paddingVertical: 6, paddingHorizontal: 12, borderRadius: 8, alignItems: 'center', minWidth: 70 }}>
+                          <Text style={{ color: colors.text, opacity: 0.5, fontSize: 10 * m }}>Kategoriler</Text>
+                          <Text style={{ color: colors.primary, fontWeight: 'bold', fontSize: 14 * m }}>{parsedPreview.stats.categories}</Text>
+                        </View>
+                        {parsedPreview.stats.debtors > 0 && (
+                          <View style={{ backgroundColor: colors.card, paddingVertical: 6, paddingHorizontal: 12, borderRadius: 8, alignItems: 'center', minWidth: 70 }}>
+                            <Text style={{ color: colors.text, opacity: 0.5, fontSize: 10 * m }}>Borçlar</Text>
+                            <Text style={{ color: colors.primary, fontWeight: 'bold', fontSize: 14 * m }}>{parsedPreview.stats.debtors}</Text>
+                          </View>
+                        )}
+                      </View>
+                    )}
+                  </View>
+
+                  <View style={styles.modalBtnRow}>
+                    <TouchableOpacity
+                      style={[styles.modalCancelBtn, { backgroundColor: colors.background, borderRadius: Math.max(tStyles.roundness / 2, 8) }]}
+                      onPress={() => setImportMode('options')}
+                    >
+                      <Text style={{ color: colors.text, fontFamily: tStyles.fontFamily, fontWeight: '600' }}>Farklı Seç</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={[styles.modalSaveBtn, { backgroundColor: '#009688', borderRadius: Math.max(tStyles.roundness / 2, 8) }]}
+                      onPress={handleExecuteImport}
+                      disabled={isImporting}
+                    >
+                      {isImporting ? (
+                        <ActivityIndicator size="small" color="#FFF" />
+                      ) : (
+                        <Text style={{ color: '#FFF', fontFamily: tStyles.fontFamily, fontWeight: 'bold' }}>
+                          Verileri İçe Aktar
+                        </Text>
+                      )}
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              )}
+            </ScrollView>
           </View>
         </View>
       </Modal>
@@ -822,4 +1205,9 @@ const styles = StyleSheet.create({
   developerName: {},
   githubLinkBadge: { flexDirection: 'row', alignItems: 'center' },
   githubLinkText: {},
+
+  // Çok Kanallı Yedek Stilleri
+  backupChannelBtn: { flexDirection: 'row', alignItems: 'center', padding: 12, marginBottom: 8 },
+  backupChannelIconBox: { width: 40, height: 40, borderRadius: 20, justifyContent: 'center', alignItems: 'center', marginRight: 12 },
+  backupChannelTitle: { fontWeight: 'bold', marginBottom: 2 },
 });

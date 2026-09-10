@@ -33,7 +33,8 @@
           "photosPermission": "TrioTrack fiş ve fatura görsellerinizi taramak için fotoğraflarınıza erişmek istiyor.",
           "cameraPermission": "TrioTrack fiş ve faturalarınızı doğrudan kamera ile taramak için kamera erişimi istiyor."
         }
-      ]
+      ],
+      "expo-sharing"
     ],
     "web": {
       "favicon": "./assets/favicon.png"
