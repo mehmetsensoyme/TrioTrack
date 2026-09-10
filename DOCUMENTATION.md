@@ -141,19 +141,21 @@ Yedekleme sistemi tek bir metin kutusundan çıkarılmış, hem karşılama ekra
 Kullanıcının harcama ve bütçeleme motivasyonunu şekillendiren Slide 3, üç temel bileşenden meydana gelir:
 1. **Canlı Önizlemeli Ana Para Birimi Seçicisi:**
    * **Hero Canlı Önizleme Kartı:** Seçili para biriminin bayrağını, kodunu, adını ve dinamik olarak formatlanan örnek bakiye görünümünü (`15.450,00 ₺`, `$ 1,250.00`, `25,50 gr` vb.) anlık gösterir.
-   * **Popüler Hızlı Çipler (Quick-Chips):** En sık kullanılan 6 para birimi (`TRY ₺`, `USD $`, `EUR €`, `GBP £`, `Gram Altın 🪙`, `Bitcoin ₿`) tek dokunuşla seçilebilir.
+   * **2 Satırlı Eşit Genişlikli Hızlı Çipler (Quick-Chips):** En sık kullanılan 6 para birimi (`TRY ₺`, `USD $`, `EUR €`, `GBP £`, `Gram Altın 🪙`, `Bitcoin ₿`) 3'erli 2 satırda eşit genişlikte (`flex: 1`) konumlandırılmış olup ekrandan taşma veya tek başına kalma hatası ortadan kaldırılmıştır.
    * **Genişletilebilir Dünya Listesi (20+):** Akordeon menü ile açılıp kapanan, anlık arama (search) kutusu içeren tam para birimi listesi.
 2. **Öncelikli Finansal Hedef (5 Hibrit Vizyon - `goalUtils.ts`):**
-   * ☕ **Günlük Harçlığımı Bilmek (Buckwheat Zekası):** Günlük net harcanabilir limiti bilerek stressiz harcama yapma.
-   * 📈 **Gereksiz Harcamaları Kısıp Birikim Yapmak (Tasarruf & Varlık):** Acil durum fonu ve düzenli birikim oluşturma.
-   * 🛡️ **Borçları Adım Adım Kapatmak (Sıfır Borç):** Kredi kartı ve şahıs borçlarını kapatma disiplini.
-   * ⚖️ **Gelir-Gider Dengesini Sıfır Tabanlı Tutmak (Sıfır Tabanlı - Zero):** Her kuruşa görev verme ve bütçeyi dengeleme.
-   * 🚀 **Yatırım ve Net Varlık Büyütme (Net Varlık - Paisa):** Toplam net değeri ve portföyü büyütme odağı.
-3. **Aylık Gelirden Birikim Oranı Hedefi (%):**
-   * `%10` (Rahat Başlangıç), `%20` (50/30/20 Kuralı - Popüler), `%30` (Hızlı Birikim), `%50` (Finansal Özgürlük / FIRE).
+   * ☕ **Günlük Harçlık (Buckwheat):** Günü kurtaracak net limiti anlık bilerek stressiz harcama.
+   * 📈 **Tasarruf & Birikim (Varlık):** Gereksiz harcamaları kısıp acil durum fonu ve düzenli birikim oluşturma.
+   * 🛡️ **Borçları Sıfırlama (Sıfır Borç):** Kredi kartı ve şahıs borçlarını kapatana kadar adım adım takip.
+   * ⚖️ **Sıfır Tabanlı Bütçe (Zero):** Her kuruşa görev verme ve gelir-gideri dengeleme.
+   * 🚀 **Net Varlık & Yatırım (Paisa):** Toplam net portföy değerini ve yatırımları büyütme odağı.
+   * *Düzen Mimarisi:* Başlık sol tarafa, rozet etiket sağ tarafa hizalanmış; böylece uzun başlıkların rozetle iç içe geçip kırılması engellenmiştir.
+3. **Aylık Gelirden Birikim Oranı (4-Segmentli Yatay Bar & Detay Kartı):**
+   * `%10` (Rahat Başlangıç), `%20` (50/30/20 Altın Kuralı - Önerilen), `%30` (Hızlı Birikim), `%50` (Finansal Özgürlük / FIRE).
+   * Eşit yükseklikli 4 yatay hap buton (`flex: 1`) ve seçilen hedefin felsefesini açıklayan dinamik bilgi kartı.
 4. **Veri Kalıcılığı ve Özet:**
    * `DataContext.tsx` içinde `@triotrack_financial_goal` ve `@triotrack_savings_target` anahtarlarıyla saklanır.
-   * Onboarding tamamlama özet kartında (Slide 6) canlı olarak listelenir.
+   * Onboarding kurulum özet kartında (Slide 6) canlı olarak listelenir.
    * JSON tam yedekleme (`exportDataAsJSON` / `importDataFromJSON`) ve sıfırlama işlemlerine eksiksiz entegre edilmiştir.
 
 ---

@@ -10,54 +10,89 @@ export interface FinancialGoal {
 export const FINANCIAL_GOALS: FinancialGoal[] = [
   {
     id: 'daily_pocket',
-    title: 'Günlük Harçlığımı Bilmek',
-    subtitle: 'Günü kurtaracak net günlük harcanabilir limiti anlık bilerek stressiz yaşayın.',
+    title: 'Günlük Harçlık',
+    subtitle: 'Günü kurtaracak net günlük limiti anlık bilerek stressiz harcayın.',
     icon: 'cafe-outline',
     color: '#EA580C',
-    badge: 'Buckwheat Zekası',
+    badge: 'Buckwheat',
   },
   {
     id: 'saving',
-    title: 'Gereksiz Harcamaları Kısıp Birikim Yapmak',
-    subtitle: 'Aylık gelirinizden artan tutarla acil durum fonu ve düzenli birikim oluşturun.',
+    title: 'Tasarruf & Birikim',
+    subtitle: 'Gereksiz harcamaları kısıp acil durum fonu ve düzenli birikim yapın.',
     icon: 'trending-up-outline',
     color: '#4CAF50',
-    badge: 'Tasarruf & Varlık',
+    badge: 'Varlık',
   },
   {
     id: 'debt_free',
-    title: 'Borçları Adım Adım Kapatmak',
-    subtitle: 'Kredi kartı ve kişi borçlarınızı adım adım sıfırlayana kadar disiplinli takip.',
+    title: 'Borçları Sıfırlama',
+    subtitle: 'Kredi kartı ve kişi borçlarınızı adım adım sıfırlayana kadar takip edin.',
     icon: 'shield-checkmark-outline',
     color: '#2196F3',
     badge: 'Sıfır Borç',
   },
   {
     id: 'zero_budget',
-    title: 'Gelir-Gider Dengesini Sıfır Tabanlı Tutmak',
+    title: 'Sıfır Tabanlı Bütçe',
     subtitle: 'Her kuruşa bir görev verin, ay sonunda sürpriz açıklarla karşılaşmayın.',
     icon: 'scale-outline',
     color: '#6750A4',
-    badge: 'Sıfır Tabanlı (Zero)',
+    badge: 'Zero',
   },
   {
     id: 'investing',
-    title: 'Yatırım ve Net Varlık Büyütme',
-    subtitle: 'Tüm cüzdan, döviz ve birikimlerinizin toplam net değerini büyütmeye odaklanın.',
+    title: 'Net Varlık & Yatırım',
+    subtitle: 'Tüm cüzdan, döviz ve birikimlerinizin toplam değerini büyütün.',
     icon: 'rocket-outline',
     color: '#E91E63',
-    badge: 'Net Varlık (Paisa)',
+    badge: 'Paisa',
   },
 ];
 
-export const SAVINGS_TARGET_OPTIONS = [
-  { percent: 10, label: '%10', desc: 'Rahat Başlangıç' },
-  { percent: 20, label: '%20', desc: '50/30/20 Kuralı (Popüler)' },
-  { percent: 30, label: '%30', desc: 'Hızlı Birikim' },
-  { percent: 50, label: '%50', desc: 'Finansal Özgürlük (FIRE)' },
+export interface SavingsTargetOption {
+  percent: number;
+  label: string;
+  badge?: string;
+  title: string;
+  desc: string;
+}
+
+export const SAVINGS_TARGET_OPTIONS: SavingsTargetOption[] = [
+  {
+    percent: 10,
+    label: '%10',
+    title: 'Rahat Başlangıç',
+    desc: 'Bütçenizi hiç zorlamadan düzenli birikim alışkanlığı kazandırır.',
+  },
+  {
+    percent: 20,
+    label: '%20',
+    badge: 'Önerilen',
+    title: '50/30/20 Altın Kuralı',
+    desc: 'Gelirinizin %50’si ihtiyaçlara, %30’u isteklere, %20’si birikime ayrılır.',
+  },
+  {
+    percent: 30,
+    label: '%30',
+    title: 'Hızlı Birikim',
+    desc: 'Hedeflerinize ve acil durum fonunuza daha çabuk ulaşmak için yüksek disiplin.',
+  },
+  {
+    percent: 50,
+    label: '%50',
+    badge: 'FIRE',
+    title: 'Finansal Özgürlük',
+    desc: 'Maksimum tasarruf ve yatırımla erken finansal bağımsızlık stratejisi.',
+  },
 ];
 
 export function getFinancialGoal(id: string | undefined | null): FinancialGoal {
   const found = FINANCIAL_GOALS.find(g => g.id === id);
   return found || FINANCIAL_GOALS[0];
+}
+
+export function getSavingsTargetOption(percent: number | undefined | null): SavingsTargetOption {
+  const found = SAVINGS_TARGET_OPTIONS.find(o => o.percent === percent);
+  return found || SAVINGS_TARGET_OPTIONS[1];
 }

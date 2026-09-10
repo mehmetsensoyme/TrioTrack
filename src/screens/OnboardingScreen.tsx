@@ -21,7 +21,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../theme/ThemeContext';
 import { useData } from '../context/DataContext';
 import { AVATAR_PRESETS, getAvatarPreset } from '../utils/avatarUtils';
-import { FINANCIAL_GOALS, SAVINGS_TARGET_OPTIONS, getFinancialGoal } from '../utils/goalUtils';
+import { FINANCIAL_GOALS, SAVINGS_TARGET_OPTIONS, getFinancialGoal, getSavingsTargetOption } from '../utils/goalUtils';
 import { 
   pickBackupFile, 
   readClipboardBackup, 
@@ -118,6 +118,13 @@ export default function OnboardingScreen({ navigation }: any) {
   const popularCurrenciesList = useMemo(() => {
     return POPULAR_CURRENCIES.map(code => CURRENCIES.find(c => c.code === code)!).filter(Boolean);
   }, []);
+
+  const popularRow1 = useMemo(() => popularCurrenciesList.slice(0, 3), [popularCurrenciesList]);
+  const popularRow2 = useMemo(() => popularCurrenciesList.slice(3, 6), [popularCurrenciesList]);
+
+  const selectedSavingsOption = useMemo(() => {
+    return getSavingsTargetOption(savingsTargetPercent);
+  }, [savingsTargetPercent]);
 
   const getCurrencyPreviewAmount = (curr: typeof CURRENCIES[0]) => {
     if (curr.code === 'TRY') return '15.450,00 ₺';
@@ -376,7 +383,8 @@ export default function OnboardingScreen({ navigation }: any) {
             styles.scrollContent,
             {
               paddingTop: Math.max(insets.top, 16) + (step === 0 ? 12 : 52),
-              paddingBottom: 24,
+              paddingBottom: 36,
+              justifyContent: (step === 0 || step === 6) ? 'center' : 'flex-start',
             }
           ]}
           showsVerticalScrollIndicator={false}
@@ -737,21 +745,19 @@ export default function OnboardingScreen({ navigation }: any) {
           {/* SLIDE 3: Currency Picker & Financial Goals (Step 6 of Roadmap) */}
           {step === 3 && (
             <View style={styles.slide}>
-              <View style={[styles.iconCircleBig, { backgroundColor: colors.primary + '18' }]}>
-                <Text style={{ fontSize: 28 * m, color: colors.primary, fontWeight: 'bold' }}>
-                  {currency.symbol}
-                </Text>
+              <View style={[styles.slideIconBox, { backgroundColor: colors.primary + '18' }]}>
+                <Ionicons name="compass-outline" size={28 * m} color={colors.primary} />
               </View>
-              <Text style={[styles.slideTitle, { color: colors.text, fontFamily: tStyles.fontFamily, fontWeight: tStyles.titleWeight, fontSize: 26 * m }]}>
+              <Text style={[styles.slideTitle, { color: colors.text, fontFamily: tStyles.fontFamily, fontWeight: tStyles.titleWeight, fontSize: 24 * m }]}>
                 Para Birimi & Hedefler
               </Text>
-              <Text style={[styles.slideSubtitle, { color: colors.text, opacity: 0.7, fontFamily: tStyles.fontFamily, fontSize: 13 * m }]}>
-                Ana para biriminizi ve finansal yol haritanızı belirleyerek TrioTrack'i kişiselleştirin.
+              <Text style={[styles.slideSubtitle, { color: colors.text, opacity: 0.7, fontFamily: tStyles.fontFamily, fontSize: 13 * m, marginBottom: 18 }]}>
+                Ana para biriminizi ve finansal yol haritanızı belirleyin.
               </Text>
 
               {/* SECTION 1: ANA PARA BİRİMİ */}
-              <View style={{ marginBottom: 24 }}>
-                <Text style={[styles.sectionHeading, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 13 * m, marginBottom: 10 }]}>
+              <View style={{ marginBottom: 20 }}>
+                <Text style={[styles.sectionHeading, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 12.5 * m, marginBottom: 8 }]}>
                   ANA PARA BİRİMİ
                 </Text>
 
@@ -760,7 +766,7 @@ export default function OnboardingScreen({ navigation }: any) {
                   styles.currencyHeroCard,
                   { 
                     backgroundColor: colors.card,
-                    borderColor: colors.primary + '40',
+                    borderColor: colors.primary + '35',
                     borderRadius: tStyles.roundness 
                   }
                 ]}>
@@ -770,75 +776,132 @@ export default function OnboardingScreen({ navigation }: any) {
                     </Text>
                   </View>
                   <View style={{ flex: 1, marginLeft: 12 }}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                      <Text style={{ fontSize: 15 * m }}>{currency.flag}</Text>
-                      <Text style={[styles.currencyHeroCode, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 15 * m }]}>
-                        {currency.code}
-                      </Text>
-                      <Text style={[styles.currencyHeroName, { color: colors.text, opacity: 0.6, fontFamily: tStyles.fontFamily, fontSize: 12 * m }]}>
-                        • {currency.name}
-                      </Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flex: 1, paddingRight: 6 }}>
+                        <Text style={{ fontSize: 16 * m }}>{currency.flag}</Text>
+                        <Text style={[styles.currencyHeroCode, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 14.5 * m }]}>
+                          {currency.code}
+                        </Text>
+                        <Text style={[styles.currencyHeroName, { color: colors.text, opacity: 0.6, fontFamily: tStyles.fontFamily, fontSize: 12 * m }]} numberOfLines={1}>
+                          • {currency.name}
+                        </Text>
+                      </View>
+                      <View style={[styles.activeCheckPill, { backgroundColor: colors.primary + '18' }]}>
+                        <Ionicons name="checkmark-circle" size={18} color={colors.primary} />
+                      </View>
                     </View>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 4, gap: 6 }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'baseline', marginTop: 4, gap: 6 }}>
                       <Text style={{ color: colors.text, opacity: 0.5, fontSize: 11 * m, fontFamily: tStyles.fontFamily }}>
-                        Örnek Bakiye:
+                        Canlı Görünüm:
                       </Text>
                       <Text style={{ color: colors.primary, fontWeight: 'bold', fontSize: 14 * m, fontFamily: tStyles.fontFamily }}>
                         {getCurrencyPreviewAmount(currency)}
                       </Text>
                     </View>
                   </View>
-                  <View style={[styles.activeCheckPill, { backgroundColor: colors.primary + '18' }]}>
-                    <Ionicons name="checkmark-circle" size={20} color={colors.primary} />
-                  </View>
                 </View>
 
-                {/* Quick Currency Chips (Top 6 Currencies) */}
-                <View style={styles.quickCurrencyGrid}>
-                  {popularCurrenciesList.map(c => {
-                    const isSelected = currency.code === c.code;
-                    return (
-                      <TouchableOpacity
-                        key={c.code}
-                        style={[
-                          styles.quickCurrencyChip,
-                          {
-                            backgroundColor: isSelected ? colors.primary + '14' : colors.card,
-                            borderColor: isSelected ? colors.primary : 'transparent',
-                            borderRadius: Math.max(tStyles.roundness / 2, 8),
-                          }
-                        ]}
-                        onPress={() => setLocalCurrency(c)}
-                        activeOpacity={0.7}
-                      >
-                        <Text style={{ fontSize: 16 * m }}>{c.flag}</Text>
-                        <View style={{ alignItems: 'flex-start' }}>
-                          <Text style={[
-                            styles.quickCurrencyCode,
-                            { 
-                              color: isSelected ? colors.primary : colors.text,
-                              fontWeight: isSelected ? 'bold' : '600',
-                              fontSize: 13 * m,
-                              fontFamily: tStyles.fontFamily 
+                {/* Quick Currency Chips (2 rows of 3, 100% equal width, immune to wrapping bugs) */}
+                <View style={{ marginBottom: 8 }}>
+                  <View style={{ flexDirection: 'row', gap: 8, marginBottom: 8 }}>
+                    {popularRow1.map(c => {
+                      const isSelected = currency.code === c.code;
+                      return (
+                        <TouchableOpacity
+                          key={c.code}
+                          style={[
+                            styles.quickCurrencyChip,
+                            {
+                              backgroundColor: isSelected ? colors.primary + '14' : colors.card,
+                              borderColor: isSelected ? colors.primary : 'rgba(0,0,0,0.06)',
+                              borderRadius: Math.max(tStyles.roundness / 2, 8),
                             }
-                          ]}>
-                            {c.code}
-                          </Text>
-                          <Text style={[
-                            styles.quickCurrencySymbol,
-                            { 
-                              color: isSelected ? colors.primary : colors.text,
-                              opacity: isSelected ? 0.9 : 0.5,
-                              fontSize: 11 * m,
-                              fontFamily: tStyles.fontFamily 
+                          ]}
+                          onPress={() => setLocalCurrency(c)}
+                          activeOpacity={0.7}
+                        >
+                          <Text style={{ fontSize: 16 * m, marginRight: 5 }}>{c.flag}</Text>
+                          <View style={{ flex: 1 }}>
+                            <Text style={[
+                              styles.quickCurrencyCode,
+                              { 
+                                color: isSelected ? colors.primary : colors.text,
+                                fontWeight: isSelected ? 'bold' : '600',
+                                fontSize: 12.5 * m,
+                                fontFamily: tStyles.fontFamily 
+                              }
+                            ]} numberOfLines={1}>
+                              {c.code}
+                            </Text>
+                            <Text style={[
+                              styles.quickCurrencySymbol,
+                              { 
+                                color: isSelected ? colors.primary : colors.text,
+                                opacity: isSelected ? 0.9 : 0.5,
+                                fontSize: 11 * m,
+                                fontFamily: tStyles.fontFamily 
+                              }
+                            ]} numberOfLines={1}>
+                              {c.symbol}
+                            </Text>
+                          </View>
+                          {isSelected && (
+                            <Ionicons name="checkmark" size={13} color={colors.primary} />
+                          )}
+                        </TouchableOpacity>
+                      );
+                    })}
+                  </View>
+
+                  <View style={{ flexDirection: 'row', gap: 8 }}>
+                    {popularRow2.map(c => {
+                      const isSelected = currency.code === c.code;
+                      return (
+                        <TouchableOpacity
+                          key={c.code}
+                          style={[
+                            styles.quickCurrencyChip,
+                            {
+                              backgroundColor: isSelected ? colors.primary + '14' : colors.card,
+                              borderColor: isSelected ? colors.primary : 'rgba(0,0,0,0.06)',
+                              borderRadius: Math.max(tStyles.roundness / 2, 8),
                             }
-                          ]}>
-                            {c.symbol}
-                          </Text>
-                        </View>
-                      </TouchableOpacity>
-                    );
-                  })}
+                          ]}
+                          onPress={() => setLocalCurrency(c)}
+                          activeOpacity={0.7}
+                        >
+                          <Text style={{ fontSize: 16 * m, marginRight: 5 }}>{c.flag}</Text>
+                          <View style={{ flex: 1 }}>
+                            <Text style={[
+                              styles.quickCurrencyCode,
+                              { 
+                                color: isSelected ? colors.primary : colors.text,
+                                fontWeight: isSelected ? 'bold' : '600',
+                                fontSize: 12.5 * m,
+                                fontFamily: tStyles.fontFamily 
+                              }
+                            ]} numberOfLines={1}>
+                              {c.code}
+                            </Text>
+                            <Text style={[
+                              styles.quickCurrencySymbol,
+                              { 
+                                color: isSelected ? colors.primary : colors.text,
+                                opacity: isSelected ? 0.9 : 0.5,
+                                fontSize: 11 * m,
+                                fontFamily: tStyles.fontFamily 
+                              }
+                            ]} numberOfLines={1}>
+                              {c.symbol}
+                            </Text>
+                          </View>
+                          {isSelected && (
+                            <Ionicons name="checkmark" size={13} color={colors.primary} />
+                          )}
+                        </TouchableOpacity>
+                      );
+                    })}
+                  </View>
                 </View>
 
                 {/* Expand / Collapse All Currencies Button */}
@@ -891,7 +954,7 @@ export default function OnboardingScreen({ navigation }: any) {
                     </View>
 
                     <View style={[styles.currencyScrollContainer, { backgroundColor: colors.card, borderRadius: tStyles.roundness }]}>
-                      <ScrollView nestedScrollEnabled style={{ maxHeight: 200 }} showsVerticalScrollIndicator={true}>
+                      <ScrollView nestedScrollEnabled style={{ maxHeight: 190 }} showsVerticalScrollIndicator={true}>
                         {filteredCurrencies.map(c => {
                           const isSelected = currency.code === c.code;
                           return (
@@ -935,12 +998,12 @@ export default function OnboardingScreen({ navigation }: any) {
               </View>
 
               {/* SECTION 2: ÖNCELİKLİ FİNANSAL HEDEFİNİZ */}
-              <View style={{ marginBottom: 24 }}>
-                <Text style={[styles.sectionHeading, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 13 * m, marginBottom: 2 }]}>
+              <View style={{ marginBottom: 20 }}>
+                <Text style={[styles.sectionHeading, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 12.5 * m, marginBottom: 2 }]}>
                   ÖNCELİKLİ FİNANSAL HEDEFİNİZ
                 </Text>
-                <Text style={{ color: colors.text, opacity: 0.6, fontSize: 11.5 * m, fontFamily: tStyles.fontFamily, marginBottom: 12 }}>
-                  TrioTrack, bütçe analizlerini ve günlük harcama limitlerinizi bu hedefe göre odaklar.
+                <Text style={{ color: colors.text, opacity: 0.6, fontSize: 11.5 * m, fontFamily: tStyles.fontFamily, marginBottom: 10 }}>
+                  TrioTrack, analiz ve limitlerinizi bu hedefe göre optimize eder.
                 </Text>
 
                 <View style={styles.financialGoalsList}>
@@ -953,19 +1016,20 @@ export default function OnboardingScreen({ navigation }: any) {
                           styles.financialGoalCard,
                           {
                             backgroundColor: colors.card,
-                            borderColor: isSelected ? colors.primary : 'transparent',
+                            borderColor: isSelected ? colors.primary : 'rgba(0,0,0,0.05)',
                             borderRadius: tStyles.roundness,
                           },
-                          isSelected && { backgroundColor: colors.primary + '0C' }
+                          isSelected && { backgroundColor: colors.primary + '0A', borderColor: colors.primary }
                         ]}
                         onPress={() => setLocalFinancialGoal(goal.id)}
                         activeOpacity={0.7}
                       >
                         <View style={[styles.goalIconBox, { backgroundColor: goal.color + '18' }]}>
-                          <Ionicons name={goal.icon as any} size={22} color={goal.color} />
+                          <Ionicons name={goal.icon as any} size={20} color={goal.color} />
                         </View>
-                        <View style={{ flex: 1, paddingRight: 6 }}>
-                          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap', marginBottom: 2 }}>
+                        
+                        <View style={{ flex: 1, marginRight: 8 }}>
+                          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 2 }}>
                             <Text style={[
                               styles.goalTitle,
                               { 
@@ -977,24 +1041,25 @@ export default function OnboardingScreen({ navigation }: any) {
                             ]}>
                               {goal.title}
                             </Text>
-                            <View style={[styles.goalBadge, { backgroundColor: goal.color + '20' }]}>
-                              <Text style={[styles.goalBadgeText, { color: goal.color, fontSize: 9.5 * m }]}>
+                            <View style={[styles.goalBadge, { backgroundColor: goal.color + '18' }]}>
+                              <Text style={[styles.goalBadgeText, { color: goal.color, fontSize: 10 * m }]}>
                                 {goal.badge}
                               </Text>
                             </View>
                           </View>
-                          <Text style={[styles.goalSubtitle, { color: colors.text, opacity: 0.65, fontFamily: tStyles.fontFamily, fontSize: 11 * m }]}>
+                          <Text style={[styles.goalSubtitle, { color: colors.text, opacity: 0.6, fontFamily: tStyles.fontFamily, fontSize: 11.5 * m, lineHeight: 15 }]}>
                             {goal.subtitle}
                           </Text>
                         </View>
+
                         <View style={[
                           styles.goalRadioCircle,
                           {
-                            borderColor: isSelected ? colors.primary : colors.text + '35',
+                            borderColor: isSelected ? colors.primary : colors.text + '30',
                             backgroundColor: isSelected ? colors.primary : 'transparent'
                           }
                         ]}>
-                          {isSelected && <Ionicons name="checkmark" size={13} color={colors.onPrimary} />}
+                          {isSelected && <Ionicons name="checkmark" size={12} color={colors.onPrimary} />}
                         </View>
                       </TouchableOpacity>
                     );
@@ -1004,61 +1069,90 @@ export default function OnboardingScreen({ navigation }: any) {
 
               {/* SECTION 3: AYLIK GELİRDEN BİRİKİM ORANI */}
               <View style={{ marginBottom: 16 }}>
-                <Text style={[styles.sectionHeading, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 13 * m, marginBottom: 2 }]}>
+                <Text style={[styles.sectionHeading, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 12.5 * m, marginBottom: 2 }]}>
                   AYLIK GELİRDEN BİRİKİM ORANI
                 </Text>
-                <Text style={{ color: colors.text, opacity: 0.6, fontSize: 11.5 * m, fontFamily: tStyles.fontFamily, marginBottom: 12 }}>
+                <Text style={{ color: colors.text, opacity: 0.6, fontSize: 11.5 * m, fontFamily: tStyles.fontFamily, marginBottom: 10 }}>
                   Aylık gelirinizden birikime veya borç kapatmaya ayırmak istediğiniz hedef oran.
                 </Text>
 
-                <View style={styles.savingsOptionsGrid}>
+                {/* 4-Pill Segmented Selector Row */}
+                <View style={{ flexDirection: 'row', gap: 8, marginBottom: 10 }}>
                   {SAVINGS_TARGET_OPTIONS.map(opt => {
                     const isSelected = savingsTargetPercent === opt.percent;
                     return (
                       <TouchableOpacity
                         key={opt.percent}
                         style={[
-                          styles.savingsOptionCard,
+                          styles.savingsPillBtn,
                           {
-                            backgroundColor: isSelected ? colors.primary + '14' : colors.card,
-                            borderColor: isSelected ? colors.primary : 'transparent',
-                            borderRadius: Math.max(tStyles.roundness / 2, 10),
+                            backgroundColor: isSelected ? colors.primary : colors.card,
+                            borderColor: isSelected ? colors.primary : 'rgba(0,0,0,0.06)',
+                            borderRadius: Math.max(tStyles.roundness / 2, 8),
                           }
                         ]}
                         onPress={() => setLocalSavingsTargetPercent(opt.percent)}
                         activeOpacity={0.7}
                       >
-                        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
-                          <Text style={[
-                            styles.savingsPercentText,
-                            {
-                              color: isSelected ? colors.primary : colors.text,
-                              fontFamily: tStyles.fontFamily,
-                              fontWeight: 'bold',
-                              fontSize: 16 * m
-                            }
+                        {opt.badge ? (
+                          <View style={[
+                            styles.savingsMicroBadge,
+                            { backgroundColor: isSelected ? colors.onPrimary + '30' : colors.primary + '18' }
                           ]}>
-                            {opt.label}
-                          </Text>
-                          {isSelected && (
-                            <Ionicons name="checkmark-circle" size={16} color={colors.primary} />
-                          )}
-                        </View>
+                            <Text style={[
+                              styles.savingsMicroBadgeText,
+                              { color: isSelected ? colors.onPrimary : colors.primary, fontSize: 8.5 * m }
+                            ]}>
+                              {opt.badge}
+                            </Text>
+                          </View>
+                        ) : (
+                          <View style={{ height: 16 }} />
+                        )}
                         <Text style={[
-                          styles.savingsOptionLabel,
+                          styles.savingsPillText,
                           {
-                            color: colors.text,
-                            opacity: isSelected ? 0.9 : 0.6,
+                            color: isSelected ? colors.onPrimary : colors.text,
                             fontFamily: tStyles.fontFamily,
-                            fontSize: 10.5 * m,
+                            fontWeight: 'bold',
+                            fontSize: 15 * m
                           }
                         ]}>
-                          {opt.desc}
+                          {opt.label}
                         </Text>
                       </TouchableOpacity>
                     );
                   })}
                 </View>
+
+                {/* Active Selected Savings Tier Info Card */}
+                {selectedSavingsOption && (
+                  <View style={[
+                    styles.savingsDetailCard,
+                    {
+                      backgroundColor: colors.card,
+                      borderColor: colors.primary + '30',
+                      borderRadius: tStyles.roundness,
+                    }
+                  ]}>
+                    <View style={[styles.savingsDetailIconBox, { backgroundColor: colors.primary + '18' }]}>
+                      <Ionicons name="sparkles" size={16} color={colors.primary} />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                        <Text style={[styles.savingsDetailTitle, { color: colors.text, fontFamily: tStyles.fontFamily, fontWeight: 'bold', fontSize: 13 * m }]}>
+                          {selectedSavingsOption.title}
+                        </Text>
+                        <Text style={{ color: colors.primary, fontWeight: 'bold', fontSize: 12 * m, fontFamily: tStyles.fontFamily }}>
+                          ({selectedSavingsOption.label})
+                        </Text>
+                      </View>
+                      <Text style={[styles.savingsDetailDesc, { color: colors.text, opacity: 0.65, fontFamily: tStyles.fontFamily, fontSize: 11.5 * m, marginTop: 2, lineHeight: 16 }]}>
+                        {selectedSavingsOption.desc}
+                      </Text>
+                    </View>
+                  </View>
+                )}
               </View>
 
             </View>
@@ -1312,7 +1406,7 @@ export default function OnboardingScreen({ navigation }: any) {
                     Tasarruf Hedefi:
                   </Text>
                   <Text style={[styles.summaryItemVal, { color: colors.primary, fontWeight: 'bold', fontFamily: tStyles.fontFamily, fontSize: 13 * m }]}>
-                    %{savingsTargetPercent} ({SAVINGS_TARGET_OPTIONS.find(o => o.percent === savingsTargetPercent)?.desc || ''})
+                    %{savingsTargetPercent} ({getSavingsTargetOption(savingsTargetPercent).title})
                   </Text>
                 </View>
                 <View style={styles.summaryItemRow}>
@@ -2045,49 +2139,54 @@ const styles = StyleSheet.create({
   statBadge: { paddingVertical: 6, paddingHorizontal: 12, borderRadius: 8, alignItems: 'center', minWidth: 70 },
 
   // Slide 3: Para Birimi & Finansal Hedef Stilleri
+  slideIconBox: {
+    width: 54,
+    height: 54,
+    borderRadius: 27,
+    justifyContent: 'center',
+    alignItems: 'center',
+    alignSelf: 'center',
+    marginBottom: 10,
+  },
   currencyHeroCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 14,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
     borderWidth: 1.5,
-    marginBottom: 12,
+    marginBottom: 10,
     elevation: 2,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
+    shadowOpacity: 0.05,
     shadowRadius: 4,
   },
   currencyHeroSymbolBadge: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 42,
+    height: 42,
+    borderRadius: 21,
     justifyContent: 'center',
     alignItems: 'center',
   },
   currencyHeroCode: {
     fontWeight: 'bold',
   },
-  currencyHeroName: {},
+  currencyHeroName: {
+    flexShrink: 1,
+  },
   activeCheckPill: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
+    width: 26,
+    height: 26,
+    borderRadius: 13,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  quickCurrencyGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-    marginBottom: 10,
-  },
   quickCurrencyChip: {
-    width: '31.5%',
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 10,
+    paddingVertical: 9,
     paddingHorizontal: 8,
-    gap: 6,
     borderWidth: 1.5,
   },
   quickCurrencyCode: {},
@@ -2101,29 +2200,28 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   financialGoalsList: {
-    gap: 10,
+    gap: 8,
   },
   financialGoalCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 13,
+    paddingVertical: 11,
+    paddingHorizontal: 13,
     borderWidth: 1.5,
     elevation: 1,
   },
   goalIconBox: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
+    width: 38,
+    height: 38,
+    borderRadius: 19,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 12,
+    marginRight: 11,
   },
   goalTitle: {},
-  goalSubtitle: {
-    lineHeight: 15,
-  },
+  goalSubtitle: {},
   goalBadge: {
-    paddingHorizontal: 6,
+    paddingHorizontal: 7,
     paddingVertical: 2,
     borderRadius: 6,
   },
@@ -2131,27 +2229,48 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   goalRadioCircle: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
     borderWidth: 2,
     justifyContent: 'center',
     alignItems: 'center',
-    marginLeft: 4,
+    marginLeft: 2,
   },
-  savingsOptionsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  savingsOptionCard: {
-    width: '48.5%',
-    padding: 12,
+  savingsPillBtn: {
+    flex: 1,
+    paddingVertical: 8,
+    paddingHorizontal: 4,
+    alignItems: 'center',
+    justifyContent: 'center',
     borderWidth: 1.5,
+    minHeight: 56,
+  },
+  savingsMicroBadge: {
+    paddingHorizontal: 5,
+    paddingVertical: 1,
+    borderRadius: 4,
+    marginBottom: 2,
+  },
+  savingsMicroBadgeText: {
+    fontWeight: 'bold',
+  },
+  savingsPillText: {},
+  savingsDetailCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
+    borderWidth: 1,
     elevation: 1,
   },
-  savingsPercentText: {},
-  savingsOptionLabel: {
-    lineHeight: 14,
+  savingsDetailIconBox: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 10,
   },
+  savingsDetailTitle: {},
+  savingsDetailDesc: {},
 });
