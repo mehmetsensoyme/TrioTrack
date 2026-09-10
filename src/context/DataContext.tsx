@@ -120,6 +120,8 @@ interface DataContextProps {
   isLoaded: boolean;
   userName: string;
   setUserName: (name: string) => void;
+  userAvatar: string | null;
+  setUserAvatar: (avatar: string | null) => Promise<void>;
   weekStartMonday: boolean;
   setWeekStartMonday: (val: boolean) => Promise<void>;
   selectedMonth: string;
@@ -133,6 +135,7 @@ interface DataContextProps {
     weekStartMonday?: boolean;
     budgetCycleDay?: number;
     selectedCategoryIds?: string[];
+    userAvatar?: string | null;
   }) => Promise<void>;
   
   // Eylemler
@@ -199,6 +202,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [monthlyBudgetGoal, setMonthlyBudgetGoal] = useState<number>(0); // Varsayılan temiz bütçe
   const [isOnboarded, setIsOnboarded] = useState<boolean>(false);
   const [userName, setUserName] = useState<string>('Mehmet Şensoy');
+  const [userAvatar, setUserAvatarState] = useState<string | null>(null);
   const [weekStartMonday, setWeekStartMondayState] = useState<boolean>(true);
   const [isBalanceHidden, setIsBalanceHidden] = useState<boolean>(false);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -214,6 +218,10 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const storedUser = await AsyncStorage.getItem('@triotrack_username');
         if (storedUser) {
           setUserName(storedUser);
+        }
+        const storedAvatar = await AsyncStorage.getItem('@triotrack_user_avatar');
+        if (storedAvatar) {
+          setUserAvatarState(storedAvatar);
         }
         const storedWeekStart = await AsyncStorage.getItem('@triotrack_week_start');
         if (storedWeekStart !== null) {
@@ -653,8 +661,18 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       budgetCycleDay,
       monthlyBudgetGoal,
       userName,
+      userAvatar,
     };
     return JSON.stringify(exportObject, null, 2);
+  };
+
+  const setUserAvatar = async (avatar: string | null) => {
+    setUserAvatarState(avatar);
+    if (avatar) {
+      await AsyncStorage.setItem('@triotrack_user_avatar', avatar);
+    } else {
+      await AsyncStorage.removeItem('@triotrack_user_avatar');
+    }
   };
 
   const importDataFromJSON = async (jsonString: string): Promise<{ success: boolean; message: string }> => {
@@ -679,6 +697,9 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUserName(parsed.userName);
         await AsyncStorage.setItem('@triotrack_username', parsed.userName);
       }
+      if (parsed.userAvatar !== undefined) {
+        await setUserAvatar(parsed.userAvatar);
+      }
 
       // Anlık yerel cihaz snapshot'ını güncelle
       await saveLocalSnapshot(jsonString, {
@@ -702,10 +723,14 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     weekStartMonday?: boolean;
     budgetCycleDay?: number;
     selectedCategoryIds?: string[];
+    userAvatar?: string | null;
   }) => {
     if (params.name?.trim()) {
       setUserName(params.name.trim());
       await AsyncStorage.setItem('@triotrack_username', params.name.trim());
+    }
+    if (params.userAvatar !== undefined) {
+      await setUserAvatar(params.userAvatar);
     }
     const goal = typeof params.monthlyGoal === 'number' && params.monthlyGoal > 0 ? params.monthlyGoal : 0;
     setMonthlyBudgetGoal(goal);
@@ -753,7 +778,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const resetAllData = async () => {
     try {
-      await AsyncStorage.multiRemove([STORAGE_KEY, '@triotrack_onboarded', '@triotrack_username', '@triotrack_week_start', '@triotrack_recalc_mode', '@triotrack_cycle_day']);
+      await AsyncStorage.multiRemove([STORAGE_KEY, '@triotrack_onboarded', '@triotrack_username', '@triotrack_user_avatar', '@triotrack_week_start', '@triotrack_recalc_mode', '@triotrack_cycle_day']);
+      setUserAvatarState(null);
       setTransactions([]);
       setAccounts([
         { id: 'acc_cash', name: 'Nakit Cüzdan', type: 'cash', balance: 0, color: '#4CAF50', icon: 'wallet-outline' }
@@ -797,6 +823,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isLoaded,
         userName,
         setUserName,
+        userAvatar,
+        setUserAvatar,
         weekStartMonday,
         setWeekStartMonday,
         selectedMonth,

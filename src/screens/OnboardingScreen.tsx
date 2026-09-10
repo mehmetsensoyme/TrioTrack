@@ -16,9 +16,11 @@ import {
   Image
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../theme/ThemeContext';
 import { useData } from '../context/DataContext';
+import { AVATAR_PRESETS, getAvatarPreset } from '../utils/avatarUtils';
 import { 
   pickBackupFile, 
   readClipboardBackup, 
@@ -92,8 +94,14 @@ export default function OnboardingScreen({ navigation }: any) {
   const [agreedPrivacy, setAgreedPrivacy] = useState(true);
   const [agreedBackup, setAgreedBackup] = useState(true);
 
-  // Step 2: Personalization
+  // Step 2: Personalization & Profile Avatar
   const [name, setName] = useState('');
+  const [avatarUri, setAvatarUri] = useState<string | null>(null);
+  const [showAvatarSheet, setShowAvatarSheet] = useState(false);
+
+  const avatarPreset = useMemo(() => {
+    return getAvatarPreset(avatarUri);
+  }, [avatarUri]);
 
   // Step 3: Currency
   const [currency, setLocalCurrency] = useState(CURRENCIES[0]);
@@ -174,7 +182,8 @@ export default function OnboardingScreen({ navigation }: any) {
         monthlyGoal: monthlyGoalNum,
         weekStartMonday,
         budgetCycleDay,
-        selectedCategoryIds: selectedCatIds
+        selectedCategoryIds: selectedCatIds,
+        userAvatar: avatarUri,
       });
 
       setTimeout(() => {
@@ -185,6 +194,49 @@ export default function OnboardingScreen({ navigation }: any) {
       console.warn(e);
       setIsFinishing(false);
       navigation.replace('Home');
+    }
+  };
+
+  const handlePickAvatarGallery = async () => {
+    try {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('İzin Gerekli', 'Fotoğraf seçebilmek için galeri erişim izni vermelisiniz.');
+        return;
+      }
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.85,
+      });
+      if (!result.canceled && result.assets[0]?.uri) {
+        setAvatarUri(result.assets[0].uri);
+        setShowAvatarSheet(false);
+      }
+    } catch (err: any) {
+      Alert.alert('Hata', 'Fotoğraf seçilirken bir sorun oluştu: ' + (err?.message || ''));
+    }
+  };
+
+  const handleTakeAvatarPhoto = async () => {
+    try {
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('İzin Gerekli', 'Fotoğraf çekebilmek için kamera erişim izni vermelisiniz.');
+        return;
+      }
+      const result = await ImagePicker.launchCameraAsync({
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.85,
+      });
+      if (!result.canceled && result.assets[0]?.uri) {
+        setAvatarUri(result.assets[0].uri);
+        setShowAvatarSheet(false);
+      }
+    } catch (err: any) {
+      Alert.alert('Hata', 'Fotoğraf çekilirken bir sorun oluştu: ' + (err?.message || ''));
     }
   };
 
@@ -478,16 +530,53 @@ export default function OnboardingScreen({ navigation }: any) {
             </View>
           )}
 
-          {/* SLIDE 2: Personalization (Zero "What should we call you?") */}
+          {/* SLIDE 2: Personalization & Styling */}
           {step === 2 && (
             <View style={styles.slide}>
-              <View style={[styles.avatarPreviewCircle, { backgroundColor: colors.primary }]}>
-                <Text style={{ color: colors.onPrimary, fontSize: 32 * m, fontWeight: 'bold', fontFamily: tStyles.fontFamily }}>
-                  {name.trim() ? name.trim().charAt(0).toUpperCase() : '👤'}
-                </Text>
+              {/* Profil Avatarı & Fotoğraf Seçim Alanı */}
+              <View style={{ alignItems: 'center', marginBottom: 16 }}>
+                <TouchableOpacity
+                  style={[
+                    styles.avatarPreviewCircle,
+                    {
+                      backgroundColor: avatarPreset ? avatarPreset.bg : colors.primary,
+                      borderColor: colors.primary + '40',
+                      borderWidth: 2.5,
+                    }
+                  ]}
+                  onPress={() => setShowAvatarSheet(true)}
+                  activeOpacity={0.8}
+                >
+                  {avatarUri && !avatarUri.startsWith('preset:') ? (
+                    <Image source={{ uri: avatarUri }} style={styles.avatarImage} resizeMode="cover" />
+                  ) : avatarPreset ? (
+                    <Ionicons name={avatarPreset.icon as any} size={36 * m} color="#FFFFFF" />
+                  ) : name.trim() ? (
+                    <Text style={[styles.avatarMonogramText, { color: colors.onPrimary, fontFamily: tStyles.fontFamily, fontSize: 30 * m }]}>
+                      {name.trim().charAt(0).toUpperCase()}
+                    </Text>
+                  ) : (
+                    <Ionicons name="person" size={34 * m} color={colors.onPrimary} />
+                  )}
+
+                  {/* Sağ Altta Kamera Rozeti */}
+                  <View style={[styles.avatarCameraBadge, { backgroundColor: colors.primary }]}>
+                    <Ionicons name="camera" size={13} color={colors.onPrimary} />
+                  </View>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  onPress={() => setShowAvatarSheet(true)}
+                  style={{ marginTop: 8, paddingHorizontal: 10, paddingVertical: 4 }}
+                  activeOpacity={0.7}
+                >
+                  <Text style={{ color: colors.primary, fontSize: 13 * m, fontWeight: 'bold', fontFamily: tStyles.fontFamily }}>
+                    {avatarUri ? 'Fotoğrafı / Stili Değiştir' : '+ Fotoğraf veya Avatar Seç'}
+                  </Text>
+                </TouchableOpacity>
               </View>
 
-              <Text style={[styles.slideTitle, { color: colors.text, fontFamily: tStyles.fontFamily, fontWeight: tStyles.titleWeight, fontSize: 26 * m }]}>
+              <Text style={[styles.slideTitle, { color: colors.text, fontFamily: tStyles.fontFamily, fontWeight: tStyles.titleWeight, fontSize: 24 * m }]}>
                 Sana Nasıl Hitap Edelim?
               </Text>
               <Text style={[styles.slideSubtitle, { color: colors.text, opacity: 0.7, fontFamily: tStyles.fontFamily, fontSize: 13 * m }]}>
@@ -499,17 +588,16 @@ export default function OnboardingScreen({ navigation }: any) {
                   İSMİNİZ VEYA TAKMA ADINIZ
                 </Text>
                 <TextInput
-                  style={[styles.bigTextInput, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 22 * m }]}
+                  style={[styles.bigTextInput, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 20 * m }]}
                   placeholder="Örn: Mehmet"
                   placeholderTextColor={colors.text + '40'}
                   value={name}
                   onChangeText={setName}
-                  autoFocus
                 />
               </View>
 
-              {/* Appearance Toggles */}
-              <Text style={[styles.sectionHeading, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 13 * m }]}>
+              {/* TEMA MODU */}
+              <Text style={[styles.sectionHeading, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 12.5 * m }]}>
                 TEMA MODU
               </Text>
               <View style={styles.rowChoices}>
@@ -540,7 +628,8 @@ export default function OnboardingScreen({ navigation }: any) {
                 ))}
               </View>
 
-              <Text style={[styles.sectionHeading, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 13 * m, marginTop: 16 }]}>
+              {/* ARAYÜZ TARZI */}
+              <Text style={[styles.sectionHeading, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 12.5 * m, marginTop: 14 }]}>
                 ARAYÜZ TARZI
               </Text>
               <View style={styles.rowChoices}>
@@ -564,6 +653,78 @@ export default function OnboardingScreen({ navigation }: any) {
                     </Text>
                     <Text style={{ color: colors.text, opacity: 0.5, fontSize: 10 * m, fontFamily: tStyles.fontFamily }}>
                       {t.desc}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+
+              {/* YAZI TİPİ (TİPOGRAFİ) */}
+              <Text style={[styles.sectionHeading, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 12.5 * m, marginTop: 14 }]}>
+                YAZI TİPİ (TİPOGRAFİ)
+              </Text>
+              <View style={styles.rowChoices}>
+                {[
+                  { id: 'modern', label: 'Modern', sub: 'Sans-Serif', sample: 'Aa' },
+                  { id: 'classic', label: 'Klasik', sub: 'Serif', sample: 'Aa' },
+                  { id: 'code', label: 'Teknik', sub: 'Monospace', sample: 'Aa' },
+                ].map(f => (
+                  <TouchableOpacity
+                    key={f.id}
+                    style={[
+                      styles.themeCardItem,
+                      { backgroundColor: colors.card, borderRadius: tStyles.roundness },
+                      fontChoice === f.id ? { borderColor: colors.primary, borderWidth: 2 } : { borderColor: 'transparent', borderWidth: 2 }
+                    ]}
+                    onPress={() => setFontChoice(f.id as any)}
+                  >
+                    <Text style={{ 
+                      fontSize: 18 * m, 
+                      fontWeight: 'bold', 
+                      color: colors.primary, 
+                      marginBottom: 2,
+                      fontFamily: f.id === 'classic' ? (Platform.OS === 'ios' ? 'Georgia' : 'serif') : f.id === 'code' ? (Platform.OS === 'ios' ? 'Menlo' : 'monospace') : (Platform.OS === 'ios' ? 'System' : 'sans-serif')
+                    }}>
+                      {f.sample}
+                    </Text>
+                    <Text style={[styles.themeCardTitle, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 12 * m }]}>
+                      {f.label}
+                    </Text>
+                    <Text style={{ color: colors.text, opacity: 0.5, fontSize: 10 * m, fontFamily: tStyles.fontFamily }}>
+                      {f.sub}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+
+              {/* YAZI BOYUTU (PUNTO) */}
+              <Text style={[styles.sectionHeading, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 12.5 * m, marginTop: 14 }]}>
+                YAZI BOYUTU
+              </Text>
+              <View style={styles.rowChoices}>
+                {[
+                  { id: 'small', label: 'Kompakt', tag: 'A-' },
+                  { id: 'medium', label: 'Standart', tag: 'A' },
+                  { id: 'large', label: 'Geniş', tag: 'A+' },
+                ].map(sz => (
+                  <TouchableOpacity
+                    key={sz.id}
+                    style={[
+                      styles.choiceChip,
+                      { backgroundColor: colors.card, borderRadius: Math.max(tStyles.roundness / 2, 6) },
+                      textSize === sz.id && { backgroundColor: colors.primary }
+                    ]}
+                    onPress={() => setTextSize(sz.id as any)}
+                  >
+                    <Text style={{ 
+                      color: textSize === sz.id ? colors.onPrimary : colors.primary, 
+                      fontWeight: 'bold', 
+                      fontSize: sz.id === 'small' ? 11 * m : sz.id === 'large' ? 15 * m : 13 * m,
+                      marginRight: 6
+                    }}>
+                      {sz.tag}
+                    </Text>
+                    <Text style={{ color: textSize === sz.id ? colors.onPrimary : colors.text, fontWeight: 'bold', fontSize: 12 * m, fontFamily: tStyles.fontFamily }}>
+                      {sz.label}
                     </Text>
                   </TouchableOpacity>
                 ))}
@@ -838,9 +999,13 @@ export default function OnboardingScreen({ navigation }: any) {
           {/* SLIDE 6: Ready & Final Transition (Paisa Setup Transition) */}
           {step === 6 && (
             <View style={[styles.slide, { alignItems: 'center', justifyContent: 'center' }]}>
-              <View style={[styles.celebrationCircle, { backgroundColor: colors.primary }]}>
+              <View style={[styles.celebrationCircle, { backgroundColor: avatarPreset ? avatarPreset.bg : colors.primary, overflow: 'hidden' }]}>
                 {isFinishing ? (
                   <ActivityIndicator size="large" color={colors.onPrimary} />
+                ) : avatarUri && !avatarUri.startsWith('preset:') ? (
+                  <Image source={{ uri: avatarUri }} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
+                ) : avatarPreset ? (
+                  <Ionicons name={avatarPreset.icon as any} size={44} color="#FFF" />
                 ) : (
                   <Ionicons name="sparkles" size={48} color={colors.onPrimary} />
                 )}
@@ -855,6 +1020,14 @@ export default function OnboardingScreen({ navigation }: any) {
 
               {/* Setup Summary Card */}
               <View style={[styles.summaryCard, { backgroundColor: colors.card, borderRadius: tStyles.roundness }]}>
+                <View style={styles.summaryItemRow}>
+                  <Text style={[styles.summaryItemLabel, { color: colors.text, opacity: 0.6, fontFamily: tStyles.fontFamily, fontSize: 12 * m }]}>
+                    Profil & Yazı Tipi:
+                  </Text>
+                  <Text style={[styles.summaryItemVal, { color: colors.text, fontWeight: 'bold', fontFamily: tStyles.fontFamily, fontSize: 13 * m }]}>
+                    {name || 'Kullanıcı'} • {fontChoice === 'classic' ? 'Klasik (Serif)' : fontChoice === 'code' ? 'Teknik (Mono)' : 'Modern'}
+                  </Text>
+                </View>
                 <View style={styles.summaryItemRow}>
                   <Text style={[styles.summaryItemLabel, { color: colors.text, opacity: 0.6, fontFamily: tStyles.fontFamily, fontSize: 12 * m }]}>
                     Seçilen Para Birimi:
@@ -1182,6 +1355,142 @@ export default function OnboardingScreen({ navigation }: any) {
         </View>
       </Modal>
 
+      {/* PROFİL FOTOĞRAFI & AVATAR SEÇİM BOTTOM SHEET'İ */}
+      <Modal visible={showAvatarSheet} transparent animationType="slide" onRequestClose={() => setShowAvatarSheet(false)}>
+        <View style={styles.modalBackdrop}>
+          <TouchableWithoutFeedback onPress={() => setShowAvatarSheet(false)}>
+            <View style={styles.backdropDismissArea} />
+          </TouchableWithoutFeedback>
+          <View style={[
+            styles.modalCard,
+            { 
+              backgroundColor: colors.card, 
+              borderTopLeftRadius: 28, 
+              borderTopRightRadius: 28, 
+              paddingBottom: Math.max(insets.bottom + 14, 26) 
+            }
+          ]}>
+            <View style={[styles.sheetHandle, { backgroundColor: colors.text + '25' }]} />
+
+            <View style={styles.sheetHeader}>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <View style={[styles.sheetIconBadge, { backgroundColor: colors.primary + '18' }]}>
+                  <Ionicons name="camera-outline" size={20} color={colors.primary} />
+                </View>
+                <View>
+                  <Text style={[styles.modalTitle, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 17 * m }]}>
+                    Profil Fotoğrafı & Avatar
+                  </Text>
+                  <Text style={{ color: colors.text, opacity: 0.55, fontSize: 11 * m, fontFamily: tStyles.fontFamily }}>
+                    Fotoğraf çekin, galeriden yükleyin veya rozet seçin
+                  </Text>
+                </View>
+              </View>
+              <TouchableOpacity onPress={() => setShowAvatarSheet(false)} style={[styles.sheetCloseBtn, { backgroundColor: colors.background }]} activeOpacity={0.7}>
+                <Ionicons name="close" size={18} color={colors.text} />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView showsVerticalScrollIndicator={false}>
+              <View style={{ gap: 10 }}>
+                {/* 1. Galeriden Seç */}
+                <TouchableOpacity
+                  style={[styles.restoreChannelBtn, { backgroundColor: colors.background, borderRadius: Math.max(tStyles.roundness / 2, 10) }]}
+                  onPress={handlePickAvatarGallery}
+                  activeOpacity={0.7}
+                >
+                  <View style={[styles.restoreChannelIconBox, { backgroundColor: colors.primary + '18' }]}>
+                    <Ionicons name="images-outline" size={22} color={colors.primary} />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={[styles.restoreChannelTitle, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 14 * m }]}>
+                      Galeriden Fotoğraf Seç
+                    </Text>
+                    <Text style={{ color: colors.text, opacity: 0.55, fontSize: 11 * m }}>
+                      Telefonunuzdaki albümlerden profil resmi seçin
+                    </Text>
+                  </View>
+                  <Ionicons name="chevron-forward" size={16} color={colors.text} style={{ opacity: 0.3 }} />
+                </TouchableOpacity>
+
+                {/* 2. Kamerayla Çek */}
+                <TouchableOpacity
+                  style={[styles.restoreChannelBtn, { backgroundColor: colors.background, borderRadius: Math.max(tStyles.roundness / 2, 10) }]}
+                  onPress={handleTakeAvatarPhoto}
+                  activeOpacity={0.7}
+                >
+                  <View style={[styles.restoreChannelIconBox, { backgroundColor: '#00968818' }]}>
+                    <Ionicons name="camera-outline" size={22} color="#009688" />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={[styles.restoreChannelTitle, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 14 * m }]}>
+                      Kamera ile Fotoğraf Çek
+                    </Text>
+                    <Text style={{ color: colors.text, opacity: 0.55, fontSize: 11 * m }}>
+                      Kamerayı açıp anında yeni bir fotoğraf çekin
+                    </Text>
+                  </View>
+                  <Ionicons name="chevron-forward" size={16} color={colors.text} style={{ opacity: 0.3 }} />
+                </TouchableOpacity>
+
+                {/* 3. Hazır Karakter & Rozet Stilleri */}
+                <Text style={[styles.sectionHeading, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 12.5 * m, marginTop: 8, marginBottom: 2 }]}>
+                  VEYA ŞIK BİR AVATAR SEÇİN
+                </Text>
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, justifyContent: 'space-between' }}>
+                  {AVATAR_PRESETS.map(p => {
+                    const isSelected = avatarUri === `preset:${p.id}`;
+                    return (
+                      <TouchableOpacity
+                        key={p.id}
+                        style={[
+                          styles.presetAvatarBtn,
+                          {
+                            backgroundColor: colors.background,
+                            borderColor: isSelected ? colors.primary : 'transparent',
+                            borderWidth: 2,
+                            borderRadius: Math.max(tStyles.roundness / 2, 10),
+                          }
+                        ]}
+                        onPress={() => {
+                          setAvatarUri(`preset:${p.id}`);
+                          setShowAvatarSheet(false);
+                        }}
+                        activeOpacity={0.7}
+                      >
+                        <View style={[styles.presetAvatarCircle, { backgroundColor: p.bg }]}>
+                          <Ionicons name={p.icon as any} size={22} color="#FFF" />
+                        </View>
+                        <Text style={{ color: colors.text, fontSize: 11 * m, fontWeight: 'bold', fontFamily: tStyles.fontFamily, marginTop: 4 }}>
+                          {p.name}
+                        </Text>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
+
+                {/* 4. Fotoğrafı Kaldır (Varsa) */}
+                {avatarUri && (
+                  <TouchableOpacity
+                    style={[styles.removeAvatarBtn, { borderColor: '#EF4444' + '50', backgroundColor: colors.background, borderRadius: Math.max(tStyles.roundness / 2, 10), marginTop: 6 }]}
+                    onPress={() => {
+                      setAvatarUri(null);
+                      setShowAvatarSheet(false);
+                    }}
+                    activeOpacity={0.7}
+                  >
+                    <Ionicons name="trash-outline" size={18} color="#EF4444" style={{ marginRight: 8 }} />
+                    <Text style={{ color: '#EF4444', fontFamily: tStyles.fontFamily, fontWeight: 'bold', fontSize: 13 * m }}>
+                      Fotoğrafı Kaldır (İsim Baş Harfine Dön)
+                    </Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
+
     </View>
   );
 }
@@ -1233,7 +1542,61 @@ const styles = StyleSheet.create({
   checkItemTitle: { fontWeight: 'bold', marginBottom: 3 },
   checkItemDesc: { lineHeight: 16 },
 
-  avatarPreviewCircle: { width: 72, height: 72, borderRadius: 36, justifyContent: 'center', alignItems: 'center', alignSelf: 'center', marginBottom: 16 },
+  avatarPreviewCircle: {
+    width: 84,
+    height: 84,
+    borderRadius: 42,
+    justifyContent: 'center',
+    alignItems: 'center',
+    alignSelf: 'center',
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.18,
+    shadowRadius: 6,
+  },
+  avatarImage: {
+    width: 84,
+    height: 84,
+    borderRadius: 42,
+  },
+  avatarMonogramText: {
+    fontWeight: 'bold',
+  },
+  avatarCameraBadge: {
+    position: 'absolute',
+    bottom: -1,
+    right: -1,
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#FFFFFF',
+    elevation: 4,
+  },
+  presetAvatarBtn: {
+    width: '31%',
+    paddingVertical: 10,
+    paddingHorizontal: 6,
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  presetAvatarCircle: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  removeAvatarBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    borderWidth: 1,
+  },
   inputBox: { padding: 14, marginBottom: 20, elevation: 1 },
   inputMicroLabel: { fontWeight: 'bold', letterSpacing: 0.8, marginBottom: 4 },
   bigTextInput: { paddingVertical: 4 },

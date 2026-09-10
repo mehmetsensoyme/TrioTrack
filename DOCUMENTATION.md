@@ -110,13 +110,32 @@ Yedekleme sistemi tek bir metin kutusundan çıkarılmış, hem karşılama ekra
   2. **Kullanıcı Başına Depolama:** Yedeklenen dosyalar geliştiricinin sunucusunda değil, **kullanıcının kendi kişisel Google Drive hesabında** durur. Her Google kullanıcısının 15 GB ücretsiz Drive kotası vardır. TrioTrack yedek dosyaları ise yalnızca **50 KB - 300 KB** (1 MB'ın bile çok altında) boyutundadır.
   3. **Hazır ve Sıfır Konfigürasyonlu Zaten Çalışan Yöntem:** TrioTrack'teki `expo-document-picker` ile "Cihazdan .json Dosyası Seç" veya Paylaş butonu tıklandığında, telefonun yerel dosya yöneticisi açılır. Android ve iOS sistem dosya yöneticisinde **Google Drive ve iCloud Drive** varsayılan olarak zaten vardır! Dolayısıyla hiçbir Google Cloud API kurulumu yapmadan bile kullanıcı dosyayı Google Drive'ına kaydedebilir veya oradan seçebilir.
 
-#### Diğer Yedekleme & Eşitleme Seçenekleri:
-1. **İşletim Sistemi Yerel Bulutu (Google Drive & iCloud Drive):** Sıfır API maliyeti, sistem dosya yöneticisiyle tam entegrasyon.
-2. **Cihaz İçi Yerel Snapshot (Otomatik Yedek):** Cihaz hafızasında saklanan ve ağ gerektirmeyen güvenli anlık görüntü.
-3. **WebDAV / Nextcloud / ownCloud:** Kendi sunucusunu çalıştıran gizlilik tutkunları için sunucusuz doğrudan bulut eşitlemesi.
-4. **P2P Yerel Ağ / QR Kod Transferi:** Aynı Wi-Fi ağındaki iki telefon arasında veya QR kod okutarak kameradan kameraya doğrudan veri aktarımı.
-5. **Şifreli AES-256 JSON:** Yedeğin kullanıcı belirleyeceği bir anahtar parola ile şifrelenerek saklanması.
-* Kullanıcıya yükleme öncesi **İşlem Sayısı**, **Cüzdan Sayısı**, **Kategori Sayısı** ve **Kaynak Türü** onaylatılır.
+### 3.5. Kullanıcı Profili, Fotoğraf/Avatar ve Tipografi Kişiselleştirmesi (Slide 2)
+
+* **Kullanıcı Fotoğrafı Yükleme Mimarisi:**
+  * Kullanıcı avatar alanına dokunduğunda açılan Bottom Sheet üzerinden **Galeriden Fotoğraf Seçme** veya **Kamera ile Çekme** imkanı (`expo-image-picker`).
+  * Fotoğraflar 1:1 kare formatında kırpılır, cihazda yerel olarak saklanır (`@triotrack_user_avatar`).
+* **Ham Emoji Sorununun Çözümü & Mor/Tüm Temalarda Kusursuz Kontrast:**
+  * Eski `'👤'` ham emojisi kaldırıldı. Mor temada veya açık/koyu modlarda soluk ve yapay duran emoji yerine;
+    1. Yüklenen gerçek kullanıcı fotoğrafı,
+    2. Veya seçilen şık hazır avatar rozeti,
+    3. Veya ismin baş harfinden oluşan zarif monogram harf (`colors.onPrimary`),
+    4. Veya yüksek kontrastlı Ionicons vektör silüeti gösterilir.
+* **6 Hazır Karakter & Rozet Stili (`avatarUtils.ts`):**
+  * Fotoğraf yüklemek istemeyen kullanıcılar için tek dokunuşla seçilebilen 6 özel tematik avatar:
+    * 💼 **Finansör** (`#6750A4`)
+    * 🛡️ **Gizlilik** (`#009688`)
+    * 🔥 **Enerjik** (`#F29F05`)
+    * 🚀 **Girişimci** (`#3F51B5`)
+    * 🌿 **Minimalist** (`#4CAF50`)
+    * ⭐ **Vizyoner** (`#E91E63`)
+* **Yazı Tipi (Tipografi) ve Yazı Boyutu Ayarları:**
+  * **Modern (Sans-Serif):** Günlük, temiz, çağdaş arayüz fontu.
+  * **Klasik (Serif / Georgia):** Prestijli, dengeli, geleneksel finans fontu.
+  * **Teknik (Monospace / Menlo):** Kodlama ve sayısal veri odaklı finansal font.
+  * **Yazı Boyutu:** Kompakt (%85), Standart (%100), Geniş (%120).
+* **Evrensel Senkronizasyon:**
+  * Seçilen avatar ve yazı tipi Onboarding sonrasında hem **Ayarlar (`SettingsScreen`)** profil kartında hem de **Cüzdanlar & Bütçeler (`AccountsBudgetsScreen`)** selamlama başlığında anında canlı olarak görünür.
 
 ---
 

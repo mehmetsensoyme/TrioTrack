@@ -1,11 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch, TextInput, Alert, Platform, Share, Modal, Linking, TouchableWithoutFeedback, ActivityIndicator } from 'react-native';
+import React, { useState, useEffect, useMemo } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch, TextInput, Alert, Platform, Share, Modal, Linking, TouchableWithoutFeedback, ActivityIndicator, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme } from '../theme/ThemeContext';
 import { useData } from '../context/DataContext';
 import { APP_VERSION, APP_BUILD } from '../constants/version';
+import { AVATAR_PRESETS, getAvatarPreset } from '../utils/avatarUtils';
 import { 
   pickBackupFile, 
   readClipboardBackup, 
@@ -63,6 +65,8 @@ export default function SettingsScreen({ navigation }: any) {
     resetAllData,
     userName,
     setUserName,
+    userAvatar,
+    setUserAvatar,
     weekStartMonday,
     setWeekStartMonday
   } = useData();
@@ -73,12 +77,58 @@ export default function SettingsScreen({ navigation }: any) {
   const [newGoalInput, setNewGoalInput] = useState(String(monthlyBudgetGoal));
   const [showExportModal, setShowExportModal] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
+  const [showAvatarSheet, setShowAvatarSheet] = useState(false);
   const [importMode, setImportMode] = useState<'options' | 'manual' | 'preview'>('options');
   const [importJsonText, setImportJsonText] = useState('');
   const [isImporting, setIsImporting] = useState(false);
   const [parsedPreview, setParsedPreview] = useState<NormalizedBackupResult | null>(null);
   const [localSnapshotMeta, setLocalSnapshotMeta] = useState<LocalSnapshotMeta | null>(null);
   const [localSnapshotContent, setLocalSnapshotContent] = useState<string | null>(null);
+
+  const avatarPreset = useMemo(() => getAvatarPreset(userAvatar), [userAvatar]);
+
+  const handlePickAvatarGallery = async () => {
+    try {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('İzin Gerekli', 'Fotoğraf seçebilmek için galeri erişim izni vermelisiniz.');
+        return;
+      }
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.85,
+      });
+      if (!result.canceled && result.assets[0]?.uri) {
+        await setUserAvatar(result.assets[0].uri);
+        setShowAvatarSheet(false);
+      }
+    } catch (err: any) {
+      Alert.alert('Hata', 'Fotoğraf seçilirken bir sorun oluştu: ' + (err?.message || ''));
+    }
+  };
+
+  const handleTakeAvatarPhoto = async () => {
+    try {
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('İzin Gerekli', 'Fotoğraf çekebilmek için kamera erişim izni vermelisiniz.');
+        return;
+      }
+      const result = await ImagePicker.launchCameraAsync({
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.85,
+      });
+      if (!result.canceled && result.assets[0]?.uri) {
+        await setUserAvatar(result.assets[0].uri);
+        setShowAvatarSheet(false);
+      }
+    } catch (err: any) {
+      Alert.alert('Hata', 'Fotoğraf çekilirken bir sorun oluştu: ' + (err?.message || ''));
+    }
+  };
 
   const m = tStyles.fontSizeMultiplier;
 
@@ -284,11 +334,34 @@ export default function SettingsScreen({ navigation }: any) {
 
         {/* 1. KULLANICI PROFİL KARTI */}
         <View style={[styles.profileCard, { backgroundColor: colors.card, borderRadius: tStyles.roundness, elevation: tStyles.elevation }]}>
-          <View style={[styles.avatarCircle, { backgroundColor: colors.primary }]}>
-            <Text style={[styles.avatarText, { color: colors.onPrimary, fontFamily: tStyles.fontFamily }]}>
-              {userName.substring(0, 1).toUpperCase()}
-            </Text>
-          </View>
+          <TouchableOpacity 
+            style={[
+              styles.avatarCircle, 
+              { 
+                backgroundColor: avatarPreset ? avatarPreset.bg : colors.primary,
+                borderWidth: 2,
+                borderColor: colors.primary + '35',
+              }
+            ]}
+            onPress={() => setShowAvatarSheet(true)}
+            activeOpacity={0.8}
+          >
+            {userAvatar && !userAvatar.startsWith('preset:') ? (
+              <Image source={{ uri: userAvatar }} style={{ width: 48, height: 48, borderRadius: 24 }} resizeMode="cover" />
+            ) : avatarPreset ? (
+              <Ionicons name={avatarPreset.icon as any} size={24 * m} color="#FFFFFF" />
+            ) : userName?.trim() ? (
+              <Text style={[styles.avatarText, { color: colors.onPrimary, fontFamily: tStyles.fontFamily }]}>
+                {userName.trim().charAt(0).toUpperCase()}
+              </Text>
+            ) : (
+              <Ionicons name="person" size={22 * m} color={colors.onPrimary} />
+            )}
+            <View style={[styles.miniCameraBadge, { backgroundColor: colors.primary }]}>
+              <Ionicons name="camera" size={10} color={colors.onPrimary} />
+            </View>
+          </TouchableOpacity>
+
           <View style={{ flex: 1, marginLeft: 14 }}>
             <TextInput
               style={[styles.profileNameInput, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 16 * m }]}
@@ -297,11 +370,15 @@ export default function SettingsScreen({ navigation }: any) {
               placeholder="Adınız"
               placeholderTextColor={colors.text + '50'}
             />
-            <Text style={[styles.profileRole, { color: colors.primary, fontFamily: tStyles.fontFamily, fontSize: 12 * m }]}>
-              TrioTrack Pro Üye
-            </Text>
+            <TouchableOpacity onPress={() => setShowAvatarSheet(true)} style={{ marginTop: 2 }}>
+              <Text style={[styles.profileRole, { color: colors.primary, fontFamily: tStyles.fontFamily, fontSize: 12 * m }]}>
+                {userAvatar ? 'Fotoğrafı / Stili Değiştir' : '+ Profil Fotoğrafı Ekle'}
+              </Text>
+            </TouchableOpacity>
           </View>
-          <Ionicons name="pencil-outline" size={18} color={colors.text} style={{ opacity: 0.4 }} />
+          <TouchableOpacity onPress={() => setShowAvatarSheet(true)} style={{ padding: 6 }}>
+            <Ionicons name="camera-outline" size={20} color={colors.primary} />
+          </TouchableOpacity>
         </View>
 
         {/* 2. GÖRÜNÜM & TEMA (Sistem / Açık / Koyu) */}
@@ -1163,6 +1240,134 @@ export default function SettingsScreen({ navigation }: any) {
           </View>
         </View>
       </Modal>
+
+      {/* PROFİL FOTOĞRAFI & AVATAR SEÇİM BOTTOM SHEET'İ */}
+      <Modal visible={showAvatarSheet} transparent animationType="slide" onRequestClose={() => setShowAvatarSheet(false)}>
+        <View style={styles.modalOverlay}>
+          <TouchableWithoutFeedback onPress={() => setShowAvatarSheet(false)}>
+            <View style={{ flex: 1 }} />
+          </TouchableWithoutFeedback>
+          <View style={[styles.modalContent, { backgroundColor: colors.card, borderTopLeftRadius: 28, borderTopRightRadius: 28, paddingBottom: Math.max(insets.bottom + 14, 26), maxHeight: '88%' }]}>
+            <View style={[styles.sheetHandle, { backgroundColor: colors.text + '25' }]} />
+
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <View style={[styles.modalHeaderIconBadge, { backgroundColor: colors.primary + '18' }]}>
+                  <Ionicons name="camera-outline" size={20} color={colors.primary} />
+                </View>
+                <View>
+                  <Text style={[styles.modalTitle, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 17 * m }]}>
+                    Profil Fotoğrafı & Avatar
+                  </Text>
+                  <Text style={{ color: colors.text, opacity: 0.55, fontSize: 11 * m }}>
+                    Fotoğraf çekin, galeriden yükleyin veya rozet seçin
+                  </Text>
+                </View>
+              </View>
+              <TouchableOpacity onPress={() => setShowAvatarSheet(false)} style={[styles.sheetCloseBtn, { backgroundColor: colors.background }]} activeOpacity={0.7}>
+                <Ionicons name="close" size={18} color={colors.text} />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView showsVerticalScrollIndicator={false}>
+              <View style={{ gap: 10 }}>
+                {/* 1. Galeriden Seç */}
+                <TouchableOpacity
+                  style={[styles.backupChannelBtn, { backgroundColor: colors.background, borderRadius: Math.max(tStyles.roundness / 2, 10) }]}
+                  onPress={handlePickAvatarGallery}
+                  activeOpacity={0.7}
+                >
+                  <View style={[styles.backupChannelIconBox, { backgroundColor: colors.primary + '18' }]}>
+                    <Ionicons name="images-outline" size={22} color={colors.primary} />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={[styles.backupChannelTitle, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 14 * m }]}>
+                      Galeriden Fotoğraf Seç
+                    </Text>
+                    <Text style={{ color: colors.text, opacity: 0.55, fontSize: 11 * m }}>
+                      Albümünüzden bir profil resmi yükleyin
+                    </Text>
+                  </View>
+                  <Ionicons name="chevron-forward" size={16} color={colors.text} style={{ opacity: 0.3 }} />
+                </TouchableOpacity>
+
+                {/* 2. Kamera ile Çek */}
+                <TouchableOpacity
+                  style={[styles.backupChannelBtn, { backgroundColor: colors.background, borderRadius: Math.max(tStyles.roundness / 2, 10) }]}
+                  onPress={handleTakeAvatarPhoto}
+                  activeOpacity={0.7}
+                >
+                  <View style={[styles.backupChannelIconBox, { backgroundColor: '#00968818' }]}>
+                    <Ionicons name="camera-outline" size={22} color="#009688" />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={[styles.backupChannelTitle, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 14 * m }]}>
+                      Kamera ile Fotoğraf Çek
+                    </Text>
+                    <Text style={{ color: colors.text, opacity: 0.55, fontSize: 11 * m }}>
+                      Kamerayı açıp anında yeni bir fotoğraf çekin
+                    </Text>
+                  </View>
+                  <Ionicons name="chevron-forward" size={16} color={colors.text} style={{ opacity: 0.3 }} />
+                </TouchableOpacity>
+
+                {/* 3. Hazır Karakter & Rozet Stilleri */}
+                <Text style={{ color: colors.text, fontWeight: 'bold', fontSize: 12.5 * m, fontFamily: tStyles.fontFamily, marginTop: 8, marginBottom: 2 }}>
+                  VEYA ŞIK BİR AVATAR SEÇİN
+                </Text>
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, justifyContent: 'space-between' }}>
+                  {AVATAR_PRESETS.map(p => {
+                    const isSelected = userAvatar === `preset:${p.id}`;
+                    return (
+                      <TouchableOpacity
+                        key={p.id}
+                        style={[
+                          styles.presetAvatarBtn,
+                          {
+                            backgroundColor: colors.background,
+                            borderColor: isSelected ? colors.primary : 'transparent',
+                            borderWidth: 2,
+                            borderRadius: Math.max(tStyles.roundness / 2, 10),
+                          }
+                        ]}
+                        onPress={async () => {
+                          await setUserAvatar(`preset:${p.id}`);
+                          setShowAvatarSheet(false);
+                        }}
+                        activeOpacity={0.7}
+                      >
+                        <View style={[styles.presetAvatarCircle, { backgroundColor: p.bg }]}>
+                          <Ionicons name={p.icon as any} size={22} color="#FFF" />
+                        </View>
+                        <Text style={{ color: colors.text, fontSize: 11 * m, fontWeight: 'bold', fontFamily: tStyles.fontFamily, marginTop: 4 }}>
+                          {p.name}
+                        </Text>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
+
+                {/* 4. Fotoğrafı Kaldır (Varsa) */}
+                {userAvatar && (
+                  <TouchableOpacity
+                    style={[styles.removeAvatarBtn, { borderColor: '#EF4444' + '50', backgroundColor: colors.background, borderRadius: Math.max(tStyles.roundness / 2, 10), marginTop: 6 }]}
+                    onPress={async () => {
+                      await setUserAvatar(null);
+                      setShowAvatarSheet(false);
+                    }}
+                    activeOpacity={0.7}
+                  >
+                    <Ionicons name="trash-outline" size={18} color="#EF4444" style={{ marginRight: 8 }} />
+                    <Text style={{ color: '#EF4444', fontFamily: tStyles.fontFamily, fontWeight: 'bold', fontSize: 13 * m }}>
+                      Fotoğrafı Kaldır (İsim Baş Harfine Dön)
+                    </Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -1176,6 +1381,41 @@ const styles = StyleSheet.create({
   profileCard: { flexDirection: 'row', alignItems: 'center', padding: 16, marginBottom: 16 },
   avatarCircle: { width: 48, height: 48, borderRadius: 24, justifyContent: 'center', alignItems: 'center' },
   avatarText: { color: '#FFF', fontSize: 20, fontWeight: 'bold' },
+  miniCameraBadge: {
+    position: 'absolute',
+    bottom: -2,
+    right: -2,
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1.5,
+    borderColor: '#FFFFFF',
+  },
+  presetAvatarBtn: {
+    width: '31%',
+    paddingVertical: 10,
+    paddingHorizontal: 6,
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  presetAvatarCircle: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  removeAvatarBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    borderWidth: 1,
+    marginTop: 8,
+  },
   profileNameInput: { fontWeight: 'bold' },
   profileRole: { marginTop: 2, fontWeight: '600' },
 

@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Modal, Alert, Switch, TouchableWithoutFeedback, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../theme/ThemeContext';
 import { useData, Account, RecurringItem, Category } from '../context/DataContext';
+import { getAvatarPreset } from '../utils/avatarUtils';
 
 const PALETTE_COLORS = ['#FF9800', '#E91E63', '#2196F3', '#9C27B0', '#4CAF50', '#F44336', '#009688', '#3F51B5'];
 const CATEGORY_ICONS = ['cart-outline', 'fast-food-outline', 'car-outline', 'receipt-outline', 'film-outline', 'medkit-outline', 'fitness-outline', 'school-outline', 'gift-outline', 'airplane-outline', 'home-outline', 'cafe-outline'];
@@ -33,9 +34,12 @@ export default function AccountsBudgetsScreen({ navigation }: any) {
     debtors,
     totalBalance,
     userName,
+    userAvatar,
     isBalanceHidden,
     toggleBalanceHidden,
   } = useData();
+
+  const avatarPreset = useMemo(() => getAvatarPreset(userAvatar), [userAvatar]);
 
   const [activeTab, setActiveTab] = useState<'accounts' | 'budgets' | 'recurring' | 'buckwheat'>('accounts');
   
@@ -229,11 +233,31 @@ export default function AccountsBudgetsScreen({ navigation }: any) {
       <View style={[styles.paisaProfileHeader, { paddingHorizontal: 16 }]}>
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
-            <View style={[styles.profileAvatarCircle, { backgroundColor: colors.primary }]}>
-              <Text style={[styles.profileAvatarLetter, { color: colors.onPrimary, fontFamily: tStyles.fontFamily, fontSize: 18 * m, fontWeight: 'bold' }]}>
-                {userName ? userName.charAt(0).toUpperCase() : 'M'}
-              </Text>
-            </View>
+            <TouchableOpacity 
+              style={[
+                styles.profileAvatarCircle, 
+                { 
+                  backgroundColor: avatarPreset ? avatarPreset.bg : colors.primary,
+                  overflow: 'hidden',
+                  borderWidth: 1.5,
+                  borderColor: colors.primary + '30',
+                }
+              ]}
+              onPress={() => navigation?.navigate('Settings')}
+              activeOpacity={0.8}
+            >
+              {userAvatar && !userAvatar.startsWith('preset:') ? (
+                <Image source={{ uri: userAvatar }} style={{ width: 44, height: 44, borderRadius: 22 }} resizeMode="cover" />
+              ) : avatarPreset ? (
+                <Ionicons name={avatarPreset.icon as any} size={22} color="#FFF" />
+              ) : userName?.trim() ? (
+                <Text style={[styles.profileAvatarLetter, { color: colors.onPrimary, fontFamily: tStyles.fontFamily, fontSize: 18 * m, fontWeight: 'bold' }]}>
+                  {userName.trim().charAt(0).toUpperCase()}
+                </Text>
+              ) : (
+                <Ionicons name="person" size={20} color={colors.onPrimary} />
+              )}
+            </TouchableOpacity>
             <View style={{ marginLeft: 12, flex: 1 }}>
               <Text style={[styles.profileGreeting, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 18 * m, fontWeight: tStyles.titleWeight }]}>
                 Merhaba, {userName} 👋
