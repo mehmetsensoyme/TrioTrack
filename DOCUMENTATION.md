@@ -262,6 +262,9 @@ flowchart TD
     * Ayarlar sekmesine özel "GÜVENLİK & UYGULAMA KİLİDİ" kartı eklendi. Cihazın biyometrik sensör tipi (Face ID, Parmak İzi, PIN) ve kayıt durumu dinamik olarak gösterilir.
     * "Kilidi Şimdi Test Et" butonu ile kullanıcının kilidi anında deneyimlemesi sağlandı.
     * Güvenlik anahtarı açılırken önce kimlik doğrulaması şart koşularak sıfır kilitlenme (anti-lockout) koruması garantilendi.
+  * **Görev Yöneticisi ve Arka Planda WhatsApp Stili Siyah Ekran (`FLAG_SECURE`):**
+    * Biyometrik kilit devredeyken `expo-screen-capture` ile pencere seviyesinde `WindowManager.LayoutParams.FLAG_SECURE` bayrağı devreye alınır.
+    * Kullanıcı başka bir uygulamaya geçtiğinde veya Görev Yöneticisi / Son Uygulamalar (App Switcher) ekranını açtığında, WhatsApp ve bankacılık uygulamalarındaki gibi ekran tamamen siyah bir kutu olarak maskelenir; hassas finansal verilerin sistem önizlemelerinde görünmesi ve ekran görüntüsü (screenshot) alınması engellenir.
 * **v1.6.6 (11 Eylül 2026 - versionCode: 7):**
   * **Tüm Sekmelerde Tek Standart Birleşik Header Mimarisi:** Ana Sayfa, Cüzdan & Bütçe, Borçlar ve Raporlar sekmelerindeki başlık alanları kusursuz bir tasarım standardında birleştirildi.
   * **44x44 Modül Rozetleri:** Ana Sayfada profil avatarı (gerçek fotoğraf/tematik rozet/monogram), Cüzdanlar sekmesinde Cüzdan (`wallet-outline`), Borçlar sekmesinde Kişiler (`people-outline`), Raporlar sekmesinde Pasta Grafik (`pie-chart-outline`) rozetleri standart boyutta ve renk tonunda konumlandırıldı.

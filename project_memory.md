@@ -30,7 +30,8 @@ TrioTrack, 3 popüler açık kaynaklı finans uygulamasının en güçlü yönle
 ---
 
 ## 🔒 Güvenlik & Donanım Uyumluluğu
-- **Biyometrik Kimlik Doğrulama & Uygulama Kilidi (`expo-local-authentication`):** Parmak İzi (Fingerprint), Face ID ve Cihaz PIN/Şifre fallback desteği. Uygulama açılışında ve arka plana geçtiğinde (`AppState: inactive|background`) otomatik kilit devreye girer. Sıfır kilitlenme (anti-lockout) koruması ile anahtar açılırken canlı doğrulama testi yapılır.
+- **Biyometrik Kimlik Doğrulama & Uygulama Kilidi (`expo-local-authentication`):** Parmak İzi (Fingerprint), Face ID ve Cihaz PIN/Şifre fallback desteği. Uygulama açılışında ve arka plana geçtiğinde otomatik kilit devreye girer. Sıfır kilitlenme (anti-lockout) koruması ile anahtar açılırken canlı doğrulama testi yapılır.
+- **Görev Yöneticisi Gizliliği (`FLAG_SECURE` - `expo-screen-capture`):** Biyometrik kilit devredeyken başka uygulamaya veya görev yöneticisine geçildiğinde WhatsApp gibi ekran tamamen siyah renkle gizlenir; finansal bakiyelerin önizlemede görünmesi ve ekran görüntüsü (screenshot) alınması engellenir.
 - **Navbar / Gesture Pill Güvenliği:** `useSafeAreaInsets` ile alt sistem çubuğu asla menü butonlarının üzerine binmez.
 - **Status Bar:** Cihaz bildirim alanı şeffaf/renk uyumlu ve `statusBarTranslucent={true}` ile tüm modallarda homojen karartma sunar.
 - **Sürüm Takibi:** Her güncellemede `APP_VERSION` (`1.6.7`, versionCode 8) ve `APP_BUILD` (`2026.09.11`) artırılarak `app.json`, `package.json`, `android/app/build.gradle` ve `version.ts` dosyaları senkronize tutulur.

@@ -57,6 +57,13 @@ export const CHANGELOG_HISTORY: VersionRelease[] = [
         typeLabel: 'DÜZELTME',
         title: 'Sıfır Kilitlenme Koruması & Cihaz PIN Desteği',
         description: 'Kilit anahtarı açılırken önce kullanıcının kimliğini doğrulaması zorunlu tutularak kullanıcının kilitli kalması önlendi. Biyometrik sensör bulunmayan veya kaydedilmemiş cihazlarda cihaz PIN/desen şifresiyle güvenle çalışır.'
+      },
+      {
+        id: '167-5',
+        type: 'feature',
+        typeLabel: 'GİZLİLİK',
+        title: 'Görev Yöneticisinde WhatsApp Stili Siyah Ekran (FLAG_SECURE)',
+        description: 'Biyometrik kilit devredeyken başka uygulamaya geçildiğinde veya görev yöneticisine (son uygulamalar) girildiğinde ekran WhatsApp gibi tamamen siyah renkle gizlenir; finansal bakiyelerin önizlemede görünmesi ve ekran görüntüsü alınması engellenir.'
       }
     ]
   },

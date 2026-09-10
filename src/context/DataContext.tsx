@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useMemo, useRef } from 'react';
 import { AppState, AppStateStatus, Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as ScreenCapture from 'expo-screen-capture';
 import { database } from '../watermelondb/database';
 import { APP_VERSION } from '../constants/version';
 import { parseAndNormalizeBackup, saveLocalSnapshot } from '../utils/backupService';
@@ -230,6 +231,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (storedBiometric === 'true') {
           setIsBiometricEnabledState(true);
           setIsAppLocked(true);
+          ScreenCapture.preventScreenCaptureAsync('triotrack_privacy').catch(() => {});
         }
         const storedOnboarded = await AsyncStorage.getItem('@triotrack_onboarded');
         if (storedOnboarded === 'true') {
@@ -474,7 +476,10 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const setBiometricEnabled = async (enabled: boolean) => {
     setIsBiometricEnabledState(enabled);
-    if (!enabled) {
+    if (enabled) {
+      ScreenCapture.preventScreenCaptureAsync('triotrack_privacy').catch(() => {});
+    } else {
+      ScreenCapture.allowScreenCaptureAsync('triotrack_privacy').catch(() => {});
       lastUnlockTimeRef.current = Date.now();
       setIsAppLocked(false);
     }

@@ -785,6 +785,21 @@ export default function SettingsScreen({ navigation }: any) {
             </Text>
           </View>
 
+          {/* WhatsApp Stili Görev Yöneticisi Gizlilik Rozeti */}
+          {isBiometricEnabled && (
+            <View style={[styles.privacyBadgeBox, { backgroundColor: '#10B98115', borderColor: '#10B98140' }]}>
+              <Ionicons name="eye-off-outline" size={16} color="#10B981" style={{ marginRight: 8, marginTop: 2 }} />
+              <View style={{ flex: 1 }}>
+                <Text style={{ color: '#10B981', fontFamily: tStyles.fontFamily, fontSize: 12 * m, fontWeight: 'bold' }}>
+                  Görev Yöneticisi Gizliliği (Siyah Ekran) Aktif
+                </Text>
+                <Text style={{ color: colors.text, opacity: 0.75, fontFamily: tStyles.fontFamily, fontSize: 11 * m, marginTop: 2, lineHeight: 15 }}>
+                  Başka bir uygulamaya veya görev yöneticisine (son uygulamalar) geçtiğinizde WhatsApp gibi ekran siyah gözükür; finansal verileriniz ve ekran görüntüsü tamamen gizlenir.
+                </Text>
+              </View>
+            </View>
+          )}
+
           {/* Kilidi Şimdi Test Et Butonu */}
           {isBiometricEnabled && (
             <TouchableOpacity 
@@ -1742,5 +1757,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     borderWidth: 1,
     marginTop: 4,
+  },
+  privacyBadgeBox: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    padding: 10,
+    borderRadius: 8,
+    borderWidth: 1,
+    marginTop: 4,
+    marginBottom: 6,
   },
 });
