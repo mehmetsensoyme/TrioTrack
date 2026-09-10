@@ -745,7 +745,10 @@ export default function OnboardingScreen({ navigation }: any) {
           {/* SLIDE 3: Currency Picker & Financial Goals (Step 6 of Roadmap) */}
           {step === 3 && (
             <View style={styles.slide}>
-              <View style={[styles.slideIconBox, { backgroundColor: colors.primary + '18' }]}>
+              <View style={[
+                styles.slideIconBox, 
+                { backgroundColor: isDark ? colors.primary + '25' : (themeName === 'zero' ? '#F4F4F5' : colors.primary + '15') }
+              ]}>
                 <Ionicons name="compass-outline" size={28 * m} color={colors.primary} />
               </View>
               <Text style={[styles.slideTitle, { color: colors.text, fontFamily: tStyles.fontFamily, fontWeight: tStyles.titleWeight, fontSize: 24 * m }]}>
@@ -766,7 +769,10 @@ export default function OnboardingScreen({ navigation }: any) {
                   styles.currencyHeroCard,
                   { 
                     backgroundColor: colors.card,
-                    borderColor: colors.primary + '35',
+                    borderColor: isDark 
+                      ? colors.primary + '40' 
+                      : (themeName === 'zero' ? '#E4E4E7' : colors.primary + '35'),
+                    borderWidth: 1.5,
                     borderRadius: tStyles.roundness 
                   }
                 ]}>
@@ -786,7 +792,14 @@ export default function OnboardingScreen({ navigation }: any) {
                           • {currency.name}
                         </Text>
                       </View>
-                      <View style={[styles.activeCheckPill, { backgroundColor: colors.primary + '18' }]}>
+                      <View style={[
+                        styles.activeCheckPill, 
+                        { 
+                          backgroundColor: isDark 
+                            ? colors.primary + '25' 
+                            : (themeName === 'zero' ? '#F4F4F5' : colors.primary + '15') 
+                        }
+                      ]}>
                         <Ionicons name="checkmark-circle" size={18} color={colors.primary} />
                       </View>
                     </View>
@@ -812,8 +825,13 @@ export default function OnboardingScreen({ navigation }: any) {
                           style={[
                             styles.quickCurrencyChip,
                             {
-                              backgroundColor: isSelected ? colors.primary + '14' : colors.card,
-                              borderColor: isSelected ? colors.primary : 'rgba(0,0,0,0.06)',
+                              backgroundColor: isSelected 
+                                ? (isDark ? colors.primary + '20' : (themeName === 'zero' ? '#F4F4F5' : colors.primary + '10'))
+                                : colors.card,
+                              borderColor: isSelected 
+                                ? colors.primary 
+                                : (isDark ? 'rgba(255,255,255,0.08)' : '#E2E8F0'),
+                              borderWidth: isSelected ? 2 : 1.5,
                               borderRadius: Math.max(tStyles.roundness / 2, 8),
                             }
                           ]}
@@ -862,8 +880,13 @@ export default function OnboardingScreen({ navigation }: any) {
                           style={[
                             styles.quickCurrencyChip,
                             {
-                              backgroundColor: isSelected ? colors.primary + '14' : colors.card,
-                              borderColor: isSelected ? colors.primary : 'rgba(0,0,0,0.06)',
+                              backgroundColor: isSelected 
+                                ? (isDark ? colors.primary + '20' : (themeName === 'zero' ? '#F4F4F5' : colors.primary + '10'))
+                                : colors.card,
+                              borderColor: isSelected 
+                                ? colors.primary 
+                                : (isDark ? 'rgba(255,255,255,0.08)' : '#E2E8F0'),
+                              borderWidth: isSelected ? 2 : 1.5,
                               borderRadius: Math.max(tStyles.roundness / 2, 8),
                             }
                           ]}
@@ -911,7 +934,10 @@ export default function OnboardingScreen({ navigation }: any) {
                     { 
                       backgroundColor: colors.card, 
                       borderRadius: Math.max(tStyles.roundness / 2, 8),
-                      borderColor: (showAllCurrencies || currencySearch) ? colors.primary + '50' : 'rgba(0,0,0,0.06)'
+                      borderColor: (showAllCurrencies || currencySearch) 
+                        ? colors.primary 
+                        : (isDark ? 'rgba(255,255,255,0.08)' : '#E2E8F0'),
+                      borderWidth: 1.5,
                     }
                   ]}
                   onPress={() => setShowAllCurrencies(!showAllCurrencies)}
@@ -937,7 +963,16 @@ export default function OnboardingScreen({ navigation }: any) {
                 {/* Collapsible Search & Full Currency Grid */}
                 {(showAllCurrencies || currencySearch.length > 0) && (
                   <View style={{ marginTop: 8 }}>
-                    <View style={[styles.searchBox, { backgroundColor: colors.card, borderRadius: tStyles.roundness, marginBottom: 8 }]}>
+                    <View style={[
+                      styles.searchBox, 
+                      { 
+                        backgroundColor: colors.card, 
+                        borderRadius: tStyles.roundness, 
+                        marginBottom: 8,
+                        borderWidth: 1,
+                        borderColor: isDark ? 'rgba(255,255,255,0.08)' : '#E2E8F0',
+                      }
+                    ]}>
                       <Ionicons name="search" size={17} color={colors.text} style={{ opacity: 0.5, marginRight: 8 }} />
                       <TextInput
                         style={[styles.searchInput, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 13.5 * m }]}
@@ -953,7 +988,15 @@ export default function OnboardingScreen({ navigation }: any) {
                       ) : null}
                     </View>
 
-                    <View style={[styles.currencyScrollContainer, { backgroundColor: colors.card, borderRadius: tStyles.roundness }]}>
+                    <View style={[
+                      styles.currencyScrollContainer, 
+                      { 
+                        backgroundColor: colors.card, 
+                        borderRadius: tStyles.roundness,
+                        borderWidth: 1,
+                        borderColor: isDark ? 'rgba(255,255,255,0.08)' : '#E2E8F0',
+                      }
+                    ]}>
                       <ScrollView nestedScrollEnabled style={{ maxHeight: 190 }} showsVerticalScrollIndicator={true}>
                         {filteredCurrencies.map(c => {
                           const isSelected = currency.code === c.code;
@@ -962,14 +1005,25 @@ export default function OnboardingScreen({ navigation }: any) {
                               key={c.code}
                               style={[
                                 styles.currencyRowItem,
-                                isSelected && { backgroundColor: colors.primary + '18' }
+                                isSelected && { 
+                                  backgroundColor: isDark 
+                                    ? colors.primary + '20' 
+                                    : (themeName === 'zero' ? '#F4F4F5' : colors.primary + '10') 
+                                }
                               ]}
                               onPress={() => {
                                 setLocalCurrency(c);
                               }}
                               activeOpacity={0.7}
                             >
-                              <View style={[styles.currencySymbolBadge, { backgroundColor: isSelected ? colors.primary : colors.background }]}>
+                              <View style={[
+                                styles.currencySymbolBadge, 
+                                { 
+                                  backgroundColor: isSelected 
+                                    ? colors.primary 
+                                    : (isDark ? colors.background : '#F1F5F9') 
+                                }
+                              ]}>
                                 <Text style={{ color: isSelected ? colors.onPrimary : colors.text, fontWeight: 'bold', fontSize: 13 * m }}>
                                   {c.symbol}
                                 </Text>
@@ -1015,24 +1069,43 @@ export default function OnboardingScreen({ navigation }: any) {
                         style={[
                           styles.financialGoalCard,
                           {
-                            backgroundColor: colors.card,
-                            borderColor: isSelected ? colors.primary : 'rgba(0,0,0,0.05)',
+                            backgroundColor: isSelected
+                              ? (isDark ? colors.primary + '20' : (themeName === 'zero' ? '#F4F4F5' : colors.primary + '0A'))
+                              : colors.card,
+                            borderColor: isSelected
+                              ? colors.primary
+                              : (isDark ? 'rgba(255,255,255,0.08)' : '#E2E8F0'),
+                            borderWidth: isSelected ? 2 : 1.5,
                             borderRadius: tStyles.roundness,
-                          },
-                          isSelected && { backgroundColor: colors.primary + '0C', borderColor: colors.primary }
+                          }
                         ]}
                         onPress={() => setLocalFinancialGoal(goal.id)}
                         activeOpacity={0.7}
                       >
-                        <View style={[styles.goalIconBox, { backgroundColor: goal.color + '18' }]}>
-                          <Ionicons name={goal.icon as any} size={22} color={goal.color} />
+                        <View style={[
+                          styles.goalIconBox, 
+                          { 
+                            backgroundColor: isSelected 
+                              ? goal.color 
+                              : (isDark ? goal.color + '22' : goal.color + '15'),
+                            borderWidth: isSelected ? 0 : 1,
+                            borderColor: isSelected ? 'transparent' : (isDark ? goal.color + '40' : goal.color + '25'),
+                          }
+                        ]}>
+                          <Ionicons 
+                            name={goal.icon as any} 
+                            size={22} 
+                            color={isSelected ? '#FFFFFF' : goal.color} 
+                          />
                         </View>
                         
-                        <View style={{ flex: 1, marginRight: 12 }}>
+                        <View style={{ flex: 1, marginRight: 10 }}>
                           <Text style={[
                             styles.goalTitle,
                             { 
-                              color: colors.text, 
+                              color: isSelected 
+                                ? (themeName === 'zero' ? colors.text : colors.primary) 
+                                : colors.text, 
                               fontFamily: tStyles.fontFamily, 
                               fontSize: 14 * m,
                               fontWeight: isSelected ? 'bold' : '600',
@@ -1045,10 +1118,10 @@ export default function OnboardingScreen({ navigation }: any) {
                             styles.goalSubtitle,
                             { 
                               color: colors.text, 
-                              opacity: 0.62, 
+                              opacity: isSelected ? 0.8 : 0.6, 
                               fontFamily: tStyles.fontFamily, 
                               fontSize: 11.5 * m, 
-                              lineHeight: 16 
+                              lineHeight: Math.round(17 * m) 
                             }
                           ]}>
                             {goal.subtitle}
@@ -1058,7 +1131,7 @@ export default function OnboardingScreen({ navigation }: any) {
                         <Ionicons
                           name={isSelected ? "checkmark-circle" : "ellipse-outline"}
                           size={22}
-                          color={isSelected ? colors.primary : colors.text + '35'}
+                          color={isSelected ? colors.primary : (isDark ? 'rgba(255,255,255,0.3)' : '#CBD5E1')}
                         />
                       </TouchableOpacity>
                     );
@@ -1086,28 +1159,44 @@ export default function OnboardingScreen({ navigation }: any) {
                           styles.savingsPillBtn,
                           {
                             backgroundColor: isSelected ? colors.primary : colors.card,
-                            borderColor: isSelected ? colors.primary : 'rgba(0,0,0,0.06)',
+                            borderColor: isSelected 
+                              ? colors.primary 
+                              : (isDark ? 'rgba(255,255,255,0.08)' : '#E2E8F0'),
+                            borderWidth: isSelected ? 2 : 1.5,
                             borderRadius: Math.max(tStyles.roundness / 2, 8),
                           }
                         ]}
                         onPress={() => setLocalSavingsTargetPercent(opt.percent)}
                         activeOpacity={0.7}
                       >
-                        {opt.badge ? (
-                          <View style={[
-                            styles.savingsMicroBadge,
-                            { backgroundColor: isSelected ? colors.onPrimary + '30' : colors.primary + '18' }
-                          ]}>
-                            <Text style={[
-                              styles.savingsMicroBadgeText,
-                              { color: isSelected ? colors.onPrimary : colors.primary, fontSize: 8.5 * m }
+                        {/* Fixed height badge container for 100% baseline alignment */}
+                        <View style={{ height: 18, justifyContent: 'center', alignItems: 'center', marginBottom: 3 }}>
+                          {opt.badge ? (
+                            <View style={[
+                              styles.savingsMicroBadge,
+                              { 
+                                backgroundColor: isSelected 
+                                  ? colors.onPrimary + '30' 
+                                  : (isDark ? colors.primary + '25' : (themeName === 'zero' ? '#E4E4E7' : colors.primary + '12')),
+                                borderWidth: isSelected ? 0 : 1,
+                                borderColor: isSelected ? 'transparent' : (isDark ? colors.primary + '40' : colors.primary + '25'),
+                              }
                             ]}>
-                              {opt.badge}
-                            </Text>
-                          </View>
-                        ) : (
-                          <View style={{ height: 16 }} />
-                        )}
+                              <Text style={[
+                                styles.savingsMicroBadgeText,
+                                { 
+                                  color: isSelected 
+                                    ? colors.onPrimary 
+                                    : (themeName === 'zero' && !isDark ? '#18181B' : colors.primary), 
+                                  fontSize: 8.5 * m 
+                                }
+                              ]}>
+                                {opt.badge}
+                              </Text>
+                            </View>
+                          ) : null}
+                        </View>
+
                         <Text style={[
                           styles.savingsPillText,
                           {
@@ -1130,11 +1219,25 @@ export default function OnboardingScreen({ navigation }: any) {
                     styles.savingsDetailCard,
                     {
                       backgroundColor: colors.card,
-                      borderColor: colors.primary + '30',
+                      borderColor: isDark 
+                        ? colors.primary + '40' 
+                        : (themeName === 'zero' ? '#E4E4E7' : colors.primary + '30'),
+                      borderWidth: 1.5,
                       borderRadius: tStyles.roundness,
                     }
                   ]}>
-                    <View style={[styles.savingsDetailIconBox, { backgroundColor: colors.primary + '18' }]}>
+                    <View style={[
+                      styles.savingsDetailIconBox, 
+                      { 
+                        backgroundColor: isDark 
+                          ? colors.primary + '25' 
+                          : (themeName === 'zero' ? '#F4F4F5' : colors.primary + '14'),
+                        borderWidth: 1,
+                        borderColor: isDark 
+                          ? colors.primary + '40' 
+                          : (themeName === 'zero' ? '#E4E4E7' : colors.primary + '25'),
+                      }
+                    ]}>
                       <Ionicons name="sparkles" size={16} color={colors.primary} />
                     </View>
                     <View style={{ flex: 1 }}>
@@ -2201,8 +2304,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 13,
     paddingHorizontal: 14,
-    borderWidth: 1.5,
-    elevation: 1,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.04,
@@ -2224,14 +2325,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1.5,
     minHeight: 56,
   },
   savingsMicroBadge: {
     paddingHorizontal: 5,
     paddingVertical: 1,
     borderRadius: 4,
-    marginBottom: 2,
   },
   savingsMicroBadgeText: {
     fontWeight: 'bold',
@@ -2241,7 +2340,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: 12,
-    borderWidth: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.04,
+    shadowRadius: 3,
     elevation: 1,
   },
   savingsDetailIconBox: {
