@@ -73,31 +73,49 @@ flowchart LR
 
 ---
 
-## 3. Karşılama Ekranı & Çok Kanallı Yedekleme Sistemi
+## 3. Karşılama Ekranı, Bottom Sheet Mimarisi & Çok Kanallı Yedekleme
 
-### 3.1. Sadeleştirilmiş Karşılama Ekranı (Slide 0)
-* Kullanıcıyı gereksiz grafik karmaşası olmadan, güçlü bir tipografi ile karşılar:
-  * **Başlık:** `TrioTrack` (Büyük, net, modern başlık).
-  * **Alt Başlık:** `Kişisel finansında kontrol sende.`
-  * Logo rozeti ve teknik hibrit açıklamaları sadeleştirilmiştir.
-* Altında uygulamanın 3 temel yeteneğini özetleyen minimalist kartlar yer alır.
-* **"Zaten bir yedeğim var (Geri Yükle)"** butonu ekranın alt kısmında her zaman erişilebilirdir.
+### 3.1. Karşılama Ekranı (Slide 0) Tasarımı
+* **Resmi TrioTrack Logosu:**
+  * Paisa (Viyolet/İndigo), Zero (Zümrüt Yeşili) ve Buckwheat (Kehribar Altın) kimliklerini temsil eden 3 boyutlu sonsuzluk (mobius) app ikonu üretildi ve `assets/triotrack_logo.png` olarak başlığın üstüne eklendi.
+* **Hibrit Sentez Manifestosu:**
+  * *"Paisa'nın zengin cüzdan estetiği, Zero'nun sıfır tabanlı gizlilik disiplini ve Buckwheat'in akıllı günlük harçlık zekası tek bir kusursuz deneyimde buluştu."*
+* **3 Temel Direk Kartları:** Paisa, Zero ve Buckwheat kartları yumuşak renk tonları ve net açıklamalarla konumlandırıldı.
+* **"Zaten bir yedeğim var (Geri Yükle)" Butonu:** Ekranın alt kısmında kullanıcıyı karşılar ve tek dokunuşla Bottom Sheet açar.
 
-### 3.2. Çok Kanallı Yedekleme & Geri Yükleme Motoru (`backupService.ts`)
+### 3.2. Ekranla Bütünleşik Modern Bottom Sheet (Alt Çekmece) Mimarisi
+Eski masaüstü tarzı, ekranın tam ortasında beliren ve mobil hissi vermeyen kutu şeklindeki pencereler yerine **Modern Mobil Bottom Sheet Standartları** getirildi:
+* **Ekran Bütünlüğü:** Ekranın tabanına oturan (`justifyContent: 'flex-end'`), üst köşeleri yumuşakça yuvarlatılmış (`borderTopLeftRadius: 28, borderTopRightRadius: 28`) tasarım.
+* **Çekme Tutamacı (Sheet Handle):** Pencerenin tepesinde minimalist tutamaç çubuğu (pill bar).
+* **Güvenli Alan (Safe Area):** Cihazın alt bar/çentik yüksekliğine (`insets.bottom`) dinamik uyum.
+* **Doğal Kapanış:** Boş alana dokunulduğunda (`TouchableWithoutFeedback`) veya kapat butonuna basıldığında ekranın altına kayarak kapanma.
+* **Uygulanan Ekranlar:** Hem `OnboardingScreen` (Yedek Geri Yükleme) hem de `SettingsScreen` (Hedef Belirleme, Yedek Alma, Yedek Yükleme).
+
+### 3.3. Çok Kanallı Yedekleme & Geri Yükleme Motoru (`backupService.ts`)
 Yedekleme sistemi tek bir metin kutusundan çıkarılmış, hem karşılama ekranında hem de ayarlar ekranında **4 farklı kanala** kavuşturulmuştur:
 
 | Kanal | Teknoloji | Açıklama |
 |---|---|---|
-| 📁 **Cihazdan .json Dosyası Seç** | `expo-document-picker` + `expo-file-system` | Telefonun dosya yöneticisinden `.json` yedeğini tek dokunuşla seçip okuma. |
+| 📁 **Cihazdan .json Dosyası Seç** | `expo-document-picker` + `expo-file-system` | Telefonun dosya yöneticisinden `.json` yedeğini tek dokunuşla seçip okuma. Google Drive, iCloud, İndirilenler doğrudan seçilebilir. |
 | 📋 **Panodan Yapıştır (Tek Dokunuş)** | `expo-clipboard` | Kopyalanan JSON metnini otomatik algılayıp doğrulama. |
 | 💾 **Cihazdaki Son Yerel Snapshot** | `AsyncStorage` (`@triotrack_local_snapshot`) | Cihaz hafızasında saklanan son güvenli kopyayı tarih ve işlem sayısıyla listeleme. |
 | ✏️ **Manuel JSON Metni** | Çok satırlı `TextInput` | İleri düzey kullanıcılar için doğrudan kod yapıştırma/düzenleme alanı. |
 
-#### 3.3. Akıllı Önizleme & Format Dönüştürücü (Converter)
-Geri yükleme yapılmadan önce `parseAndNormalizeBackup()` devrede:
-* **TrioTrack Native:** Standart yedek verisi.
-* **Zero Formatı:** `expenses`, `categories`, `debtors` yapılarını otomatik olarak TrioTrack formatına dönüştürür.
-* **Paisa Formatı:** `accounts`, `transactions` yapılarını otomatik olarak haritalar.
+### 3.4. Google Drive & Bulut Yedekleme Analizi: Maliyet ve Seçenekler
+
+#### Google Drive API'si Ücretli mi? (Para Ödemek Gerekir mi?)
+* **Cevap: HAYIR, tamamen ÜCRETSİZDİR (0 TL).**
+* **Neden Ücretsiz?**
+  1. **Google Cloud Platform (GCP) Ücretsiz Kotası:** Google Drive API çağrıları için geliştiriciden ücret talep etmez. Kişisel veya topluluk odaklı bir uygulamanın günde alacağı yedekler, GCP'nin ücretsiz kota tavanının %0.001'ine bile ulaşamaz.
+  2. **Kullanıcı Başına Depolama:** Yedeklenen dosyalar geliştiricinin sunucusunda değil, **kullanıcının kendi kişisel Google Drive hesabında** durur. Her Google kullanıcısının 15 GB ücretsiz Drive kotası vardır. TrioTrack yedek dosyaları ise yalnızca **50 KB - 300 KB** (1 MB'ın bile çok altında) boyutundadır.
+  3. **Hazır ve Sıfır Konfigürasyonlu Zaten Çalışan Yöntem:** TrioTrack'teki `expo-document-picker` ile "Cihazdan .json Dosyası Seç" veya Paylaş butonu tıklandığında, telefonun yerel dosya yöneticisi açılır. Android ve iOS sistem dosya yöneticisinde **Google Drive ve iCloud Drive** varsayılan olarak zaten vardır! Dolayısıyla hiçbir Google Cloud API kurulumu yapmadan bile kullanıcı dosyayı Google Drive'ına kaydedebilir veya oradan seçebilir.
+
+#### Diğer Yedekleme & Eşitleme Seçenekleri:
+1. **İşletim Sistemi Yerel Bulutu (Google Drive & iCloud Drive):** Sıfır API maliyeti, sistem dosya yöneticisiyle tam entegrasyon.
+2. **Cihaz İçi Yerel Snapshot (Otomatik Yedek):** Cihaz hafızasında saklanan ve ağ gerektirmeyen güvenli anlık görüntü.
+3. **WebDAV / Nextcloud / ownCloud:** Kendi sunucusunu çalıştıran gizlilik tutkunları için sunucusuz doğrudan bulut eşitlemesi.
+4. **P2P Yerel Ağ / QR Kod Transferi:** Aynı Wi-Fi ağındaki iki telefon arasında veya QR kod okutarak kameradan kameraya doğrudan veri aktarımı.
+5. **Şifreli AES-256 JSON:** Yedeğin kullanıcı belirleyeceği bir anahtar parola ile şifrelenerek saklanması.
 * Kullanıcıya yükleme öncesi **İşlem Sayısı**, **Cüzdan Sayısı**, **Kategori Sayısı** ve **Kaynak Türü** onaylatılır.
 
 ---
@@ -176,8 +194,13 @@ flowchart TD
 ```
 
 ### Değişiklik Günlüğü (Changelog):
+* **v1.6.1 (10 Eylül 2026):**
+  * TrioTrack resmi sonsuzluk/mobius uygulama logosu üretildi ve Karşılama Ekranı (Slide 0) başlığının üstüne yerleştirildi.
+  * Karşılama ekranına 3 uygulamanın felsefi birleşimini yansıtan ilham verici manifesto metni eklendi.
+  * Karşılama ve Ayarlar ekranlarındaki tüm pencereler masaüstü tarzı yapay ortalanmış kutudan, modern mobil **Bottom Sheet (Alt Çekmece)** yapısına dönüştürüldü (`sheetHandle`, safe-area alt padding, pürüzsüz dokunarak kapanış).
+  * Google Drive API maliyeti (0 TL, ücretsiz) ve bulut yedekleme alternatifleri dokümante edildi.
 * **v1.6.0 (10 Eylül 2026):**
-  * Karşılama ekranı başlığı sadeleştirildi (TrioTrack logo ve hibrit mimari alt yazısı kaldırıldı).
+  * Karşılama ekranı başlığı sadeleştirildi.
   * Çok kanallı yedekleme ve geri yükleme servisi (`backupService.ts`) yazıldı.
   * Karşılama ve Ayarlar ekranlarına Cihaz Dosyası, Pano, Yerel Snapshot ve Manuel seçenekleri eklendi.
   * Zero ve Paisa formatlarını otomatik tanıyan akıllı normalizasyon motoru kuruldu.

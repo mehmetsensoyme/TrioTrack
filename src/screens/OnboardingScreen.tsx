@@ -12,7 +12,8 @@ import {
   Modal,
   Alert,
   ActivityIndicator,
-  TouchableWithoutFeedback
+  TouchableWithoutFeedback,
+  Image
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -321,13 +322,20 @@ export default function OnboardingScreen({ navigation }: any) {
           {/* SLIDE 0: Welcome & Hybrid Architecture Showcase */}
           {step === 0 && (
             <View style={styles.slide}>
-              {/* Sade ve Şık TrioTrack Başlığı */}
-              <View style={{ alignItems: 'center', marginBottom: 22, marginTop: 12 }}>
-                <Text style={[styles.brandTitle, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 32 * m, textAlign: 'center', marginBottom: 6 }]}>
+              {/* TrioTrack Logo & İlham Verici Başlık */}
+              <View style={{ alignItems: 'center', marginBottom: 20, marginTop: 4 }}>
+                <View style={[styles.logoContainer, { borderColor: colors.primary + '35' }]}>
+                  <Image
+                    source={require('../../assets/triotrack_logo.png')}
+                    style={styles.logoImage}
+                    resizeMode="cover"
+                  />
+                </View>
+                <Text style={[styles.brandTitle, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 32 * m, textAlign: 'center', marginTop: 14, marginBottom: 8 }]}>
                   TrioTrack
                 </Text>
-                <Text style={[styles.heroLead, { color: colors.text, opacity: 0.7, fontFamily: tStyles.fontFamily, fontSize: 14.5 * m, textAlign: 'center', marginBottom: 0 }]}>
-                  Kişisel finansında kontrol sende.
+                <Text style={[styles.manifestoText, { color: colors.text, opacity: 0.75, fontFamily: tStyles.fontFamily, fontSize: 13.5 * m, textAlign: 'center', lineHeight: 20 * m, paddingHorizontal: 12 }]}>
+                  Paisa'nın zengin cüzdan estetiği, Zero'nun sıfır tabanlı gizlilik disiplini ve Buckwheat'in akıllı günlük harçlık zekası tek bir kusursuz deneyimde buluştu.
                 </Text>
               </View>
 
@@ -378,7 +386,7 @@ export default function OnboardingScreen({ navigation }: any) {
 
               {/* Secondary Option: Restore from Backup */}
               <TouchableOpacity
-                style={[styles.restoreBtn, { borderColor: colors.primary + '50', borderRadius: tStyles.roundness }]}
+                style={[styles.restoreBtn, { borderColor: colors.primary + '40', backgroundColor: colors.card, borderRadius: tStyles.roundness }]}
                 onPress={handleOpenRestoreOptions}
                 activeOpacity={0.7}
               >
@@ -927,24 +935,45 @@ export default function OnboardingScreen({ navigation }: any) {
 
       </KeyboardAvoidingView>
 
-      {/* ÇOK KANALLI YEDEKTEN GERİ YÜKLEME MODALI */}
+      {/* ÇOK KANALLI YEDEKTEN GERİ YÜKLEME MODALI (BOTTOM SHEET) */}
       <Modal visible={showRestoreModal} transparent animationType="slide" onRequestClose={() => setShowRestoreModal(false)}>
         <View style={styles.modalBackdrop}>
           <TouchableWithoutFeedback onPress={() => setShowRestoreModal(false)}>
-            <View style={StyleSheet.absoluteFill} />
+            <View style={styles.backdropDismissArea} />
           </TouchableWithoutFeedback>
-          <View style={[styles.modalCard, { backgroundColor: colors.card, borderRadius: tStyles.roundness * 1.2, maxHeight: '88%' }]}>
-            
-            {/* Modal Başlığı */}
-            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+          <View style={[
+            styles.modalCard,
+            { 
+              backgroundColor: colors.card, 
+              borderTopLeftRadius: 28, 
+              borderTopRightRadius: 28, 
+              paddingBottom: Math.max(insets.bottom + 14, 26) 
+            }
+          ]}>
+            {/* Alt Çekmece Tutamacı (Sheet Handle) */}
+            <View style={[styles.sheetHandle, { backgroundColor: colors.text + '25' }]} />
+
+            {/* Modal Başlığı & Kapat Butonu */}
+            <View style={styles.sheetHeader}>
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <Ionicons name="cloud-download-outline" size={22} color={colors.primary} style={{ marginRight: 8 }} />
-                <Text style={[styles.modalTitle, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 18 * m }]}>
-                  {restoreMode === 'preview' ? 'Yedek Önizlemesi' : 'Yedekten Geri Yükle'}
-                </Text>
+                <View style={[styles.sheetIconBadge, { backgroundColor: colors.primary + '18' }]}>
+                  <Ionicons name="cloud-download-outline" size={20} color={colors.primary} />
+                </View>
+                <View>
+                  <Text style={[styles.modalTitle, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 17 * m }]}>
+                    {restoreMode === 'preview' ? 'Yedek Önizlemesi' : 'Yedekten Geri Yükle'}
+                  </Text>
+                  <Text style={{ color: colors.text, opacity: 0.55, fontSize: 11 * m, fontFamily: tStyles.fontFamily }}>
+                    {restoreMode === 'preview' ? 'İçeriği kontrol edin ve onaylayın' : 'TrioTrack, Paisa veya Zero verileri'}
+                  </Text>
+                </View>
               </View>
-              <TouchableOpacity onPress={() => setShowRestoreModal(false)} style={{ padding: 4 }}>
-                <Ionicons name="close" size={22} color={colors.text} />
+              <TouchableOpacity 
+                onPress={() => setShowRestoreModal(false)} 
+                style={[styles.sheetCloseBtn, { backgroundColor: colors.background }]}
+                activeOpacity={0.7}
+              >
+                <Ionicons name="close" size={18} color={colors.text} />
               </TouchableOpacity>
             </View>
 
@@ -957,9 +986,10 @@ export default function OnboardingScreen({ navigation }: any) {
 
                   {/* Seçenek 1: Cihazdan Dosya Seç */}
                   <TouchableOpacity
-                    style={[styles.restoreChannelBtn, { backgroundColor: colors.background, borderRadius: Math.max(tStyles.roundness / 2, 8) }]}
+                    style={[styles.restoreChannelBtn, { backgroundColor: colors.background, borderRadius: Math.max(tStyles.roundness / 2, 10) }]}
                     onPress={handlePickFile}
                     disabled={isRestoring}
+                    activeOpacity={0.7}
                   >
                     <View style={[styles.restoreChannelIconBox, { backgroundColor: colors.primary + '18' }]}>
                       <Ionicons name="document-text-outline" size={22} color={colors.primary} />
@@ -969,7 +999,7 @@ export default function OnboardingScreen({ navigation }: any) {
                         Cihazdan .json Dosyası Seç
                       </Text>
                       <Text style={{ color: colors.text, opacity: 0.55, fontSize: 11 * m }}>
-                        İndirilenler veya dosya yöneticisinden yedek dosyasını açın
+                        Google Drive, iCloud, İndirilenler veya Dahili Hafıza
                       </Text>
                     </View>
                     <Ionicons name="chevron-forward" size={16} color={colors.text} style={{ opacity: 0.3 }} />
@@ -1257,13 +1287,80 @@ const styles = StyleSheet.create({
   primaryActionBtn: { paddingVertical: 14, paddingHorizontal: 26, elevation: 3 },
   primaryActionBtnText: { fontWeight: 'bold', letterSpacing: 0.8 },
 
-  modalBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center', padding: 20 },
-  modalCard: { width: '100%', maxWidth: 440, padding: 20 },
+  modalBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.55)',
+    justifyContent: 'flex-end',
+  },
+  backdropDismissArea: {
+    flex: 1,
+  },
+  modalCard: {
+    width: '100%',
+    paddingHorizontal: 22,
+    paddingTop: 12,
+    maxHeight: '90%',
+    elevation: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+  },
+  sheetHandle: {
+    width: 38,
+    height: 4.5,
+    borderRadius: 3,
+    alignSelf: 'center',
+    marginBottom: 14,
+  },
+  sheetHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 16,
+  },
+  sheetIconBadge: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 10,
+  },
+  sheetCloseBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   modalTitle: { fontWeight: 'bold' },
   backupInputBox: { minHeight: 140, padding: 12, borderWidth: 1, marginTop: 4, marginBottom: 16 },
   modalActionsRow: { flexDirection: 'row', gap: 10, justifyContent: 'flex-end' },
-  modalCancelBtn: { paddingVertical: 10, paddingHorizontal: 16, alignItems: 'center' },
-  modalConfirmBtn: { paddingVertical: 10, paddingHorizontal: 20, alignItems: 'center' },
+  modalCancelBtn: { paddingVertical: 12, paddingHorizontal: 18, alignItems: 'center' },
+  modalConfirmBtn: { paddingVertical: 12, paddingHorizontal: 22, alignItems: 'center' },
+
+  // Logo & Manifesto Stilleri
+  logoContainer: {
+    width: 82,
+    height: 82,
+    borderRadius: 24,
+    overflow: 'hidden',
+    borderWidth: 1.5,
+    backgroundColor: '#09090B',
+    elevation: 6,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 10,
+  },
+  logoImage: {
+    width: '100%',
+    height: '100%',
+  },
+  manifestoText: {
+    letterSpacing: 0.2,
+  },
 
   // Çok Kanallı Yedek Stilleri
   restoreChannelBtn: { flexDirection: 'row', alignItems: 'center', padding: 12, marginBottom: 8 },

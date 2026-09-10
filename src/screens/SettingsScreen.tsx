@@ -762,15 +762,25 @@ export default function SettingsScreen({ navigation }: any) {
       <Modal visible={showGoalModal} transparent animationType="slide" onRequestClose={() => setShowGoalModal(false)}>
         <View style={styles.modalOverlay}>
           <TouchableWithoutFeedback onPress={() => setShowGoalModal(false)}>
-            <View style={StyleSheet.absoluteFill} />
+            <View style={{ flex: 1 }} />
           </TouchableWithoutFeedback>
-          <View style={[styles.modalContent, { backgroundColor: colors.card, borderRadius: tStyles.roundness }]}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
-              <Ionicons name="flag-outline" size={20} color={colors.primary} style={{ marginRight: 8 }} />
-              <Text style={[styles.modalTitle, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 18 * m }]}>
-                Aylık Bütçe Hedefi Belirle
-              </Text>
+          <View style={[styles.modalContent, { backgroundColor: colors.card, borderTopLeftRadius: 28, borderTopRightRadius: 28, paddingBottom: Math.max(insets.bottom + 14, 26) }]}>
+            <View style={[styles.sheetHandle, { backgroundColor: colors.text + '25' }]} />
+            
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <View style={[styles.modalHeaderIconBadge, { backgroundColor: colors.primary + '18' }]}>
+                  <Ionicons name="flag-outline" size={20} color={colors.primary} />
+                </View>
+                <Text style={[styles.modalTitle, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 17 * m }]}>
+                  Aylık Bütçe Hedefi Belirle
+                </Text>
+              </View>
+              <TouchableOpacity onPress={() => setShowGoalModal(false)} style={[styles.sheetCloseBtn, { backgroundColor: colors.background }]}>
+                <Ionicons name="close" size={18} color={colors.text} />
+              </TouchableOpacity>
             </View>
+
             <Text style={{ color: colors.text, opacity: 0.6, fontSize: 12 * m, fontFamily: tStyles.fontFamily, marginBottom: 16 }}>
               Buckwheat akıllı motoru, bu hedef tutardan ay içinde yaptığınız harcamaları çıkarıp kalan günlere akıllıca paylaştırır.
             </Text>
@@ -808,18 +818,27 @@ export default function SettingsScreen({ navigation }: any) {
       <Modal visible={showExportModal} transparent animationType="slide" onRequestClose={() => setShowExportModal(false)}>
         <View style={styles.modalOverlay}>
           <TouchableWithoutFeedback onPress={() => setShowExportModal(false)}>
-            <View style={StyleSheet.absoluteFill} />
+            <View style={{ flex: 1 }} />
           </TouchableWithoutFeedback>
-          <View style={[styles.modalContent, { backgroundColor: colors.card, borderRadius: tStyles.roundness, maxHeight: '85%' }]}>
+          <View style={[styles.modalContent, { backgroundColor: colors.card, borderTopLeftRadius: 28, borderTopRightRadius: 28, paddingBottom: Math.max(insets.bottom + 14, 26), maxHeight: '88%' }]}>
+            <View style={[styles.sheetHandle, { backgroundColor: colors.text + '25' }]} />
+
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <Ionicons name="cloud-upload-outline" size={22} color={colors.primary} style={{ marginRight: 8 }} />
-                <Text style={[styles.modalTitle, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 18 * m }]}>
-                  Yedekleme Seçenekleri
-                </Text>
+                <View style={[styles.modalHeaderIconBadge, { backgroundColor: colors.primary + '18' }]}>
+                  <Ionicons name="cloud-upload-outline" size={20} color={colors.primary} />
+                </View>
+                <View>
+                  <Text style={[styles.modalTitle, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 17 * m }]}>
+                    Yedekleme Seçenekleri
+                  </Text>
+                  <Text style={{ color: colors.text, opacity: 0.55, fontSize: 11 * m }}>
+                    Tüm verilerinizi güvenle dışa aktarın
+                  </Text>
+                </View>
               </View>
-              <TouchableOpacity onPress={() => setShowExportModal(false)} style={{ padding: 4 }}>
-                <Ionicons name="close" size={22} color={colors.text} />
+              <TouchableOpacity onPress={() => setShowExportModal(false)} style={[styles.sheetCloseBtn, { backgroundColor: colors.background }]}>
+                <Ionicons name="close" size={18} color={colors.text} />
               </TouchableOpacity>
             </View>
 
@@ -915,20 +934,28 @@ export default function SettingsScreen({ navigation }: any) {
       <Modal visible={showImportModal} transparent animationType="slide" onRequestClose={() => setShowImportModal(false)}>
         <View style={styles.modalOverlay}>
           <TouchableWithoutFeedback onPress={() => setShowImportModal(false)}>
-            <View style={StyleSheet.absoluteFill} />
+            <View style={{ flex: 1 }} />
           </TouchableWithoutFeedback>
-          <View style={[styles.modalContent, { backgroundColor: colors.card, borderRadius: tStyles.roundness, maxHeight: '88%' }]}>
+          <View style={[styles.modalContent, { backgroundColor: colors.card, borderTopLeftRadius: 28, borderTopRightRadius: 28, paddingBottom: Math.max(insets.bottom + 14, 26), maxHeight: '88%' }]}>
+            <View style={[styles.sheetHandle, { backgroundColor: colors.text + '25' }]} />
             
             {/* Başlık */}
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <Ionicons name="cloud-download-outline" size={22} color="#009688" style={{ marginRight: 8 }} />
-                <Text style={[styles.modalTitle, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 18 * m }]}>
-                  {importMode === 'preview' ? 'Yedek Önizlemesi' : 'Yedekten Geri Yükle'}
-                </Text>
+                <View style={[styles.modalHeaderIconBadge, { backgroundColor: '#00968818' }]}>
+                  <Ionicons name="cloud-download-outline" size={20} color="#009688" />
+                </View>
+                <View>
+                  <Text style={[styles.modalTitle, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 17 * m }]}>
+                    {importMode === 'preview' ? 'Yedek Önizlemesi' : 'Yedekten Geri Yükle'}
+                  </Text>
+                  <Text style={{ color: colors.text, opacity: 0.55, fontSize: 11 * m }}>
+                    {importMode === 'preview' ? 'Verileri kontrol edip onaylayın' : 'TrioTrack, Paisa veya Zero'}
+                  </Text>
+                </View>
               </View>
-              <TouchableOpacity onPress={() => setShowImportModal(false)} style={{ padding: 4 }}>
-                <Ionicons name="close" size={22} color={colors.text} />
+              <TouchableOpacity onPress={() => setShowImportModal(false)} style={[styles.sheetCloseBtn, { backgroundColor: colors.background }]}>
+                <Ionicons name="close" size={18} color={colors.text} />
               </TouchableOpacity>
             </View>
 
@@ -1184,13 +1211,53 @@ const styles = StyleSheet.create({
   creditDesc: { marginTop: 1 },
   versionBox: {},
 
-  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center', padding: 20 },
-  modalContent: { width: '100%', maxWidth: 440, padding: 20 },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.55)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    width: '100%',
+    maxHeight: '90%',
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    borderBottomLeftRadius: 0,
+    borderBottomRightRadius: 0,
+    paddingHorizontal: 22,
+    paddingTop: 12,
+    elevation: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+  },
+  sheetHandle: {
+    width: 38,
+    height: 4.5,
+    borderRadius: 3,
+    alignSelf: 'center',
+    marginBottom: 14,
+  },
+  sheetCloseBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalHeaderIconBadge: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 10,
+  },
   modalTitle: { fontWeight: 'bold' },
   modalInput: { paddingVertical: 10 },
   modalBtnRow: { flexDirection: 'row', gap: 10, justifyContent: 'flex-end' },
-  modalCancelBtn: { paddingVertical: 10, paddingHorizontal: 16, alignItems: 'center' },
-  modalSaveBtn: { paddingVertical: 10, paddingHorizontal: 20, alignItems: 'center' },
+  modalCancelBtn: { paddingVertical: 12, paddingHorizontal: 18, alignItems: 'center' },
+  modalSaveBtn: { paddingVertical: 12, paddingHorizontal: 22, alignItems: 'center' },
   jsonImportInput: { minHeight: 130, padding: 12, textAlignVertical: 'top' },
   brandCard: { padding: 18, marginBottom: 28, borderWidth: 1, borderColor: 'rgba(0,0,0,0.05)' },
   brandTopRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 14 },
