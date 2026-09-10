@@ -194,8 +194,7 @@ Tüm veriler cihaz üzerinde yerel olarak saklanır.
 1. **Lazer Tarama Animasyonu:** OCR ekranında 60/120fps native thread üzerinde çalışan `Animated.loop` tarama efekti.
 2. **Akıcı Sayfa & Modal Geçişleri:** React Native Screens + `animationType="slide"` donanım destekli pencereler.
 3. **Dinamik Liste Geçişleri:** `LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut)` ile kategori filtrelerinde sıfır takılmalı yeniden dizilim.
-4. **Evrensel Modal Kapanışı (Backdrop Dismiss):** Tüm modalların siyah/saydam boş alanına dokunulduğunda (`TouchableWithoutFeedback`) anında ve yumuşak kapanma.
-5. **Yüzen Yarı Saydam Navigasyon Barları (Translucent Floating Bars):** Onboarding ekranında üst 'Geri' barı ve alt buton çubuğu, içerikleri sert kesen katı kutular yerine %85 yarı saydam (`colors.background + 'D9'`) ve yüzen (`position: 'absolute'`) yapıya kavuşturulmuştur. Liste kaydırıldığında içerik butonların arkasından akıcı ve pürüzsüzce geçer.
+5. **Tamamen Şeffaf Yüzen Navigasyon Barları (Fully Transparent Floating Bars):** Onboarding ekranında üst 'Geri' barı ve alt buton çubuğu, herhangi bir arka plan rengi veya çizgi olmadan **tamamen şeffaf (`transparent`)** ve yüzen (`position: 'absolute'`) yapıya getirilmiştir. `pointerEvents="box-none"` özelliği sayesinde boş şeffaf alanlara dokunulduğunda kaydırma jestleri arkadaki listeye iletilirken, 'Geri' ve 'İleri' butonları gölgeli ve zarif şekilde doğrudan tıklanabilir.
 
 ---
 
@@ -207,7 +206,7 @@ flowchart TD
     Step2["✅ 2. Adım: Simge Kataloğu & 13 Kategori Sentezi"]
     Step3["✅ 3. Adım: Karşılama Ekranı (Slide 0) & Çok Kanallı Yedek"]
     Step4["✅ 4. Adım: Özellik Turu (Slide 1) Onayı"]
-    Step5["✅ 5. Adım: Kişiselleştirme, Fotoğraf & Tipografi & Yüzen Saydam Bar (Slide 2)"]
+    Step5["✅ 5. Adım: Kişiselleştirme, Fotoğraf & Tipografi & Şeffaf Yüzen Bar (Slide 2)"]
     Step6["⏳ 6. Adım: Para Birimi & Finansal Hedef (Slide 3)"]
     Step7["⏳ 7. Adım: Varsayılan Cüzdanlar & Bakiyeler (Slide 4)"]
     Step8["⏳ 8. Adım: Buckwheat Harçlık Motoru Kurulumu (Slide 5)"]
@@ -217,7 +216,7 @@ flowchart TD
 
 ### Değişiklik Günlüğü (Changelog):
 * **v1.6.3 (10 Eylül 2026):**
-  * **Yüzen Yarı Saydam Navigasyon & Alt Bar (Floating Translucent Bars):** Onboarding ekranında sayfa kaydırıldığında alt butonların ve üst 'Geri' butonunun katı/opak blok halinde içeriği kesmesi engellendi. Her iki bar da %85 yarı saydam (`colors.background + 'D9'`), z-index destekli ve yüzen yapıya dönüştürülerek liste içeriğinin butonların arkasından akıcı şekilde akması sağlandı.
+  * **Tamamen Şeffaf Yüzen Navigasyon & Alt Bar (Transparent Floating Bars):** Onboarding ekranında sayfa kaydırıldığında alt ve üst barlar tamamen şeffaf (`backgroundColor: 'transparent'`) hale getirildi. Çerçeve ve sınır çizgileri kaldırılarak butonların doğrudan arka plan üzerinde havada süzülmesi sağlandı. `pointerEvents="box-none"` ile şeffaf alanlardan kaydırma geçişi sağlandı.
   * **Avatar Düğme Temizliği:** Profil fotoğrafı seçim dairesinin altındaki mükerrer metin butonu kaldırılarak arayüz sadeleştirildi.
 * **v1.6.2 (10 Eylül 2026):**
   * **Kullanıcı Fotoğrafı Yükleme:** Onboarding 3. adım (Slide 2) ve Ayarlar ekranına `expo-image-picker` ile Galeri ve Kamera üzerinden profil fotoğrafı yükleme ve kırpma yeteneği eklendi.
