@@ -1404,7 +1404,7 @@ export default function OnboardingScreen({ navigation }: any) {
                 />
 
                 <Text style={[styles.inputMicroLabel, { color: colors.primary, fontFamily: tStyles.fontFamily, fontSize: 11 * m, marginTop: 12 }]}>
-                  BAŞLANGIÇ BAKİYESİ (Temiz Sıfır: 0,00 {currency.symbol})
+                  BAŞLANGIÇ BAKİYESİ
                 </Text>
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                   <Text style={{ fontSize: 18 * m, fontWeight: 'bold', color: colors.primary, marginRight: 8 }}>

@@ -1,4 +1,4 @@
-export const APP_VERSION = '1.6.9';
+export const APP_VERSION = '1.7.0';
 export const APP_BUILD = '2026.09.11';
 export const APP_NAME = 'TrioTrack';
 export const APP_DESCRIPTION = 'Paisa, Zero ve Buckwheat mimarilerini birleştiren akıllı kişisel finans ve bütçe yöneticisi';
@@ -24,10 +24,40 @@ export interface VersionRelease {
 
 export const CHANGELOG_HISTORY: VersionRelease[] = [
   {
+    version: '1.7.0',
+    buildDate: '11 Eylül 2026',
+    title: 'Doğal Canlı TextInput & Karşılama Başlık İyileştirmesi',
+    isLatest: true,
+    summary: 'Şeffaf katman kaldırılarak doğrudan yerel TextInput motoruna geçildi. İmleç konumu, metin seçimi ve tuşlara basıldığı anda anında 54.885,00 canlı formatlaması kusursuzlaştırıldı.',
+    items: [
+      {
+        id: '170-1',
+        type: 'feature',
+        typeLabel: 'CANLI GİRDİ',
+        title: 'Doğal Yerel TextInput & Sıfır Gecikmeli Canlı Format',
+        description: 'Gizli katman yapısı kaldırılarak doğrudan görünür ve net yerel TextInput kullanıldı. İmlecin sola kaçması, metnin seçilememesi ve sekme değiştirmeden güncellememe sorunları çözüldü; tuşa basıldığı anda 54.885,00 canlı formatlanır.'
+      },
+      {
+        id: '170-2',
+        type: 'design',
+        typeLabel: 'KARŞILAMA EKRANI',
+        title: 'Sade "BAŞLANGIÇ BAKİYESİ" Başlığı',
+        description: 'Karşılama ekranında yer alan "(Temiz Sıfır: 0,00 ₺)" parantez ibaresi kaldırılarak net ve sade "BAŞLANGIÇ BAKİYESİ" başlığı uygulandı.'
+      },
+      {
+        id: '170-3',
+        type: 'core',
+        typeLabel: 'ÇEKİRDEK AYRIŞTIRICI',
+        title: 'Akıllı Binlik Nokta Ayrıştırma (parseCurrencyInput)',
+        description: '54.885 veya 1.000 gibi virgül içermeyen noktalı tutarların float olarak 54 veya 1 sanılması engellendi, doğrudan 54885 ve 1000 olarak kaydedilmesi sağlandı.'
+      }
+    ]
+  },
+  {
     version: '1.6.9',
     buildDate: '11 Eylül 2026',
     title: 'Canlı Yazarken Para Maskeleme (Live Currency Mask: 54.885,00)',
-    isLatest: true,
+    isLatest: false,
     summary: 'Tutar giriş alanlarında kullanıcı daha yazarken anında Türkçe para formatına (örn: 54885 yazıldığında 54.885,00) canlı maskeleme yapan CurrencyInputField bileşeni geliştirildi. Odaktan çıkmayı beklemeden, gerçek zamanlı finansal girdi deneyimi.',
     items: [
       {

@@ -1,8 +1,8 @@
 # 📘 TrioTrack — Kapsamlı Proje ve Mimari Dokümantasyonu
 
-> **Sürüm:** 1.6.9 (Build 2026.09.11 - versionCode: 10)  
+> **Sürüm:** 1.7.0 (Build 2026.09.11 - versionCode: 11)  
 > **Son Güncelleme:** 11 Eylül 2026  
-> **Durum:** Kararlı Sürüm (Canlı Para Maskeleme 54.885,00, Standart Ondalık Format, Biyometrik Kilit & APK Derlendi)
+> **Durum:** Kararlı Sürüm (Doğal Yerel Canlı TextInput, 54.885,00 Canlı Maskeleme & APK Derlendi)
 
 ---
 
@@ -251,6 +251,15 @@ flowchart TD
       5. 4 adet aylık gelir birikim oranı hedef seçeneği (%10, %20, %30, %50).
     * `DataContext.tsx` içine `financialGoal` ve `savingsTargetPercent` durumları, AsyncStorage anahtarları, `completeOnboarding` parametreleri ve JSON yedekleme desteği eklendi.
     * Onboarding Slide 6 (Özet Kartı) içine seçilen finansal hedef ve tasarruf oranı canlı olarak entegre edildi.
+* **v1.7.0 (11 Eylül 2026 - versionCode: 11):**
+  * **Doğal Yerel Canlı TextInput Mimarisi (`CurrencyInputField.tsx`):**
+    * Şeffaf katmanlı sanal girdi mimarisi yerine doğrudan yerel, görünür `TextInput` motoruna geçildi.
+    * Android'de imlecin en sola kaçması (0,0 koordinatı), metnin seçilememesi ve Gboard klavyesinin yazılanları sekme değiştirene kadar bekletmesi sorunları kökten çözüldü.
+    * Kullanıcı tuşa bastığı anda sıfır gecikmeyle canlı `54.885,00` biçimlendirmesi sağlanır.
+  * **Karşılama Ekranı Sadeleştirmesi:**
+    * Başlangıç bakiyesi alanındaki `(Temiz Sıfır: 0,00 ₺)` ibaresi kaldırılarak doğrudan `BAŞLANGIÇ BAKİYESİ` başlığına dönüştürüldü.
+  * **Akıllı Binlik Nokta Ayrıştırıcı (`formatUtils.ts`):**
+    * `parseCurrencyInput` fonksiyonu `54.885` gibi virgül içermeyen Türk formatındaki binlik noktalı girdileri float hatasına düşmeden doğrudan `54885` olarak hesaplamaya aktaracak şekilde güçlendirildi.
 * **v1.6.9 (11 Eylül 2026 - versionCode: 10):**
   * **Canlı Yazarken Para Maskeleme Motoru (`CurrencyInputField.tsx`):**
     * Tutar giriş alanlarında kullanıcı daha yazarken anında Türkçe para formatına (örn: `54885` yazıldığında anında `54.885,00` olarak) canlı maskeleme yapan özel `CurrencyInputField` bileşeni geliştirildi.

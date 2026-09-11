@@ -1,115 +1,103 @@
 import React, { useState, useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
 import {
-  View,
-  Text,
   TextInput,
-  StyleSheet,
-  TouchableOpacity,
-  Animated,
   StyleProp,
   TextStyle,
-  ViewStyle,
+  TextInputProps,
 } from 'react-native';
+import { parseCurrencyInput } from '../utils/formatUtils';
 
-export interface CurrencyInputFieldProps {
+export interface CurrencyInputFieldProps extends Omit<TextInputProps, 'value' | 'onChangeText'> {
   value?: string;
-  onChangeText: (formatted: string, numeric: number) => void;
+  onChangeText: (formatted: string, numeric?: number) => void;
   placeholder?: string;
   placeholderTextColor?: string;
   style?: StyleProp<TextStyle>;
-  containerStyle?: StyleProp<ViewStyle>;
+  containerStyle?: any;
+  cursorColor?: string;
   autoFocus?: boolean;
   editable?: boolean;
-  cursorColor?: string;
   onFocus?: () => void;
   onBlur?: () => void;
   testID?: string;
 }
 
-export interface CurrencyInputFieldRef {
-  focus: () => void;
-  blur: () => void;
-  isFocused: () => boolean;
-}
-
 /**
- * Normalizes any text into a raw digits-and-comma format.
- * Respects Turkish number conventions (dot is thousands separator, comma is decimal).
+ * Gerçek zamanlı Türk Lirası canlı para maskeleme motoru:
+ * Kullanıcı klavyeden tuşlara bastıkça anında 1.000,00 formatına dönüştürür.
+ * Örneğin: 5 -> 5,00 -> 54 -> 54,00 -> 548 -> 548,00 -> 5488 -> 5.488,00 -> 54885 -> 54.885,00
  */
-export function cleanRawInput(text: string): string {
-  if (!text) return '';
-  let cleaned = String(text).replace(/[^0-9,\.]/g, '');
+export function handleLiveText(newText: string, prevVal: string = ''): string {
+  if (!newText || newText === '' || newText === '0,00' || newText === ',00') {
+    return '';
+  }
 
-  // If text contains both dot and comma, dots are thousands separators
-  if (cleaned.includes('.') && cleaned.includes(',')) {
-    cleaned = cleaned.replace(/\./g, '');
-  } else if (cleaned.includes('.')) {
-    // If only dots exist
-    const dotCount = (cleaned.match(/\./g) || []).length;
-    if (dotCount > 1) {
-      cleaned = cleaned.replace(/\./g, '');
-    } else {
-      // Single dot treated as decimal
-      cleaned = cleaned.replace('.', ',');
+  // Kullanıcı sonuna virgül veya nokta eklediyse (kuruş hanesine geçiş)
+  if (newText.endsWith(',') || newText.endsWith('.')) {
+    const parts = newText.split(',');
+    const intDigits = parts[0].replace(/\D/g, '').replace(/^0+(?=\d)/, '') || '0';
+    return Number(intDigits).toLocaleString('tr-TR') + ',';
+  }
+
+  // Virgül vardı ve kullanıcı 1. kuruş rakamını girdi (örn: 54.885, + 5 -> 54.885,50)
+  if (prevVal.endsWith(',') && newText.length === prevVal.length + 1) {
+    const digit = newText.slice(-1);
+    if (/\d/.test(digit)) {
+      return prevVal + digit + '0';
     }
   }
 
-  // Ensure only one comma exists and at most 2 decimal digits
-  const commaIndex = cleaned.indexOf(',');
-  if (commaIndex !== -1) {
-    const beforeComma = cleaned.slice(0, commaIndex);
-    const afterComma = cleaned.slice(commaIndex + 1).replace(/,/g, '').slice(0, 2);
-    cleaned = beforeComma + ',' + afterComma;
+  // Virgüllüydü ve kullanıcı 2. kuruş rakamını girdi (örn: 54.885,50 + 2 -> 54.885,52)
+  if (prevVal.includes(',') && !prevVal.endsWith(',00') && newText.length === prevVal.length + 1) {
+    const parts = prevVal.split(',');
+    const digit = newText.slice(-1);
+    if (/\d/.test(digit)) {
+      return parts[0] + ',' + (parts[1][0] || '0') + digit;
+    }
   }
 
-  // Cap integer part to 12 digits
-  const parts = cleaned.split(',');
-  if (parts[0].length > 12) {
-    parts[0] = parts[0].slice(0, 12);
-    cleaned = parts.join(',');
+  // Sabit ,00 formatında sonuna rakam eklendiyse (örn: 5,00 + 4 -> 54,00)
+  if (prevVal.endsWith(',00') && newText.startsWith(prevVal) && newText.length === prevVal.length + 1) {
+    const addedDigit = newText.slice(-1);
+    if (/\d/.test(addedDigit)) {
+      const prevInt = prevVal.slice(0, -3).replace(/\D/g, '');
+      const newInt = prevInt + addedDigit;
+      return Number(newInt).toLocaleString('tr-TR') + ',00';
+    }
   }
 
-  return cleaned;
+  // Sabit ,00 iken backspace yapıldıysa (örn: 54.885,00 -> 5.488,00)
+  if (prevVal.endsWith(',00') && newText === prevVal.slice(0, -1)) {
+    const prevInt = prevVal.slice(0, -3).replace(/\D/g, '');
+    const newInt = prevInt.slice(0, -1);
+    if (!newInt) return '';
+    return Number(newInt).toLocaleString('tr-TR') + ',00';
+  }
+
+  // Kuruşlu değerden backspace yapıldıysa
+  if (prevVal.includes(',') && !prevVal.endsWith(',00') && newText.length < prevVal.length) {
+    const parts = prevVal.split(',');
+    return parts[0] + ',';
+  }
+
+  // Genel ayrıştırma (Yapıştırma / dışarıdan veri besleme)
+  const clean = newText.replace(/[^0-9,]/g, '');
+  if (clean.includes(',')) {
+    const parts = clean.split(',');
+    const intStr = parts[0].replace(/\D/g, '').replace(/^0+(?=\d)/, '') || '0';
+    let decStr = parts.slice(1).join('').replace(/\D/g, '');
+    if (decStr.length > 2) decStr = decStr.slice(0, 2);
+    if (decStr.length === 1) decStr += '0';
+    if (!decStr) decStr = '00';
+    return Number(intStr).toLocaleString('tr-TR') + ',' + decStr;
+  }
+
+  const intStr = clean.replace(/\D/g, '').replace(/^0+(?=\d)/, '');
+  if (!intStr) return '';
+  return Number(intStr).toLocaleString('tr-TR') + ',00';
 }
 
-/**
- * Converts raw digits (e.g. "54885" or "54885,5") into live Turkish currency display ("54.885,00" or "54.885,50").
- */
-export function rawToDisplay(raw: string): { display: string; isEmpty: boolean; numeric: number } {
-  if (!raw || raw.trim() === '') {
-    return { display: '0,00', isEmpty: true, numeric: 0 };
-  }
-
-  let clean = raw.replace(/[^\d,]/g, '');
-  if (!clean) {
-    return { display: '0,00', isEmpty: true, numeric: 0 };
-  }
-
-  let parts = clean.split(',');
-  let intPartRaw = parts[0];
-  let decPartRaw = parts.length > 1 ? parts[1].slice(0, 2) : '';
-
-  intPartRaw = intPartRaw.replace(/^0+(?=\d)/, '');
-  if (!intPartRaw) intPartRaw = '0';
-
-  const formattedInt = Number(intPartRaw).toLocaleString('tr-TR');
-
-  let display = '';
-  if (clean.endsWith(',')) {
-    display = `${formattedInt},`;
-  } else if (parts.length > 1 && decPartRaw.length === 1) {
-    display = `${formattedInt},${decPartRaw}0`;
-  } else if (parts.length > 1 && decPartRaw.length >= 2) {
-    display = `${formattedInt},${decPartRaw}`;
-  } else {
-    display = `${formattedInt},00`;
-  }
-
-  const numeric = parseFloat(`${intPartRaw}.${decPartRaw || '00'}`);
-  return { display, isEmpty: false, numeric };
-}
-
-export const CurrencyInputField = forwardRef<CurrencyInputFieldRef, CurrencyInputFieldProps>(
+export const CurrencyInputField = forwardRef<TextInput, CurrencyInputFieldProps>(
   (
     {
       value = '',
@@ -118,167 +106,71 @@ export const CurrencyInputField = forwardRef<CurrencyInputFieldRef, CurrencyInpu
       placeholderTextColor = '#999999',
       style,
       containerStyle,
+      cursorColor,
       autoFocus = false,
       editable = true,
-      cursorColor,
       onFocus,
       onBlur,
       testID,
+      ...restProps
     },
     ref
   ) => {
     const inputRef = useRef<TextInput>(null);
-    const [raw, setRaw] = useState<string>(() => cleanRawInput(value));
-    const [isFocused, setIsFocused] = useState(false);
-    const cursorAnim = useRef(new Animated.Value(1)).current;
-    const lastEmittedDisplay = useRef<string>('');
+    useImperativeHandle(ref, () => inputRef.current as TextInput);
 
-    // Synchronize when external value prop changes (e.g. OCR, Calculator, Presets)
+    const [internalText, setInternalText] = useState<string>(() => {
+      if (!value || value === '0,00') return '';
+      return value;
+    });
+
     useEffect(() => {
-      if (value === lastEmittedDisplay.current) {
-        return;
+      if (value !== internalText) {
+        if (!value || value === '0,00') {
+          setInternalText('');
+        } else {
+          setInternalText(value);
+        }
       }
-      const incomingRaw = cleanRawInput(value);
-      setRaw(incomingRaw);
-      const { display, isEmpty } = rawToDisplay(incomingRaw);
-      lastEmittedDisplay.current = isEmpty ? '' : display;
     }, [value]);
 
-    useImperativeHandle(ref, () => ({
-      focus: () => inputRef.current?.focus(),
-      blur: () => inputRef.current?.blur(),
-      isFocused: () => isFocused,
-    }));
-
-    // Blinking cursor animation
-    useEffect(() => {
-      let animation: Animated.CompositeAnimation | null = null;
-      if (isFocused) {
-        animation = Animated.loop(
-          Animated.sequence([
-            Animated.timing(cursorAnim, {
-              toValue: 0,
-              duration: 500,
-              useNativeDriver: true,
-            }),
-            Animated.timing(cursorAnim, {
-              toValue: 1,
-              duration: 500,
-              useNativeDriver: true,
-            }),
-          ])
-        );
-        animation.start();
-      } else {
-        cursorAnim.setValue(0);
-      }
-      return () => {
-        animation?.stop();
-      };
-    }, [isFocused]);
-
-    const handleChangeText = (text: string) => {
-      const newRaw = cleanRawInput(text);
-      setRaw(newRaw);
-      const { display, isEmpty, numeric } = rawToDisplay(newRaw);
-      const emitted = isEmpty ? '' : display;
-      lastEmittedDisplay.current = emitted;
-      if (isEmpty) {
+    const handleChangeText = (incoming: string) => {
+      const formatted = handleLiveText(incoming, internalText);
+      setInternalText(formatted);
+      if (!formatted) {
         onChangeText('', 0);
       } else {
-        onChangeText(display, numeric);
+        const numeric = parseCurrencyInput(formatted);
+        onChangeText(formatted, numeric);
       }
     };
 
-    const { display, isEmpty } = rawToDisplay(raw);
-
-    // Extract font size and color for cursor and display
-    const flattenedStyle = StyleSheet.flatten(style) || {};
-    const fontSize = (flattenedStyle.fontSize as number) || 28;
-    const textColor = (flattenedStyle.color as string) || '#000000';
-    const cursorHeight = fontSize * 0.95;
-
     return (
-      <TouchableOpacity
-        activeOpacity={1}
-        onPress={() => inputRef.current?.focus()}
-        style={[styles.container, containerStyle]}
+      <TextInput
+        ref={inputRef}
+        style={style}
+        value={internalText}
+        onChangeText={handleChangeText}
+        placeholder={placeholder}
+        placeholderTextColor={placeholderTextColor}
+        keyboardType="decimal-pad"
+        autoFocus={autoFocus}
+        editable={editable}
+        cursorColor={cursorColor}
+        onFocus={onFocus}
+        onBlur={() => {
+          if (internalText.endsWith(',')) {
+            const normalized = internalText + '00';
+            setInternalText(normalized);
+            onChangeText(normalized, parseCurrencyInput(normalized));
+          }
+          onBlur?.();
+        }}
         testID={testID}
-      >
-        <View style={styles.textRow}>
-          <Text
-            style={[
-              style,
-              { color: isEmpty ? placeholderTextColor : textColor },
-            ]}
-            numberOfLines={1}
-          >
-            {isEmpty ? placeholder : display}
-          </Text>
-          {isFocused && (
-            <Animated.View
-              style={[
-                styles.cursor,
-                {
-                  backgroundColor: cursorColor || textColor,
-                  height: cursorHeight,
-                  opacity: cursorAnim,
-                },
-              ]}
-            />
-          )}
-        </View>
-
-        <TextInput
-          ref={inputRef}
-          style={styles.hiddenInput}
-          value={raw}
-          onChangeText={handleChangeText}
-          keyboardType="decimal-pad"
-          onFocus={() => {
-            setIsFocused(true);
-            onFocus?.();
-          }}
-          onBlur={() => {
-            setIsFocused(false);
-            onBlur?.();
-          }}
-          autoFocus={autoFocus}
-          editable={editable}
-          caretHidden
-          selectionColor="transparent"
-        />
-      </TouchableOpacity>
+        {...restProps}
+      />
     );
   }
 );
-
-const styles = StyleSheet.create({
-  container: {
-    position: 'relative',
-    justifyContent: 'center',
-    minHeight: 44,
-  },
-  textRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  cursor: {
-    width: 2.5,
-    marginLeft: 3,
-    borderRadius: 1.5,
-  },
-  hiddenInput: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    opacity: 0,
-    color: 'transparent',
-    backgroundColor: 'transparent',
-    fontSize: 1,
-  },
-});
 
 export default CurrencyInputField;

@@ -131,6 +131,16 @@ export function parseCurrencyInput(input: string | number | undefined | null): n
     return isNaN(val) ? 0 : val;
   }
 
+  // Sadece nokta varsa: Türk formatında binlik ayıracı kontrolü (örn: 54.885, 1.000, 1.000.000)
+  if (str.includes('.')) {
+    const parts = str.split('.');
+    const isThousands = parts.length > 1 && parts.slice(1).every(p => p.length === 3);
+    if (isThousands) {
+      const val = parseFloat(str.replace(/\./g, ''));
+      return isNaN(val) ? 0 : val;
+    }
+  }
+
   // Standart float
   const val = parseFloat(str);
   return isNaN(val) ? 0 : val;
