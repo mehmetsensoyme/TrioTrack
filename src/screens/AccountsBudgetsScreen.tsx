@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../theme/ThemeContext';
 import { useData, Account, RecurringItem, Category } from '../context/DataContext';
+import { formatCurrency, formatNumber, parseCurrencyInput } from '../utils/formatUtils';
 
 const PALETTE_COLORS = ['#FF9800', '#E91E63', '#2196F3', '#9C27B0', '#4CAF50', '#F44336', '#009688', '#3F51B5'];
 const CATEGORY_ICONS = ['cart-outline', 'fast-food-outline', 'car-outline', 'receipt-outline', 'film-outline', 'medkit-outline', 'fitness-outline', 'school-outline', 'gift-outline', 'airplane-outline', 'home-outline', 'cafe-outline'];
@@ -93,7 +94,7 @@ export default function AccountsBudgetsScreen({ navigation }: any) {
       Alert.alert('Hata', 'Lütfen bir hesap adı girin.');
       return;
     }
-    const bal = parseFloat(newAccBalance) || 0;
+    const bal = parseCurrencyInput(newAccBalance);
     let icon = 'card-outline';
     let color = '#2196F3';
     if (newAccType === 'cash') { icon = 'wallet-outline'; color = '#4CAF50'; }
@@ -114,7 +115,7 @@ export default function AccountsBudgetsScreen({ navigation }: any) {
 
   // Kategori bütçesi kaydetme
   const handleSaveBudget = async () => {
-    const limit = parseFloat(budgetLimitInput);
+    const limit = parseCurrencyInput(budgetLimitInput);
     if (isNaN(limit) || limit <= 0) {
       Alert.alert('Hata', 'Geçerli bir limit tutarı girin.');
       return;
@@ -134,7 +135,7 @@ export default function AccountsBudgetsScreen({ navigation }: any) {
   // Cüzdan detayını açma
   const handleOpenAccountDetail = (acc: Account) => {
     setSelectedAccountForDetail(acc);
-    setEditBalanceInput(String(acc.balance));
+    setEditBalanceInput(formatNumber(acc.balance));
     setIsEditingBalance(false);
     setShowAccountDetailModal(true);
   };
@@ -142,7 +143,7 @@ export default function AccountsBudgetsScreen({ navigation }: any) {
   // Bakiye güncelleme
   const handleSaveBalance = async () => {
     if (!selectedAccountForDetail) return;
-    const num = parseFloat(editBalanceInput.replace(',', '.'));
+    const num = parseCurrencyInput(editBalanceInput);
     if (isNaN(num)) {
       Alert.alert('Hata', 'Geçerli bir bakiye tutarı girin.');
       return;
@@ -194,7 +195,7 @@ export default function AccountsBudgetsScreen({ navigation }: any) {
       Alert.alert('Eksik Alan', 'Lütfen bir başlık girin (Örn: Netflix).');
       return;
     }
-    const val = parseFloat(recAmount.replace(',', '.'));
+    const val = parseCurrencyInput(recAmount);
     if (isNaN(val) || val <= 0) {
       Alert.alert('Hata', 'Geçerli bir tutar girin.');
       return;
@@ -376,7 +377,7 @@ export default function AccountsBudgetsScreen({ navigation }: any) {
                       fontWeight: tStyles.titleWeight 
                     }
                   ]}>
-                    {isBalanceHidden ? `${currency} ••••••` : `${netWorth < 0 ? '-' : ''}${currency} ${Math.abs(netWorth).toLocaleString('tr-TR')}`}
+                    {isBalanceHidden ? `${currency} ••••••` : formatCurrency(netWorth, currency)}
                   </Text>
                 </View>
                 <View style={[styles.netWorthBadge, { backgroundColor: (netWorth >= 0 ? '#10B981' : '#EF4444') + '20' }]}>
@@ -390,19 +391,19 @@ export default function AccountsBudgetsScreen({ navigation }: any) {
                 <View style={styles.netWorthStatItem}>
                   <Text style={[styles.netWorthStatLabel, { color: colors.text, opacity: 0.5, fontSize: 10 * m, fontFamily: tStyles.fontFamily }]}>Cüzdan Varlıkları</Text>
                   <Text style={[styles.netWorthStatValue, { color: colors.text, fontSize: 13 * m, fontWeight: 'bold', fontFamily: tStyles.fontFamily }]}>
-                    {isBalanceHidden ? `${currency} ••••` : `${currency} ${totalBalance.toLocaleString('tr-TR')}`}
+                    {isBalanceHidden ? `${currency} ••••` : formatCurrency(totalBalance, currency)}
                   </Text>
                 </View>
                 <View style={styles.netWorthStatItem}>
                   <Text style={[styles.netWorthStatLabel, { color: colors.text, opacity: 0.5, fontSize: 10 * m, fontFamily: tStyles.fontFamily }]}>Toplam Borç</Text>
                   <Text style={[styles.netWorthStatValue, { color: '#EF4444', fontSize: 13 * m, fontWeight: 'bold', fontFamily: tStyles.fontFamily }]}>
-                    {isBalanceHidden ? `${currency} ••••` : `${currency} ${totalLiabilities.toLocaleString('tr-TR')}`}
+                    {isBalanceHidden ? `${currency} ••••` : formatCurrency(totalLiabilities, currency)}
                   </Text>
                 </View>
                 <View style={styles.netWorthStatItem}>
                   <Text style={[styles.netWorthStatLabel, { color: colors.text, opacity: 0.5, fontSize: 10 * m, fontFamily: tStyles.fontFamily }]}>Bekleyen Alacak</Text>
                   <Text style={[styles.netWorthStatValue, { color: '#10B981', fontSize: 13 * m, fontWeight: 'bold', fontFamily: tStyles.fontFamily }]}>
-                    {isBalanceHidden ? `${currency} ••••` : `${currency} ${totalReceivables.toLocaleString('tr-TR')}`}
+                    {isBalanceHidden ? `${currency} ••••` : formatCurrency(totalReceivables, currency)}
                   </Text>
                 </View>
               </View>
@@ -450,7 +451,7 @@ export default function AccountsBudgetsScreen({ navigation }: any) {
                       }
                     ]}
                   >
-                    {isBalanceHidden ? `${currency} ••••` : `${acc.balance < 0 ? '-' : ''}${currency} ${Math.abs(acc.balance).toLocaleString('tr-TR')}`}
+                    {isBalanceHidden ? `${currency} ••••` : formatCurrency(acc.balance, currency)}
                   </Text>
                   <Ionicons name="chevron-forward" size={14} color={colors.text} style={{ opacity: 0.3, marginTop: 4 }} />
                 </View>
@@ -489,7 +490,7 @@ export default function AccountsBudgetsScreen({ navigation }: any) {
                     SIFIR TABANLI BÜTÇE PLANI (ZERO)
                   </Text>
                   <Text style={[styles.zeroBudgetTitle, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 15 * m, fontWeight: 'bold', marginTop: 2 }]}>
-                    Aylık Hedef: {currency} {monthlyBudgetGoal.toLocaleString('tr-TR')}
+                    Aylık Hedef: {formatCurrency(monthlyBudgetGoal, currency)}
                   </Text>
                 </View>
                 <View style={[
@@ -512,7 +513,7 @@ export default function AccountsBudgetsScreen({ navigation }: any) {
                     fontSize: 11 * m,
                     fontFamily: tStyles.fontFamily
                   }}>
-                    {unallocatedBudget === 0 ? '✓ Zero-Budgeted' : unallocatedBudget > 0 ? `${currency} ${unallocatedBudget.toLocaleString('tr-TR')} Boşta` : `Aşım: ${currency} ${Math.abs(unallocatedBudget).toLocaleString('tr-TR')}`}
+                    {unallocatedBudget === 0 ? '✓ Zero-Budgeted' : unallocatedBudget > 0 ? `${formatCurrency(unallocatedBudget, currency)} Boşta` : `Aşım: ${formatCurrency(Math.abs(unallocatedBudget), currency)}`}
                   </Text>
                 </View>
               </View>
@@ -531,10 +532,10 @@ export default function AccountsBudgetsScreen({ navigation }: any) {
 
               <View style={styles.zeroFooterRow}>
                 <Text style={{ color: colors.text, opacity: 0.6, fontSize: 11 * m, fontFamily: tStyles.fontFamily }}>
-                  Tahsis Edilen: {currency} {totalAllocated.toLocaleString('tr-TR')} (%{monthlyBudgetGoal > 0 ? Math.round((totalAllocated / monthlyBudgetGoal) * 100) : 0})
+                  Tahsis Edilen: {formatCurrency(totalAllocated, currency)} (%{monthlyBudgetGoal > 0 ? Math.round((totalAllocated / monthlyBudgetGoal) * 100) : 0})
                 </Text>
                 <Text style={{ color: colors.text, opacity: 0.6, fontSize: 11 * m, fontFamily: tStyles.fontFamily }}>
-                  Kalan: {currency} {Math.max(0, unallocatedBudget).toLocaleString('tr-TR')}
+                  Kalan: {formatCurrency(Math.max(0, unallocatedBudget), currency)}
                 </Text>
               </View>
             </View>
@@ -611,10 +612,10 @@ export default function AccountsBudgetsScreen({ navigation }: any) {
 
                     <View style={styles.budgetBottomRow}>
                       <Text style={[styles.budgetSpentText, { color: colors.text, opacity: 0.7, fontFamily: tStyles.fontFamily, fontSize: 12 * m }]}>
-                        Harcanan: {currency} {spent.toLocaleString('tr-TR')}
+                        Harcanan: {formatCurrency(spent, currency)}
                       </Text>
                       <Text style={[styles.budgetLimitText, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 12 * m }]}>
-                        Limit: {currency} {b.amount.toLocaleString('tr-TR')}
+                        Limit: {formatCurrency(b.amount, currency)}
                       </Text>
                     </View>
                   </View>
@@ -633,7 +634,7 @@ export default function AccountsBudgetsScreen({ navigation }: any) {
                   Düzenli İşlemler & Abonelikler
                 </Text>
                 <Text style={{ color: colors.text, opacity: 0.6, fontSize: 12 * m, marginTop: 2 }}>
-                  Aylık Taahhüt: {currency} {totalMonthlyRecurring.toLocaleString('tr-TR')} / ay
+                  Aylık Taahhüt: {formatCurrency(totalMonthlyRecurring, currency)} / ay
                 </Text>
               </View>
               <TouchableOpacity 
@@ -689,7 +690,7 @@ export default function AccountsBudgetsScreen({ navigation }: any) {
 
                     <View style={{ alignItems: 'flex-end', marginRight: 10 }}>
                       <Text style={[styles.accBalance, { color: item.type === 'expense' ? '#EF5350' : '#4CAF50', fontFamily: tStyles.fontFamily, fontSize: 15 * m }]}>
-                        {currency} {item.amount.toLocaleString('tr-TR')}
+                        {formatCurrency(item.amount, currency, { type: item.type })}
                       </Text>
                     </View>
 
@@ -738,7 +739,7 @@ export default function AccountsBudgetsScreen({ navigation }: any) {
                     keyboardType="numeric"
                     value={String(monthlyBudgetGoal)}
                     onChangeText={val => {
-                      const num = parseInt(val) || 0;
+                      const num = parseCurrencyInput(val);
                       setMonthlyBudgetGoal(num);
                     }}
                   />
@@ -750,14 +751,14 @@ export default function AccountsBudgetsScreen({ navigation }: any) {
                 <View style={[styles.statBox, { backgroundColor: colors.background, borderRadius: Math.max(tStyles.roundness / 2, 8) }]}>
                   <Text style={[styles.statLabel, { color: colors.text, opacity: 0.6, fontSize: 11 * m }]}>Günlük Akıllı Limit</Text>
                   <Text style={[styles.statValue, { color: colors.primary, fontSize: 17 * m, fontWeight: 'bold' }]}>
-                    {currency} {buckwheatMetrics.dailyAllowance.toLocaleString('tr-TR')}
+                    {formatCurrency(buckwheatMetrics.dailyAllowance, currency)}
                   </Text>
                 </View>
 
                 <View style={[styles.statBox, { backgroundColor: colors.background, borderRadius: Math.max(tStyles.roundness / 2, 8) }]}>
                   <Text style={[styles.statLabel, { color: colors.text, opacity: 0.6, fontSize: 11 * m }]}>Bugün Harcanan</Text>
                   <Text style={[styles.statValue, { color: colors.text, fontSize: 17 * m, fontWeight: 'bold' }]}>
-                    {currency} {buckwheatMetrics.todaySpent.toLocaleString('tr-TR')}
+                    {formatCurrency(buckwheatMetrics.todaySpent, currency)}
                   </Text>
                 </View>
 
@@ -770,7 +771,7 @@ export default function AccountsBudgetsScreen({ navigation }: any) {
                     fontSize: 17 * m, 
                     fontWeight: 'bold' 
                   }]}>
-                    {buckwheatMetrics.todayRemaining < 0 ? '-' : ''}{currency} {Math.abs(buckwheatMetrics.todayRemaining).toLocaleString('tr-TR')}
+                    {formatCurrency(buckwheatMetrics.todayRemaining, currency)}
                   </Text>
                 </View>
 
@@ -834,11 +835,19 @@ export default function AccountsBudgetsScreen({ navigation }: any) {
 
             <TextInput
               style={[styles.modalInput, { backgroundColor: colors.background, color: colors.text, borderRadius: Math.max(tStyles.roundness / 2, 6) }]}
-              placeholder="Başlangıç Bakiyesi (0.00)"
+              placeholder="Başlangıç Bakiyesi (0,00)"
               placeholderTextColor={colors.text + '60'}
-              keyboardType="numeric"
+              keyboardType="decimal-pad"
               value={newAccBalance}
               onChangeText={setNewAccBalance}
+              onBlur={() => {
+                if (newAccBalance.trim()) {
+                  const parsed = parseCurrencyInput(newAccBalance);
+                  if (!isNaN(parsed) && parsed > 0) {
+                    setNewAccBalance(formatNumber(parsed));
+                  }
+                }
+              }}
             />
 
             <View style={styles.modalButtons}>
@@ -889,11 +898,19 @@ export default function AccountsBudgetsScreen({ navigation }: any) {
 
             <TextInput
               style={[styles.modalInput, { backgroundColor: colors.background, color: colors.text, borderRadius: Math.max(tStyles.roundness / 2, 6) }]}
-              placeholder={`Aylık Limit Tutarı (${currency})`}
+              placeholder={`Aylık Limit Tutarı (${currency} 0,00)`}
               placeholderTextColor={colors.text + '60'}
-              keyboardType="numeric"
+              keyboardType="decimal-pad"
               value={budgetLimitInput}
               onChangeText={setBudgetLimitInput}
+              onBlur={() => {
+                if (budgetLimitInput.trim()) {
+                  const parsed = parseCurrencyInput(budgetLimitInput);
+                  if (!isNaN(parsed) && parsed > 0) {
+                    setBudgetLimitInput(formatNumber(parsed));
+                  }
+                }
+              }}
             />
 
             <View style={styles.modalButtons}>
@@ -944,9 +961,17 @@ export default function AccountsBudgetsScreen({ navigation }: any) {
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 4 }}>
                   <TextInput
                     style={[styles.modalInput, { flex: 1, backgroundColor: colors.card, color: colors.text, marginBottom: 0, paddingVertical: 8 }]}
-                    keyboardType="numeric"
+                    keyboardType="decimal-pad"
                     value={editBalanceInput}
                     onChangeText={setEditBalanceInput}
+                    onBlur={() => {
+                      if (editBalanceInput.trim()) {
+                        const parsed = parseCurrencyInput(editBalanceInput);
+                        if (!isNaN(parsed)) {
+                          setEditBalanceInput(formatNumber(parsed));
+                        }
+                      }
+                    }}
                     autoFocus
                   />
                   <TouchableOpacity onPress={handleSaveBalance} style={[styles.modalSaveBtn, { backgroundColor: colors.primary, paddingVertical: 10, paddingHorizontal: 16 }]}>
@@ -956,7 +981,7 @@ export default function AccountsBudgetsScreen({ navigation }: any) {
               ) : (
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                   <Text style={{ fontSize: 24 * m, color: colors.text, fontWeight: 'bold', fontFamily: tStyles.fontFamily }}>
-                    {currency} {selectedAccountForDetail?.balance.toLocaleString('tr-TR')}
+                    {formatCurrency(selectedAccountForDetail?.balance, currency)}
                   </Text>
                   <TouchableOpacity 
                     style={[styles.smallActionBtn, { backgroundColor: colors.primary + '20', borderRadius: Math.max(tStyles.roundness / 2, 6) }]}
@@ -975,20 +1000,18 @@ export default function AccountsBudgetsScreen({ navigation }: any) {
                 <View style={[styles.detailStatBox, { backgroundColor: colors.background, borderRadius: Math.max(tStyles.roundness / 2, 6) }]}>
                   <Text style={{ color: colors.text, opacity: 0.6, fontSize: 11 * m }}>Toplam Giren</Text>
                   <Text style={{ color: isDark ? '#81C784' : '#2E7D32', fontWeight: 'bold', fontSize: 14 * m, marginTop: 2 }}>
-                    +{currency} {transactions
+                    {formatCurrency(transactions
                       .filter(t => (t.accountId === selectedAccountForDetail.id && t.type === 'income') || (t.toAccountId === selectedAccountForDetail.id && t.type === 'transfer'))
-                      .reduce((s, t) => s + t.amount, 0)
-                      .toLocaleString('tr-TR')}
+                      .reduce((s, t) => s + t.amount, 0), currency, { sign: '+' })}
                   </Text>
                 </View>
 
                 <View style={[styles.detailStatBox, { backgroundColor: colors.background, borderRadius: Math.max(tStyles.roundness / 2, 6) }]}>
                   <Text style={{ color: colors.text, opacity: 0.6, fontSize: 11 * m }}>Toplam Çıkan</Text>
                   <Text style={{ color: '#EF5350', fontWeight: 'bold', fontSize: 14 * m, marginTop: 2 }}>
-                    -{currency} {transactions
+                    {formatCurrency(transactions
                       .filter(t => t.accountId === selectedAccountForDetail.id && (t.type === 'expense' || t.type === 'transfer'))
-                      .reduce((s, t) => s + t.amount, 0)
-                      .toLocaleString('tr-TR')}
+                      .reduce((s, t) => s + t.amount, 0), currency, { sign: '-' })}
                   </Text>
                 </View>
               </View>
@@ -1014,7 +1037,7 @@ export default function AccountsBudgetsScreen({ navigation }: any) {
                         <Text style={{ color: colors.text, opacity: 0.5, fontSize: 10 * m }}>{tx.date}</Text>
                       </View>
                       <Text style={{ color: tx.type === 'transfer' ? '#7C3AED' : tx.type === 'income' ? '#4CAF50' : '#EF5350', fontWeight: 'bold', fontSize: 13 * m }}>
-                        {tx.type === 'transfer' ? '↔' : tx.type === 'income' ? '+' : '-'}{currency} {tx.amount.toLocaleString('tr-TR')}
+                        {formatCurrency(tx.amount, currency, { type: tx.type })}
                       </Text>
                     </View>
                   ))
@@ -1168,11 +1191,19 @@ export default function AccountsBudgetsScreen({ navigation }: any) {
 
             <TextInput
               style={[styles.modalInput, { backgroundColor: colors.background, color: colors.text, borderRadius: Math.max(tStyles.roundness / 2, 6) }]}
-              placeholder={`Tutar (${currency})`}
+              placeholder={`Tutar (${currency} 0,00)`}
               placeholderTextColor={colors.text + '60'}
-              keyboardType="numeric"
+              keyboardType="decimal-pad"
               value={recAmount}
               onChangeText={setRecAmount}
+              onBlur={() => {
+                if (recAmount.trim()) {
+                  const parsed = parseCurrencyInput(recAmount);
+                  if (!isNaN(parsed) && parsed > 0) {
+                    setRecAmount(formatNumber(parsed));
+                  }
+                }
+              }}
             />
 
             {/* Periyot Seçimi */}

@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../theme/ThemeContext';
 import { useData } from '../context/DataContext';
+import { formatCurrency, formatNumber } from '../utils/formatUtils';
 
 const MONTH_NAMES = [
   'Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran',
@@ -178,7 +179,7 @@ export default function ReportsScreen({ navigation }: any) {
               }
             ]}
           >
-            {netSavings >= 0 ? '+' : ''}{currency} {netSavings.toLocaleString('tr-TR')}
+            {formatCurrency(netSavings, currency, { showSign: true })}
           </Text>
 
           <View style={styles.incomeExpenseRow}>
@@ -189,7 +190,7 @@ export default function ReportsScreen({ navigation }: any) {
               <View>
                 <Text style={[styles.subLabel, { color: colors.text, opacity: 0.6, fontFamily: tStyles.fontFamily, fontSize: 11 * m }]}>Toplam Gelir</Text>
                 <Text style={[styles.subVal, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 13 * m, fontWeight: 'bold' }]}>
-                  +{currency} {totalIncomeThisMonth.toLocaleString('tr-TR')}
+                  {formatCurrency(totalIncomeThisMonth, currency, { sign: '+' })}
                 </Text>
               </View>
             </View>
@@ -201,7 +202,7 @@ export default function ReportsScreen({ navigation }: any) {
               <View>
                 <Text style={[styles.subLabel, { color: colors.text, opacity: 0.6, fontFamily: tStyles.fontFamily, fontSize: 11 * m }]}>Toplam Gider</Text>
                 <Text style={[styles.subVal, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 13 * m, fontWeight: 'bold' }]}>
-                  -{currency} {totalExpenseThisMonth.toLocaleString('tr-TR')}
+                  {formatCurrency(totalExpenseThisMonth, currency, { sign: '-' })}
                 </Text>
               </View>
             </View>
@@ -235,7 +236,7 @@ export default function ReportsScreen({ navigation }: any) {
               <Text style={[styles.glanceBadgeText, { color: '#2196F3', fontFamily: tStyles.fontFamily, fontSize: 10 * m }]}>ORTALAMA</Text>
             </View>
             <Text style={[styles.glanceMainVal, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 20 * m, fontWeight: 'bold' }]}>
-              {currency} {buckwheatMetrics.averageDailySpent.toLocaleString('tr-TR')}
+              {formatCurrency(buckwheatMetrics.averageDailySpent, currency)}
             </Text>
             <Text style={[styles.glanceDesc, { color: colors.text, opacity: 0.6, fontFamily: tStyles.fontFamily, fontSize: 11 * m }]}>
               Günlük Tüketim Hızı
@@ -266,7 +267,7 @@ export default function ReportsScreen({ navigation }: any) {
               {topCategory ? topCategory.name : 'Yok'}
             </Text>
             <Text style={[styles.glanceDesc, { color: colors.text, opacity: 0.6, fontFamily: tStyles.fontFamily, fontSize: 11 * m }]}>
-              {topCategory ? `${currency} ${topCategory.spent.toLocaleString('tr-TR')}` : '-'}
+              {topCategory ? formatCurrency(topCategory.spent, currency) : '-'}
             </Text>
           </View>
         </View>
@@ -290,7 +291,7 @@ export default function ReportsScreen({ navigation }: any) {
               </Text>
             </View>
             <Text style={{ color: '#EF4444', fontFamily: tStyles.fontFamily, fontSize: 15 * m, fontWeight: 'bold' }}>
-              -{currency} {maxExpense.amount.toLocaleString('tr-TR')}
+              {formatCurrency(maxExpense.amount, currency, { sign: '-' })}
             </Text>
           </View>
         )}
@@ -350,7 +351,7 @@ export default function ReportsScreen({ navigation }: any) {
                     </View>
                     <View style={{ alignItems: 'flex-end' }}>
                       <Text style={[styles.catAmount, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 14 * m, fontWeight: 'bold' }]}>
-                        {currency} {cat.spent.toLocaleString('tr-TR')}
+                        {formatCurrency(cat.spent, currency)}
                       </Text>
                       <Text style={[styles.catPercent, { color: colors.primary, fontFamily: tStyles.fontFamily, fontSize: 11 * m }]}>
                         %{cat.percentage} ({cat.count} işlem)

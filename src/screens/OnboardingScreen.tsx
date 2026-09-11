@@ -22,6 +22,7 @@ import { useTheme } from '../theme/ThemeContext';
 import { useData } from '../context/DataContext';
 import { AVATAR_PRESETS, getAvatarPreset } from '../utils/avatarUtils';
 import { FINANCIAL_GOALS, SAVINGS_TARGET_OPTIONS, getFinancialGoal, getSavingsTargetOption } from '../utils/goalUtils';
+import { formatCurrency, formatNumber, parseCurrencyInput } from '../utils/formatUtils';
 import { 
   pickBackupFile, 
   readClipboardBackup, 
@@ -200,7 +201,7 @@ export default function OnboardingScreen({ navigation }: any) {
     setIsFinishing(true);
     try {
       setGlobalCurrency(currency.symbol);
-      const initialBalNum = initialBalance ? parseFloat(initialBalance.replace(',', '.')) : 0;
+      const initialBalNum = parseCurrencyInput(initialBalance);
       const monthlyGoalNum = monthlyGoal ? parseInt(monthlyGoal) : undefined;
 
       await completeOnboarding({
@@ -1402,7 +1403,7 @@ export default function OnboardingScreen({ navigation }: any) {
                 />
 
                 <Text style={[styles.inputMicroLabel, { color: colors.primary, fontFamily: tStyles.fontFamily, fontSize: 11 * m, marginTop: 12 }]}>
-                  BAŞLANGIÇ BAKİYESİ (Temiz Sıfır: 0.00 {currency.symbol})
+                  BAŞLANGIÇ BAKİYESİ (Temiz Sıfır: 0,00 {currency.symbol})
                 </Text>
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                   <Text style={{ fontSize: 18 * m, fontWeight: 'bold', color: colors.primary, marginRight: 8 }}>
@@ -1410,11 +1411,19 @@ export default function OnboardingScreen({ navigation }: any) {
                   </Text>
                   <TextInput
                     style={[styles.mediumTextInput, { color: colors.text, flex: 1, fontFamily: tStyles.fontFamily, fontSize: 16 * m }]}
-                    placeholder="0.00"
+                    placeholder="0,00"
                     keyboardType="decimal-pad"
                     placeholderTextColor={colors.text + '40'}
                     value={initialBalance}
                     onChangeText={setInitialBalance}
+                    onBlur={() => {
+                      if (initialBalance.trim()) {
+                        const parsed = parseCurrencyInput(initialBalance);
+                        if (!isNaN(parsed) && parsed > 0) {
+                          setInitialBalance(formatNumber(parsed));
+                        }
+                      }
+                    }}
                   />
                 </View>
               </View>
@@ -1507,7 +1516,7 @@ export default function OnboardingScreen({ navigation }: any) {
                     İlk Cüzdan:
                   </Text>
                   <Text style={[styles.summaryItemVal, { color: colors.text, fontWeight: 'bold', fontFamily: tStyles.fontFamily, fontSize: 13 * m }]}>
-                    {accountName || 'Nakit Cüzdanım'} ({initialBalance ? parseFloat(initialBalance) : 0} {currency.symbol})
+                    {accountName || 'Nakit Cüzdanım'} ({formatCurrency(initialBalance ? parseCurrencyInput(initialBalance) : 0, currency.symbol)})
                   </Text>
                 </View>
                 <View style={styles.summaryItemRow}>

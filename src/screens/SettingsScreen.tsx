@@ -10,6 +10,7 @@ import { useData } from '../context/DataContext';
 import { APP_VERSION, APP_BUILD } from '../constants/version';
 import { WhatsNewModal } from '../components/WhatsNewModal';
 import { AVATAR_PRESETS, getAvatarPreset } from '../utils/avatarUtils';
+import { formatCurrency, formatNumber, parseCurrencyInput } from '../utils/formatUtils';
 import { 
   pickBackupFile, 
   readClipboardBackup, 
@@ -235,14 +236,14 @@ export default function SettingsScreen({ navigation }: any) {
   };
 
   const handleSaveGoal = () => {
-    const parsed = parseInt(newGoalInput, 10);
+    const parsed = parseCurrencyInput(newGoalInput);
     if (isNaN(parsed) || parsed <= 0) {
       Alert.alert('Hata', 'Lütfen geçerli bir bütçe tutarı girin.');
       return;
     }
     setMonthlyBudgetGoal(parsed);
     setShowGoalModal(false);
-    Alert.alert('Başarılı', `Aylık bütçe hedefiniz ${currency} ${parsed.toLocaleString('tr-TR')} olarak güncellendi.`);
+    Alert.alert('Başarılı', `Aylık bütçe hedefiniz ${formatCurrency(parsed, currency)} olarak güncellendi.`);
   };
 
   // Çok Kanallı Dışa Aktarma
@@ -649,7 +650,7 @@ export default function SettingsScreen({ navigation }: any) {
           <View style={[styles.toggleRow, { marginBottom: 12 }]}>
             <View style={{ flex: 1, marginRight: 10 }}>
               <Text style={[styles.toggleLabel, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 14 * m }]}>
-                Aylık Bütçe Hedefi: {currency} {monthlyBudgetGoal.toLocaleString('tr-TR')}
+                Aylık Bütçe Hedefi: {formatCurrency(monthlyBudgetGoal, currency)}
               </Text>
               <Text style={[styles.toggleDesc, { color: colors.text, opacity: 0.6, fontFamily: tStyles.fontFamily, fontSize: 11 * m }]}>
                 Akıllı günlük limit bu hedef tutara göre dağıtılır.
@@ -658,7 +659,7 @@ export default function SettingsScreen({ navigation }: any) {
             <TouchableOpacity 
               style={[styles.smallActionBtn, { backgroundColor: colors.primary, borderRadius: Math.max(tStyles.roundness / 2, 6) }]}
               onPress={() => {
-                setNewGoalInput(String(monthlyBudgetGoal));
+                setNewGoalInput(formatNumber(monthlyBudgetGoal));
                 setShowGoalModal(true);
               }}
             >

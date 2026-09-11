@@ -13,6 +13,7 @@ import { APP_VERSION } from './src/constants/version';
 import { WhatsNewModal } from './src/components/WhatsNewModal';
 import { BiometricLockOverlay } from './src/components/BiometricLockOverlay';
 import { getAvatarPreset } from './src/utils/avatarUtils';
+import { formatCurrency, formatNumber } from './src/utils/formatUtils';
 
 import OnboardingScreen from './src/screens/OnboardingScreen';
 import AddExpenseScreen from './src/screens/AddExpenseScreen';
@@ -329,7 +330,7 @@ const HomeScreen = ({ navigation }: any) => {
           ]}>
             {isBalanceHidden 
               ? `${currency} ••••` 
-              : `${buckwheatMetrics.todayRemaining < 0 ? '-' : ''}${currency} ${Math.abs(buckwheatMetrics.todayRemaining).toLocaleString('tr-TR')}`}
+              : formatCurrency(buckwheatMetrics.todayRemaining, currency)}
           </Text>
 
           <View style={[styles.bwProgressContainer, { backgroundColor: colors.background }]}>
@@ -337,8 +338,8 @@ const HomeScreen = ({ navigation }: any) => {
               style={[
                 styles.bwProgressBar, 
                 { 
-                  width: `${Math.min(100, (buckwheatMetrics.totalSpentThisMonth / buckwheatMetrics.monthlyBudget) * 100)}%`,
-                  backgroundColor: buckwheatMetrics.todayRemaining < 0 ? '#EF4444' : colors.primary 
+                  width: `${Math.min(100, buckwheatMetrics.dailyAllowance > 0 ? (buckwheatMetrics.todaySpent / buckwheatMetrics.dailyAllowance) * 100 : 0)}%`,
+                  backgroundColor: buckwheatMetrics.todayRemaining < 0 ? '#EF4444' : buckwheatMetrics.todaySpent > buckwheatMetrics.dailyAllowance * 0.8 ? '#F59E0B' : (isDark ? '#81C784' : '#2E7D32')
                 }
               ]} 
             />
@@ -346,7 +347,7 @@ const HomeScreen = ({ navigation }: any) => {
 
           <View style={styles.bwFooterRow}>
             <Text style={[styles.bwFooterText, { color: colors.text, opacity: 0.6, fontFamily: tStyles.fontFamily, fontSize: 11 * m }]}>
-              Bugün: {isBalanceHidden ? `${currency} ••••` : `${currency} ${buckwheatMetrics.todaySpent.toLocaleString('tr-TR')}`} / Hedef: {isBalanceHidden ? `${currency} ••••` : `${currency} ${buckwheatMetrics.dailyAllowance.toLocaleString('tr-TR')}`}
+              Bugün: {isBalanceHidden ? `${currency} ••••` : formatCurrency(buckwheatMetrics.todaySpent, currency)} / Hedef: {isBalanceHidden ? `${currency} ••••` : formatCurrency(buckwheatMetrics.dailyAllowance, currency)}
             </Text>
             <Text style={[styles.bwFooterText, { color: colors.text, opacity: 0.6, fontFamily: tStyles.fontFamily, fontSize: 11 * m }]}>
               {buckwheatMetrics.daysRemaining} Gün Kaldı
@@ -464,20 +465,20 @@ const HomeScreen = ({ navigation }: any) => {
           </View>
           
           <Text style={[styles.balanceAmount, { color: colors.onPrimary, fontFamily: tStyles.fontFamily, fontSize: 28 * m, fontWeight: tStyles.titleWeight, marginTop: 4 }]}>
-            {isBalanceHidden ? `${currency} ••••••` : `${currency} ${totalBalance.toLocaleString('tr-TR')}`}
+            {isBalanceHidden ? `${currency} ••••••` : formatCurrency(totalBalance, currency)}
           </Text>
           
           <View style={[styles.balanceRow, { borderTopColor: colors.onPrimary + '30' }]}>
             <View style={styles.flowBox}>
               <Text style={[styles.flowSubLabel, { color: colors.onPrimary, opacity: 0.75, fontFamily: tStyles.fontFamily, fontSize: 11 * m }]}>Bu Ay Gelir</Text>
               <Text style={[styles.flowIncome, { color: isDark ? '#A7F3D0' : '#DCFCE7', fontFamily: tStyles.fontFamily, fontSize: 14 * m, fontWeight: 'bold' }]}>
-                {isBalanceHidden ? `+${currency} ••••` : `+${currency} ${totalIncomeThisMonth.toLocaleString('tr-TR')}`}
+                {isBalanceHidden ? `+${currency} ••••` : formatCurrency(totalIncomeThisMonth, currency, { sign: '+' })}
               </Text>
             </View>
             <View style={[styles.flowBox, { alignItems: 'flex-end' }]}>
               <Text style={[styles.flowSubLabel, { color: colors.onPrimary, opacity: 0.75, fontFamily: tStyles.fontFamily, fontSize: 11 * m }]}>Bu Ay Gider</Text>
               <Text style={[styles.flowExpense, { color: isDark ? '#FECDD3' : '#FEE2E2', fontFamily: tStyles.fontFamily, fontSize: 14 * m, fontWeight: 'bold' }]}>
-                {isBalanceHidden ? `-${currency} ••••` : `-${currency} ${totalExpenseThisMonth.toLocaleString('tr-TR')}`}
+                {isBalanceHidden ? `-${currency} ••••` : formatCurrency(totalExpenseThisMonth, currency, { sign: '-' })}
               </Text>
             </View>
           </View>
@@ -695,7 +696,9 @@ const HomeScreen = ({ navigation }: any) => {
                       }
                     ]}
                   >
-                    {isTransfer ? '↔' : (tx.type === 'income' ? '+' : '-')}{currency} {isBalanceHidden ? '••••' : tx.amount.toLocaleString('tr-TR')}
+                    {isBalanceHidden 
+                      ? '••••' 
+                      : formatCurrency(tx.amount, currency, { type: isTransfer ? 'transfer' : tx.type })}
                   </Text>
                 </View>
 
@@ -792,7 +795,7 @@ const HomeScreen = ({ navigation }: any) => {
                 {filteredSearchTransactions.length} işlem bulundu
               </Text>
               <Text style={{ color: colors.primary, fontWeight: 'bold', fontSize: 13 * m, fontFamily: tStyles.fontFamily }}>
-                Toplam: {currency} {filteredSearchTransactions.reduce((s, t) => s + t.amount, 0).toLocaleString('tr-TR')}
+                Toplam: {formatCurrency(filteredSearchTransactions.reduce((s, t) => s + t.amount, 0), currency)}
               </Text>
             </View>
 
@@ -848,7 +851,7 @@ const HomeScreen = ({ navigation }: any) => {
                           fontSize: 14 * m 
                         }
                       ]}>
-                        {isTransfer ? '↔' : isExpense ? '-' : '+'}{currency} {tx.amount.toLocaleString('tr-TR')}
+                        {formatCurrency(tx.amount, currency, { type: isTransfer ? 'transfer' : isExpense ? 'expense' : 'income' })}
                       </Text>
                     </TouchableOpacity>
                   );
@@ -927,7 +930,7 @@ const HomeScreen = ({ navigation }: any) => {
                         marginVertical: 4
                       }
                     ]}>
-                      {isTransfer ? '↔' : isIncome ? '+' : '-'}{currency} {selectedTxForDetail.amount.toLocaleString('tr-TR')}
+                      {formatCurrency(selectedTxForDetail.amount, currency, { type: isTransfer ? 'transfer' : isIncome ? 'income' : 'expense' })}
                     </Text>
                     <Text style={{ color: colors.text, opacity: 0.8, fontSize: 13 * m, fontWeight: '600', fontFamily: tStyles.fontFamily }}>
                       {selectedTxForDetail.title}

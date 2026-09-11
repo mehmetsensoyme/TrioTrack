@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../theme/ThemeContext';
 import { useData, DebtCategory, Debtor, DebtPayment } from '../context/DataContext';
+import { formatCurrency, formatNumber, parseCurrencyInput } from '../utils/formatUtils';
 
 const DEBT_CATEGORIES: { id: DebtCategory; label: string; icon: any }[] = [
   { id: 'person', label: 'Kişi', icon: 'person-outline' },
@@ -58,7 +59,7 @@ export default function DebtsScreen({ navigation }: any) {
       Alert.alert('Eksik Bilgi', 'Lütfen isim ve tutar girin.');
       return;
     }
-    const val = parseFloat(amountInput.replace(',', '.'));
+    const val = parseCurrencyInput(amountInput);
     if (isNaN(val) || val <= 0) {
       Alert.alert('Geçersiz Tutar', 'Lütfen pozitif bir tutar girin.');
       return;
@@ -84,14 +85,14 @@ export default function DebtsScreen({ navigation }: any) {
 
   const handleMakePayment = async () => {
     if (!selectedDebtorForPay) return;
-    const val = parseFloat(payAmountInput.replace(',', '.'));
+    const val = parseCurrencyInput(payAmountInput);
     if (isNaN(val) || val <= 0) {
       Alert.alert('Geçersiz Tutar', 'Lütfen geçerli bir ödeme tutarı girin.');
       return;
     }
     const currentRemaining = selectedDebtorForPay.amount - (selectedDebtorForPay.paidAmount || 0);
     if (val > currentRemaining) {
-      Alert.alert('Uyarı', `Ödeme tutarı kalan borçtan (${currency} ${currentRemaining.toLocaleString('tr-TR')}) fazla olamaz.`);
+      Alert.alert('Uyarı', `Ödeme tutarı kalan borçtan (${formatCurrency(currentRemaining, currency)}) fazla olamaz.`);
       return;
     }
 
@@ -195,7 +196,7 @@ export default function DebtsScreen({ navigation }: any) {
             ALACAKLARIM (BANA)
           </Text>
           <Text style={[styles.summaryAmount, { color: isDark ? '#81C784' : '#2E7D32', fontFamily: tStyles.fontFamily, fontSize: 18 * m, fontWeight: tStyles.titleWeight }]}>
-            +{currency} {totalOweMe.toLocaleString('tr-TR')}
+            {formatCurrency(totalOweMe, currency, { sign: '+' })}
           </Text>
         </View>
 
@@ -207,7 +208,7 @@ export default function DebtsScreen({ navigation }: any) {
             BORÇLARIM (BENİM)
           </Text>
           <Text style={[styles.summaryAmount, { color: isDark ? '#EF5350' : '#C62828', fontFamily: tStyles.fontFamily, fontSize: 18 * m, fontWeight: tStyles.titleWeight }]}>
-            -{currency} {totalIOwe.toLocaleString('tr-TR')}
+            {formatCurrency(totalIOwe, currency, { sign: '-' })}
           </Text>
         </View>
       </View>
@@ -331,11 +332,11 @@ export default function DebtsScreen({ navigation }: any) {
                         }
                       ]}
                     >
-                      {currency} {remaining.toLocaleString('tr-TR')}
+                      {formatCurrency(remaining, currency)}
                     </Text>
                     {paid > 0 && !d.settled && (
                       <Text style={{ fontSize: 10 * m, color: colors.text, opacity: 0.5 }}>
-                        (Top: {currency} {d.amount.toLocaleString('tr-TR')})
+                        (Top: {formatCurrency(d.amount, currency)})
                       </Text>
                     )}
                   </View>
@@ -379,10 +380,10 @@ export default function DebtsScreen({ navigation }: any) {
                         </View>
                         <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 3 }}>
                           <Text style={{ fontSize: 10 * m, color: colors.text, opacity: 0.6 }}>
-                            Ödenen: {currency} {paid.toLocaleString('tr-TR')} (%{percentage})
+                            Ödenen: {formatCurrency(paid, currency)} (%{percentage})
                           </Text>
                           <Text style={{ fontSize: 10 * m, color: colors.text, opacity: 0.6 }}>
-                            Kalan: {currency} {remaining.toLocaleString('tr-TR')}
+                            Kalan: {formatCurrency(remaining, currency)}
                           </Text>
                         </View>
                       </View>
@@ -520,11 +521,19 @@ export default function DebtsScreen({ navigation }: any) {
 
             <TextInput
               style={[styles.modalInput, { backgroundColor: colors.background, color: colors.text, borderRadius: Math.max(tStyles.roundness / 2, 6) }]}
-              placeholder={`Tutar (${currency})`}
+              placeholder={`Tutar (${currency} 0,00)`}
               placeholderTextColor={colors.text + '60'}
-              keyboardType="numeric"
+              keyboardType="decimal-pad"
               value={amountInput}
               onChangeText={setAmountInput}
+              onBlur={() => {
+                if (amountInput.trim()) {
+                  const parsed = parseCurrencyInput(amountInput);
+                  if (!isNaN(parsed) && parsed > 0) {
+                    setAmountInput(formatNumber(parsed));
+                  }
+                }
+              }}
             />
 
             <TextInput
@@ -602,18 +611,26 @@ export default function DebtsScreen({ navigation }: any) {
             {selectedDebtorForPay && (
               <View style={[styles.paymentInfoBox, { backgroundColor: colors.background, borderRadius: Math.max(tStyles.roundness / 2, 6) }]}>
                 <Text style={{ color: colors.text, opacity: 0.6, fontSize: 11 * m }}>
-                  Toplam: {currency} {selectedDebtorForPay.amount.toLocaleString('tr-TR')} • Kalan: {currency} {(selectedDebtorForPay.amount - (selectedDebtorForPay.paidAmount || 0)).toLocaleString('tr-TR')}
+                  Toplam: {formatCurrency(selectedDebtorForPay.amount, currency)} • Kalan: {formatCurrency(selectedDebtorForPay.amount - (selectedDebtorForPay.paidAmount || 0), currency)}
                 </Text>
               </View>
             )}
 
             <TextInput
               style={[styles.modalInput, { backgroundColor: colors.background, color: colors.text, borderRadius: Math.max(tStyles.roundness / 2, 6) }]}
-              placeholder={`Ödeme Tutarı (${currency})`}
+              placeholder={`Ödeme Tutarı (${currency} 0,00)`}
               placeholderTextColor={colors.text + '60'}
-              keyboardType="numeric"
+              keyboardType="decimal-pad"
               value={payAmountInput}
               onChangeText={setPayAmountInput}
+              onBlur={() => {
+                if (payAmountInput.trim()) {
+                  const parsed = parseCurrencyInput(payAmountInput);
+                  if (!isNaN(parsed) && parsed > 0) {
+                    setPayAmountInput(formatNumber(parsed));
+                  }
+                }
+              }}
               autoFocus
             />
 
@@ -663,7 +680,7 @@ export default function DebtsScreen({ navigation }: any) {
 
             <View style={[styles.paymentInfoBox, { backgroundColor: colors.background, borderRadius: Math.max(tStyles.roundness / 2, 6) }]}>
               <Text style={{ color: colors.primary, fontWeight: 'bold', fontSize: 12 * m }}>
-                Toplam Yapılan Ödeme: {currency} {(selectedDebtorForHistory?.paidAmount || 0).toLocaleString('tr-TR')}
+                Toplam Yapılan Ödeme: {formatCurrency(selectedDebtorForHistory?.paidAmount || 0, currency)}
               </Text>
             </View>
 
@@ -675,7 +692,7 @@ export default function DebtsScreen({ navigation }: any) {
                   <View key={p.id || String(idx)} style={[styles.paymentItemCard, { backgroundColor: colors.background, borderRadius: Math.max(tStyles.roundness / 2, 6) }]}>
                     <View style={{ flex: 1 }}>
                       <Text style={{ color: colors.text, fontWeight: 'bold', fontSize: 13 * m }}>
-                        +{currency} {p.amount.toLocaleString('tr-TR')}
+                        {formatCurrency(p.amount, currency, { sign: '+' })}
                       </Text>
                       {p.note ? (
                         <Text style={{ color: colors.text, opacity: 0.6, fontSize: 11 * m, marginTop: 2 }}>{p.note}</Text>

@@ -1,4 +1,4 @@
-export const APP_VERSION = '1.6.7';
+export const APP_VERSION = '1.6.8';
 export const APP_BUILD = '2026.09.11';
 export const APP_NAME = 'TrioTrack';
 export const APP_DESCRIPTION = 'Paisa, Zero ve Buckwheat mimarilerini birleştiren akıllı kişisel finans ve bütçe yöneticisi';
@@ -24,10 +24,46 @@ export interface VersionRelease {
 
 export const CHANGELOG_HISTORY: VersionRelease[] = [
   {
+    version: '1.6.8',
+    buildDate: '11 Eylül 2026',
+    title: 'Standart Ondalık Sayı & Türk Finansal Para Formatı (1.000,00)',
+    isLatest: true,
+    summary: 'Tüm uygulama genelinde ondalık ve kuruş hassasiyeti standartlaştırıldı. Binlik ayıracı nokta, ondalık ayıracı virgül ve 2 basamaklı kuruş formatı (1.000,00) ile sıfır kayıplı finans deneyimi.',
+    items: [
+      {
+        id: '168-1',
+        type: 'feature',
+        typeLabel: 'FİNANSAL STANDART',
+        title: 'Standart 2 Basamaklı Ondalık Format (1.000,00)',
+        description: 'Tüm bakiye, gelir, gider, borç, alacak ve rapor gösterimleri Türk Lirası ve finansal standartlara uygun olarak nokta binlik ayıracı ve virgül ondalık ayıracı ile sabit 2 kuruş hanesine (1.000,00) kavuşturuldu.'
+      },
+      {
+        id: '168-2',
+        type: 'core',
+        typeLabel: 'ÇEKİRDEK MOTOR',
+        title: 'Evrensel Biçimlendirme & Girdi Ayrıştırma Motoru (formatUtils)',
+        description: 'formatCurrency, formatNumber ve parseCurrencyInput yardımcıları ile kullanıcıların virgüllü (250,50) veya noktalı (1.000,50) tutar girişleri sıfır kayıpla kusursuz hesaplamalara dönüştürülür.'
+      },
+      {
+        id: '168-3',
+        type: 'design',
+        typeLabel: 'TASARIM & UI',
+        title: 'Tüm Ekranlarda Bütünleşik Para Gösterimi',
+        description: 'Ana Sayfa, Cüzdanlar & Bütçeler, Zero Borç & Alacak, Buckwheat Akıllı Limit, Aylık Analiz & Performans ve İşlem Detay ekranlarının tamamı yeni ondalık standardına uyarlandı.'
+      },
+      {
+        id: '168-4',
+        type: 'core',
+        typeLabel: 'GÜVENLİK',
+        title: 'WhatsApp Tarzı Ekran Karartma & Çoklu Görev Gizliliği',
+        description: 'Son uygulamalar (Recents / Task Manager) menüsünde ve uygulama değiştirirken ekran görüntüsü alınması engellenerek bankacılık seviyesinde siyah ekran gizlilik koruması (FLAG_SECURE) aktif tutuldu.'
+      },
+    ]
+  },
+  {
     version: '1.6.7',
     buildDate: '11 Eylül 2026',
     title: 'Biyometrik Uygulama Kilidi & Üst Düzey Güvenlik Katmanı',
-    isLatest: true,
     summary: 'Parmak izi, Face ID ve cihaz PIN doğrulamasıyla verileriniz artık tamamen güvende. Uygulama açılışında ve arka plana geçtiğinde otomatik kilitlenme devrede.',
     items: [
       {

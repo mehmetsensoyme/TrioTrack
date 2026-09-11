@@ -1,8 +1,8 @@
 # 📘 TrioTrack — Kapsamlı Proje ve Mimari Dokümantasyonu
 
-> **Sürüm:** 1.6.7 (Build 2026.09.11 - versionCode: 8)  
+> **Sürüm:** 1.6.8 (Build 2026.09.11 - versionCode: 9)  
 > **Son Güncelleme:** 11 Eylül 2026  
-> **Durum:** Kararlı Sürüm (Biyometrik Uygulama Kilidi, Standart Headerlar & APK Derlendi)
+> **Durum:** Kararlı Sürüm (Standart Ondalık Format 1.000,00, Biyometrik Kilit & APK Derlendi)
 
 ---
 
@@ -251,6 +251,19 @@ flowchart TD
       5. 4 adet aylık gelir birikim oranı hedef seçeneği (%10, %20, %30, %50).
     * `DataContext.tsx` içine `financialGoal` ve `savingsTargetPercent` durumları, AsyncStorage anahtarları, `completeOnboarding` parametreleri ve JSON yedekleme desteği eklendi.
     * Onboarding Slide 6 (Özet Kartı) içine seçilen finansal hedef ve tasarruf oranı canlı olarak entegre edildi.
+* **v1.6.8 (11 Eylül 2026 - versionCode: 9):**
+  * **Standart Ondalık Sayı & Türk Finansal Para Formatı (`1.000,00`):**
+    * Tüm uygulama genelinde para tutarları ve bakiyeler Türk Lirası ve uluslararası finans standartlarına kavuşturuldu: Binlik basamak ayıracı nokta (`.`), kuruş/ondalık basamak ayıracı virgül (`,`) ve sabit 2 hane hassasiyeti (`1.000,00`, `250,50`, `0,00`).
+    * `formatUtils.ts` yardımcı motoru oluşturuldu:
+      * `formatNumber(val)`: Sayıları sabit 2 ondalık basamaklı Türk standart formatına dönüştürür.
+      * `formatCurrency(amount, currency, options)`: Sembol (`₺`, `$`, vb.) ve yön işaretiyle (`+`, `-`, `↔`) tam finansal metin üretir.
+      * `parseCurrencyInput(input)`: Kullanıcının girdiği `1.000,50`, `250,50` veya `1000.50` gibi tüm kuruşlu formatları sıfır kayıpla sayısal floata dönüştürür.
+  * **Tüm Ekranlarda Bütünleşik Entegrasyon:**
+    * **Ana Sayfa:** Buckwheat Akıllı Limit (kalan, harcanan, hedef), Net Bakiye, Bu Ay Gelir, Bu Ay Gider, İşlem Listesi ve Arama Modalı yeni ondalık standardına uyarlandı.
+    * **Cüzdanlar & Bütçeler (AccountsBudgetsScreen):** Net Varlık kartı, Cüzdan Varlıkları, Toplam Borç, Bekleyen Alacak, Cüzdan bakiyeleri, Sıfır Tabanlı Bütçe hedefleri, Kategori bütçe sınırları ve Düzenli Abonelikler güncellendi.
+    * **Borçlar & Alacaklar (DebtsScreen):** Alacaklarım, Borçlarım, borç kartları ödenen ve kalan tutarları, kısmi ödeme modalı ve ödeme geçmişi güncellendi.
+    * **Finansal Raporlar (ReportsScreen):** Net Tasarruf, Toplam Gelir, Toplam Gider, Günlük Ortalama Harcama, Lider Kategori harcaması, Ayın En Büyük Tekil Gideri ve Kategori Dağılımı güncellendi.
+    * **Harcama Ekleme & Onboarding (AddExpenseScreen & OnboardingScreen):** Canlı tutar önizlemeleri, fiş kartları, hesap makinesi ekranı ve başlangıç bakiyesi girdisi tam kuruş/ondalık desteğiyle donatıldı.
 * **v1.6.7 (11 Eylül 2026 - versionCode: 8):**
   * **Biyometrik Kimlik Doğrulama & Uygulama Kilidi Katmanı (`expo-local-authentication`):**
     * Cihazdaki parmak izi okuyucu (Fingerprint) ve yüz tanıma (Face ID) donanımları ile tam entegre kilit sistemi eklendi.

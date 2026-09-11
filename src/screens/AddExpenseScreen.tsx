@@ -19,6 +19,7 @@ import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { useTheme } from '../theme/ThemeContext';
 import { useData } from '../context/DataContext';
+import { formatCurrency, formatNumber, parseCurrencyInput } from '../utils/formatUtils';
 import { POPULAR_BRANDS, BRAND_CATEGORIES, BrandItem } from '../constants/brands';
 import { 
   PAISA_CORE_CATEGORIES, 
@@ -73,7 +74,7 @@ const PALETTE_COLORS = [
 const RECEIPT_PRESETS = [
   {
     store: 'BİM Birleşik Mağazalar A.Ş.',
-    amount: '248.50',
+    amount: '248,50',
     receiptNo: '#FŞ-0482',
     categoryId: 'cat_market',
     categoryName: 'Market & Gıda',
@@ -83,7 +84,7 @@ const RECEIPT_PRESETS = [
   },
   {
     store: 'Starbucks Coffee',
-    amount: '135.00',
+    amount: '135,00',
     receiptNo: '#FŞ-1109',
     categoryId: 'cat_dining',
     categoryName: 'Yemek & Kafe',
@@ -93,7 +94,7 @@ const RECEIPT_PRESETS = [
   },
   {
     store: 'Opet Akaryakıt',
-    amount: '1250.00',
+    amount: '1.250,00',
     receiptNo: '#FŞ-8471',
     categoryId: 'cat_transport',
     categoryName: 'Ulaşım & Akaryakıt',
@@ -103,7 +104,7 @@ const RECEIPT_PRESETS = [
   },
   {
     store: 'Enerjisa Elektrik Dağıtım',
-    amount: '480.00',
+    amount: '480,00',
     receiptNo: '#FAT-2026-904',
     categoryId: 'cat_bills',
     categoryName: 'Faturalar & Abonelik',
@@ -113,7 +114,7 @@ const RECEIPT_PRESETS = [
   },
   {
     store: 'Merkez Şifa Eczanesi',
-    amount: '320.00',
+    amount: '320,00',
     receiptNo: '#ECZ-3912',
     categoryId: 'cat_health',
     categoryName: 'Sağlık & Eczane',
@@ -459,8 +460,9 @@ export default function AddExpenseScreen({ navigation }: any) {
 
   const applyCalculatorResult = () => {
     const finalVal = calcPreview !== '0' && calcPreview ? calcPreview : calcExpression;
-    if (finalVal && !isNaN(parseFloat(finalVal))) {
-      setAmount(finalVal);
+    const parsed = parseCurrencyInput(finalVal);
+    if (!isNaN(parsed) && parsed > 0) {
+      setAmount(formatNumber(parsed));
     }
     setShowCalculator(false);
   };
@@ -471,7 +473,7 @@ export default function AddExpenseScreen({ navigation }: any) {
       return;
     }
 
-    const val = parseFloat(amount.replace(',', '.'));
+    const val = parseCurrencyInput(amount);
     if (isNaN(val) || val <= 0) {
       Alert.alert('Hata', 'Lütfen geçerli bir tutar girin.');
       return;
@@ -622,11 +624,19 @@ export default function AddExpenseScreen({ navigation }: any) {
             </Text>
             <TextInput
               style={[styles.amountInput, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 34 * m }]}
-              placeholder="0.00"
+              placeholder="0,00"
               placeholderTextColor={colors.text + '40'}
               keyboardType="decimal-pad"
               value={amount}
               onChangeText={setAmount}
+              onBlur={() => {
+                if (amount.trim()) {
+                  const parsed = parseCurrencyInput(amount);
+                  if (!isNaN(parsed) && parsed > 0) {
+                    setAmount(formatNumber(parsed));
+                  }
+                }
+              }}
               autoFocus
             />
           </View>
@@ -720,7 +730,7 @@ export default function AddExpenseScreen({ navigation }: any) {
                     {receiptNo || 'Kayıtlı Fiş / Belge'}
                   </Text>
                   <Text style={{ color: colors.text, opacity: 0.6, fontSize: 11 * m, fontFamily: tStyles.fontFamily }}>
-                    {receiptStoreName ? `${receiptStoreName} • ` : ''}Tutar: {currency} {amount || '0.00'}
+                    {receiptStoreName ? `${receiptStoreName} • ` : ''}Tutar: {formatCurrency(amount || 0, currency)}
                   </Text>
                   {receiptImageUri && (
                     <Text style={{ color: '#10B981', fontSize: 10 * m, fontFamily: tStyles.fontFamily, fontWeight: 'bold', marginTop: 2 }}>
@@ -1110,7 +1120,7 @@ export default function AddExpenseScreen({ navigation }: any) {
                   </View>
                   <View style={{ alignItems: 'flex-end' }}>
                     <Text style={{ color: colors.primary, fontFamily: tStyles.fontFamily, fontSize: 14 * m, fontWeight: 'bold' }}>
-                      {currency} {preset.amount}
+                      {formatCurrency(preset.amount, currency)}
                     </Text>
                     <Text style={{ color: '#10B981', fontSize: 10 * m, fontWeight: 'bold', fontFamily: tStyles.fontFamily }}>
                       {preset.receiptNo}
@@ -1482,7 +1492,7 @@ export default function AddExpenseScreen({ navigation }: any) {
                 {calcExpression || '0'}
               </Text>
               <Text style={[styles.calcResultText, { color: colors.primary, fontFamily: tStyles.fontFamily, fontSize: 28 * m, fontWeight: 'bold' }]}>
-                = {currency} {calcPreview || '0'}
+                = {formatCurrency(calcPreview || 0, currency)}
               </Text>
             </View>
 
