@@ -11,6 +11,7 @@ import { APP_VERSION, APP_BUILD } from '../constants/version';
 import { WhatsNewModal } from '../components/WhatsNewModal';
 import { AVATAR_PRESETS, getAvatarPreset } from '../utils/avatarUtils';
 import { formatCurrency, formatNumber, parseCurrencyInput } from '../utils/formatUtils';
+import CurrencyInputField from '../components/CurrencyInputField';
 import { 
   pickBackupFile, 
   readClipboardBackup, 
@@ -1062,13 +1063,14 @@ export default function SettingsScreen({ navigation }: any) {
             </Text>
             <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: colors.background, borderRadius: Math.max(tStyles.roundness / 2, 8), paddingHorizontal: 12, marginBottom: 18 }}>
               <Text style={{ fontSize: 20 * m, fontWeight: 'bold', color: colors.primary, marginRight: 8 }}>{currency}</Text>
-              <TextInput
+              <CurrencyInputField
                 style={[styles.modalInput, { color: colors.text, flex: 1, fontFamily: tStyles.fontFamily, fontSize: 18 * m }]}
-                keyboardType="numeric"
+                containerStyle={{ flex: 1 }}
                 value={newGoalInput}
-                onChangeText={setNewGoalInput}
-                placeholder="Örn: 20000"
+                onChangeText={(formatted) => setNewGoalInput(formatted)}
+                placeholder="0,00"
                 placeholderTextColor={colors.text + '50'}
+                cursorColor={colors.primary}
                 autoFocus
               />
             </View>

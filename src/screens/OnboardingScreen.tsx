@@ -23,6 +23,7 @@ import { useData } from '../context/DataContext';
 import { AVATAR_PRESETS, getAvatarPreset } from '../utils/avatarUtils';
 import { FINANCIAL_GOALS, SAVINGS_TARGET_OPTIONS, getFinancialGoal, getSavingsTargetOption } from '../utils/goalUtils';
 import { formatCurrency, formatNumber, parseCurrencyInput } from '../utils/formatUtils';
+import CurrencyInputField from '../components/CurrencyInputField';
 import { 
   pickBackupFile, 
   readClipboardBackup, 
@@ -1409,21 +1410,14 @@ export default function OnboardingScreen({ navigation }: any) {
                   <Text style={{ fontSize: 18 * m, fontWeight: 'bold', color: colors.primary, marginRight: 8 }}>
                     {currency.symbol}
                   </Text>
-                  <TextInput
+                  <CurrencyInputField
                     style={[styles.mediumTextInput, { color: colors.text, flex: 1, fontFamily: tStyles.fontFamily, fontSize: 16 * m }]}
+                    containerStyle={{ flex: 1 }}
                     placeholder="0,00"
-                    keyboardType="decimal-pad"
                     placeholderTextColor={colors.text + '40'}
                     value={initialBalance}
-                    onChangeText={setInitialBalance}
-                    onBlur={() => {
-                      if (initialBalance.trim()) {
-                        const parsed = parseCurrencyInput(initialBalance);
-                        if (!isNaN(parsed) && parsed > 0) {
-                          setInitialBalance(formatNumber(parsed));
-                        }
-                      }
-                    }}
+                    onChangeText={(formatted) => setInitialBalance(formatted)}
+                    cursorColor={colors.primary}
                   />
                 </View>
               </View>

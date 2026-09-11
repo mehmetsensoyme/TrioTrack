@@ -1,8 +1,8 @@
 # 📘 TrioTrack — Kapsamlı Proje ve Mimari Dokümantasyonu
 
-> **Sürüm:** 1.6.8 (Build 2026.09.11 - versionCode: 9)  
+> **Sürüm:** 1.6.9 (Build 2026.09.11 - versionCode: 10)  
 > **Son Güncelleme:** 11 Eylül 2026  
-> **Durum:** Kararlı Sürüm (Standart Ondalık Format 1.000,00, Biyometrik Kilit & APK Derlendi)
+> **Durum:** Kararlı Sürüm (Canlı Para Maskeleme 54.885,00, Standart Ondalık Format, Biyometrik Kilit & APK Derlendi)
 
 ---
 
@@ -251,6 +251,19 @@ flowchart TD
       5. 4 adet aylık gelir birikim oranı hedef seçeneği (%10, %20, %30, %50).
     * `DataContext.tsx` içine `financialGoal` ve `savingsTargetPercent` durumları, AsyncStorage anahtarları, `completeOnboarding` parametreleri ve JSON yedekleme desteği eklendi.
     * Onboarding Slide 6 (Özet Kartı) içine seçilen finansal hedef ve tasarruf oranı canlı olarak entegre edildi.
+* **v1.6.9 (11 Eylül 2026 - versionCode: 10):**
+  * **Canlı Yazarken Para Maskeleme Motoru (`CurrencyInputField.tsx`):**
+    * Tutar giriş alanlarında kullanıcı daha yazarken anında Türkçe para formatına (örn: `54885` yazıldığında anında `54.885,00` olarak) canlı maskeleme yapan özel `CurrencyInputField` bileşeni geliştirildi.
+    * Kullanıcıların odaktan çıkmasını (`onBlur`) beklemeden, her bir rakam tuşlandığında sıfır gecikmeyle (5 -> 5,00 -> 54,00 -> 548,00 -> 5.488,00 -> 54.885,00) canlı finansal girdi deneyimi sağlandı.
+    * Android ve iOS platformlarında imleç sıçramasını (cursor jumping) ve titremeyi (flickering) önleyen gizli native `TextInput` ve animasyonlu yanıp sönen şık dikey imleç (`Animated.View`) mimarisi kuruldu.
+    * Girdi boşken `0,00` placeholder'ı ve odaklanıldığında canlı yanıp sönen imleç desteği eklendi.
+    * Kuruş girmek isteyen kullanıcılar için virgül (`,`) ve nokta (`.`) ayrıştırması, azami 2 ondalık hane sınırlaması ve hesap makinesi / OCR / fiş hazır butonları ile iki yönlü kusursuz senkronizasyon sağlandı.
+  * **Tüm Girdi Alanlarında Canlı Maskeleme Entegrasyonu:**
+    * **Harcama / Gelir / Transfer Ekleme (`AddExpenseScreen`):** Ana devasa tutar alanına tam canlı maskeleme entegre edildi.
+    * **Karşılama Ekranı (`OnboardingScreen`):** Başlangıç bakiyesi girişine canlı `CurrencyInputField` entegre edildi.
+    * **Borçlar & Alacaklar (`DebtsScreen`):** Yeni borç/alacak tutarı ve kısmi borç ödeme modalı canlı maskelemeye kavuştu.
+    * **Cüzdanlar & Bütçeler (`AccountsBudgetsScreen`):** Yeni hesap açılış bakiyesi, hesap bakiyesi hızlı düzenleme, bütçe limit tutarı ve düzenli ödeme tutarı alanları güncellendi.
+    * **Ayarlar (`SettingsScreen`):** Buckwheat aylık tasarruf ve harcama hedefi belirleme modalına canlı maskeleme entegre edildi.
 * **v1.6.8 (11 Eylül 2026 - versionCode: 9):**
   * **Standart Ondalık Sayı & Türk Finansal Para Formatı (`1.000,00`):**
     * Tüm uygulama genelinde para tutarları ve bakiyeler Türk Lirası ve uluslararası finans standartlarına kavuşturuldu: Binlik basamak ayıracı nokta (`.`), kuruş/ondalık basamak ayıracı virgül (`,`) ve sabit 2 hane hassasiyeti (`1.000,00`, `250,50`, `0,00`).

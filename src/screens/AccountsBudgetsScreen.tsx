@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../theme/ThemeContext';
 import { useData, Account, RecurringItem, Category } from '../context/DataContext';
 import { formatCurrency, formatNumber, parseCurrencyInput } from '../utils/formatUtils';
+import CurrencyInputField from '../components/CurrencyInputField';
 
 const PALETTE_COLORS = ['#FF9800', '#E91E63', '#2196F3', '#9C27B0', '#4CAF50', '#F44336', '#009688', '#3F51B5'];
 const CATEGORY_ICONS = ['cart-outline', 'fast-food-outline', 'car-outline', 'receipt-outline', 'film-outline', 'medkit-outline', 'fitness-outline', 'school-outline', 'gift-outline', 'airplane-outline', 'home-outline', 'cafe-outline'];
@@ -833,21 +834,19 @@ export default function AccountsBudgetsScreen({ navigation }: any) {
               ))}
             </View>
 
-            <TextInput
-              style={[styles.modalInput, { backgroundColor: colors.background, color: colors.text, borderRadius: Math.max(tStyles.roundness / 2, 6) }]}
-              placeholder="Başlangıç Bakiyesi (0,00)"
-              placeholderTextColor={colors.text + '60'}
-              keyboardType="decimal-pad"
-              value={newAccBalance}
-              onChangeText={setNewAccBalance}
-              onBlur={() => {
-                if (newAccBalance.trim()) {
-                  const parsed = parseCurrencyInput(newAccBalance);
-                  if (!isNaN(parsed) && parsed > 0) {
-                    setNewAccBalance(formatNumber(parsed));
-                  }
-                }
+            <CurrencyInputField
+              containerStyle={{
+                backgroundColor: colors.background,
+                borderRadius: Math.max(tStyles.roundness / 2, 6),
+                padding: 14,
+                marginBottom: 12,
               }}
+              style={{ color: colors.text, fontSize: 15 }}
+              placeholder="0,00"
+              placeholderTextColor={colors.text + '60'}
+              value={newAccBalance}
+              onChangeText={(formatted) => setNewAccBalance(formatted)}
+              cursorColor={colors.primary}
             />
 
             <View style={styles.modalButtons}>
@@ -896,21 +895,19 @@ export default function AccountsBudgetsScreen({ navigation }: any) {
               ))}
             </ScrollView>
 
-            <TextInput
-              style={[styles.modalInput, { backgroundColor: colors.background, color: colors.text, borderRadius: Math.max(tStyles.roundness / 2, 6) }]}
-              placeholder={`Aylık Limit Tutarı (${currency} 0,00)`}
-              placeholderTextColor={colors.text + '60'}
-              keyboardType="decimal-pad"
-              value={budgetLimitInput}
-              onChangeText={setBudgetLimitInput}
-              onBlur={() => {
-                if (budgetLimitInput.trim()) {
-                  const parsed = parseCurrencyInput(budgetLimitInput);
-                  if (!isNaN(parsed) && parsed > 0) {
-                    setBudgetLimitInput(formatNumber(parsed));
-                  }
-                }
+            <CurrencyInputField
+              containerStyle={{
+                backgroundColor: colors.background,
+                borderRadius: Math.max(tStyles.roundness / 2, 6),
+                padding: 14,
+                marginBottom: 12,
               }}
+              style={{ color: colors.text, fontSize: 15 }}
+              placeholder="0,00"
+              placeholderTextColor={colors.text + '60'}
+              value={budgetLimitInput}
+              onChangeText={(formatted) => setBudgetLimitInput(formatted)}
+              cursorColor={colors.primary}
             />
 
             <View style={styles.modalButtons}>
@@ -959,19 +956,21 @@ export default function AccountsBudgetsScreen({ navigation }: any) {
               <Text style={{ color: colors.text, opacity: 0.6, fontSize: 11 * m, marginBottom: 4 }}>GÜNCEL BAKİYE</Text>
               {isEditingBalance ? (
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 4 }}>
-                  <TextInput
-                    style={[styles.modalInput, { flex: 1, backgroundColor: colors.card, color: colors.text, marginBottom: 0, paddingVertical: 8 }]}
-                    keyboardType="decimal-pad"
-                    value={editBalanceInput}
-                    onChangeText={setEditBalanceInput}
-                    onBlur={() => {
-                      if (editBalanceInput.trim()) {
-                        const parsed = parseCurrencyInput(editBalanceInput);
-                        if (!isNaN(parsed)) {
-                          setEditBalanceInput(formatNumber(parsed));
-                        }
-                      }
+                  <CurrencyInputField
+                    containerStyle={{
+                      flex: 1,
+                      backgroundColor: colors.card,
+                      borderRadius: Math.max(tStyles.roundness / 2, 6),
+                      paddingHorizontal: 14,
+                      paddingVertical: 8,
+                      marginBottom: 0,
                     }}
+                    style={{ color: colors.text, fontSize: 15 }}
+                    placeholder="0,00"
+                    placeholderTextColor={colors.text + '60'}
+                    value={editBalanceInput}
+                    onChangeText={(formatted) => setEditBalanceInput(formatted)}
+                    cursorColor={colors.primary}
                     autoFocus
                   />
                   <TouchableOpacity onPress={handleSaveBalance} style={[styles.modalSaveBtn, { backgroundColor: colors.primary, paddingVertical: 10, paddingHorizontal: 16 }]}>
@@ -1189,21 +1188,19 @@ export default function AccountsBudgetsScreen({ navigation }: any) {
               onChangeText={setRecTitle}
             />
 
-            <TextInput
-              style={[styles.modalInput, { backgroundColor: colors.background, color: colors.text, borderRadius: Math.max(tStyles.roundness / 2, 6) }]}
-              placeholder={`Tutar (${currency} 0,00)`}
-              placeholderTextColor={colors.text + '60'}
-              keyboardType="decimal-pad"
-              value={recAmount}
-              onChangeText={setRecAmount}
-              onBlur={() => {
-                if (recAmount.trim()) {
-                  const parsed = parseCurrencyInput(recAmount);
-                  if (!isNaN(parsed) && parsed > 0) {
-                    setRecAmount(formatNumber(parsed));
-                  }
-                }
+            <CurrencyInputField
+              containerStyle={{
+                backgroundColor: colors.background,
+                borderRadius: Math.max(tStyles.roundness / 2, 6),
+                padding: 14,
+                marginBottom: 12,
               }}
+              style={{ color: colors.text, fontSize: 15 }}
+              placeholder="0,00"
+              placeholderTextColor={colors.text + '60'}
+              value={recAmount}
+              onChangeText={(formatted) => setRecAmount(formatted)}
+              cursorColor={colors.primary}
             />
 
             {/* Periyot Seçimi */}

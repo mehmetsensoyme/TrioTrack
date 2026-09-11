@@ -1,4 +1,4 @@
-export const APP_VERSION = '1.6.8';
+export const APP_VERSION = '1.6.9';
 export const APP_BUILD = '2026.09.11';
 export const APP_NAME = 'TrioTrack';
 export const APP_DESCRIPTION = 'Paisa, Zero ve Buckwheat mimarilerini birleştiren akıllı kişisel finans ve bütçe yöneticisi';
@@ -24,10 +24,40 @@ export interface VersionRelease {
 
 export const CHANGELOG_HISTORY: VersionRelease[] = [
   {
+    version: '1.6.9',
+    buildDate: '11 Eylül 2026',
+    title: 'Canlı Yazarken Para Maskeleme (Live Currency Mask: 54.885,00)',
+    isLatest: true,
+    summary: 'Tutar giriş alanlarında kullanıcı daha yazarken anında Türkçe para formatına (örn: 54885 yazıldığında 54.885,00) canlı maskeleme yapan CurrencyInputField bileşeni geliştirildi. Odaktan çıkmayı beklemeden, gerçek zamanlı finansal girdi deneyimi.',
+    items: [
+      {
+        id: '169-1',
+        type: 'feature',
+        typeLabel: 'CANLI MASKELEME',
+        title: 'Yazarken Anında Türk Lirası Formatı (54.885,00)',
+        description: 'Tutar kutusuna rakam yazılırken daha klavyeden tuşlandığı anda (örneğin 54885 yazıldığında) anında 54.885,00 olarak biçimlendiren ve sıfır gecikmeli geri bildirim sağlayan canlı maskeleme motoru eklendi.'
+      },
+      {
+        id: '169-2',
+        type: 'core',
+        typeLabel: 'YENİ BİLEŞEN',
+        title: 'Özel CurrencyInputField Bileşeni',
+        description: 'Android ve iOS native klavye senkronizasyonunu, imleç sıçramasını önleyen gizli girdi katmanını ve animasyonlu yanıp sönen imleç efektini birleştiren yüksek performanslı CurrencyInputField mimarisi geliştirildi.'
+      },
+      {
+        id: '169-3',
+        type: 'feature',
+        typeLabel: 'TÜM MODÜLLER',
+        title: 'Tüm Giriş Alanlarına Canlı Entegrasyon',
+        description: 'Harcama/Gelir/Transfer ekleme, Borç ve Alacak ekleme/ödeme, Cüzdan başlangıç ve bakiye düzenleme, Sıfır Tabanlı Bütçe havuz limitleri ve Karşılama (Onboarding) ekranlarının tamamı canlı maskeleme ile güncellendi.'
+      }
+    ]
+  },
+  {
     version: '1.6.8',
     buildDate: '11 Eylül 2026',
     title: 'Standart Ondalık Sayı & Türk Finansal Para Formatı (1.000,00)',
-    isLatest: true,
+    isLatest: false,
     summary: 'Tüm uygulama genelinde ondalık ve kuruş hassasiyeti standartlaştırıldı. Binlik ayıracı nokta, ondalık ayıracı virgül ve 2 basamaklı kuruş formatı (1.000,00) ile sıfır kayıplı finans deneyimi.',
     items: [
       {

@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../theme/ThemeContext';
 import { useData, DebtCategory, Debtor, DebtPayment } from '../context/DataContext';
 import { formatCurrency, formatNumber, parseCurrencyInput } from '../utils/formatUtils';
+import CurrencyInputField from '../components/CurrencyInputField';
 
 const DEBT_CATEGORIES: { id: DebtCategory; label: string; icon: any }[] = [
   { id: 'person', label: 'Kişi', icon: 'person-outline' },
@@ -519,21 +520,19 @@ export default function DebtsScreen({ navigation }: any) {
               onChangeText={setNameInput}
             />
 
-            <TextInput
-              style={[styles.modalInput, { backgroundColor: colors.background, color: colors.text, borderRadius: Math.max(tStyles.roundness / 2, 6) }]}
-              placeholder={`Tutar (${currency} 0,00)`}
-              placeholderTextColor={colors.text + '60'}
-              keyboardType="decimal-pad"
-              value={amountInput}
-              onChangeText={setAmountInput}
-              onBlur={() => {
-                if (amountInput.trim()) {
-                  const parsed = parseCurrencyInput(amountInput);
-                  if (!isNaN(parsed) && parsed > 0) {
-                    setAmountInput(formatNumber(parsed));
-                  }
-                }
+            <CurrencyInputField
+              containerStyle={{
+                backgroundColor: colors.background,
+                borderRadius: Math.max(tStyles.roundness / 2, 6),
+                padding: 14,
+                marginBottom: 12,
               }}
+              style={{ color: colors.text, fontSize: 15 }}
+              placeholder={`0,00`}
+              placeholderTextColor={colors.text + '60'}
+              value={amountInput}
+              onChangeText={(formatted) => setAmountInput(formatted)}
+              cursorColor={colors.primary}
             />
 
             <TextInput
@@ -616,21 +615,19 @@ export default function DebtsScreen({ navigation }: any) {
               </View>
             )}
 
-            <TextInput
-              style={[styles.modalInput, { backgroundColor: colors.background, color: colors.text, borderRadius: Math.max(tStyles.roundness / 2, 6) }]}
-              placeholder={`Ödeme Tutarı (${currency} 0,00)`}
-              placeholderTextColor={colors.text + '60'}
-              keyboardType="decimal-pad"
-              value={payAmountInput}
-              onChangeText={setPayAmountInput}
-              onBlur={() => {
-                if (payAmountInput.trim()) {
-                  const parsed = parseCurrencyInput(payAmountInput);
-                  if (!isNaN(parsed) && parsed > 0) {
-                    setPayAmountInput(formatNumber(parsed));
-                  }
-                }
+            <CurrencyInputField
+              containerStyle={{
+                backgroundColor: colors.background,
+                borderRadius: Math.max(tStyles.roundness / 2, 6),
+                padding: 14,
+                marginBottom: 12,
               }}
+              style={{ color: colors.text, fontSize: 15 }}
+              placeholder={`0,00`}
+              placeholderTextColor={colors.text + '60'}
+              value={payAmountInput}
+              onChangeText={(formatted) => setPayAmountInput(formatted)}
+              cursorColor={colors.primary}
               autoFocus
             />
 

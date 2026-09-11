@@ -20,6 +20,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { useTheme } from '../theme/ThemeContext';
 import { useData } from '../context/DataContext';
 import { formatCurrency, formatNumber, parseCurrencyInput } from '../utils/formatUtils';
+import CurrencyInputField from '../components/CurrencyInputField';
 import { POPULAR_BRANDS, BRAND_CATEGORIES, BrandItem } from '../constants/brands';
 import { 
   PAISA_CORE_CATEGORIES, 
@@ -622,21 +623,14 @@ export default function AddExpenseScreen({ navigation }: any) {
             <Text style={[styles.currencySymbol, { color: colors.primary, fontFamily: tStyles.fontFamily, fontSize: 32 * m }]}>
               {currency}
             </Text>
-            <TextInput
+            <CurrencyInputField
               style={[styles.amountInput, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 34 * m }]}
+              containerStyle={{ flex: 1 }}
               placeholder="0,00"
               placeholderTextColor={colors.text + '40'}
-              keyboardType="decimal-pad"
               value={amount}
-              onChangeText={setAmount}
-              onBlur={() => {
-                if (amount.trim()) {
-                  const parsed = parseCurrencyInput(amount);
-                  if (!isNaN(parsed) && parsed > 0) {
-                    setAmount(formatNumber(parsed));
-                  }
-                }
-              }}
+              onChangeText={(formatted) => setAmount(formatted)}
+              cursorColor={colors.primary}
               autoFocus
             />
           </View>
