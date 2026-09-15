@@ -8,6 +8,7 @@
 [![Expo](https://img.shields.io/badge/Expo-~57.0.22-000020?style=for-the-badge&logo=expo&logoColor=white)](https://expo.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-~6.0.3-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Platform](https://img.shields.io/badge/Platform-Android%20%7C%20iOS-3DDC84?style=for-the-badge&logo=android&logoColor=white)](https://developer.android.com/)
+[![Download APK](https://img.shields.io/badge/İndir-Android%20APK-brightgreen?style=for-the-badge&logo=android)](https://github.com/mehmetsensoyme/TrioTrack/releases/latest)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
 
 **TrioTrack**, dünyanın en saygın üç açık kaynak kişisel finans projesinin (*Buckwheat*, *Zero* ve *Paisa*) en güçlü yönlerini modern bir arayüzde bir araya getiren; %100 çevrimdışı, biyometrik korumalı ve canlı Türk Lirası para giriş motoruna sahip yeni nesil bir bütçe takip uygulamasıdır.
