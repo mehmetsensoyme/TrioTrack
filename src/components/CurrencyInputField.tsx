@@ -32,33 +32,22 @@ export function handleLiveText(newText: string, prevVal: string = ''): string {
     return '';
   }
 
-  // Kullanıcı sonuna virgül veya nokta eklediyse (kuruş hanesine geçiş)
-  if (newText.endsWith(',') || newText.endsWith('.')) {
-    const parts = newText.split(',');
+  // Kullanıcı sonuna nokta koyduysa Türkçe standardına uygun olarak virgüle çevir
+  let normalized = newText;
+  if (normalized.endsWith('.')) {
+    normalized = normalized.slice(0, -1) + ',';
+  }
+
+  // Kullanıcı sonuna virgül eklediyse (kuruş hanesine geçiş) -> örn: "54.885,"
+  if (normalized.endsWith(',')) {
+    const parts = normalized.split(',');
     const intDigits = parts[0].replace(/\D/g, '').replace(/^0+(?=\d)/, '') || '0';
     return Number(intDigits).toLocaleString('tr-TR') + ',';
   }
 
-  // Virgül vardı ve kullanıcı 1. kuruş rakamını girdi (örn: 54.885, + 5 -> 54.885,50)
-  if (prevVal.endsWith(',') && newText.length === prevVal.length + 1) {
-    const digit = newText.slice(-1);
-    if (/\d/.test(digit)) {
-      return prevVal + digit + '0';
-    }
-  }
-
-  // Virgüllüydü ve kullanıcı 2. kuruş rakamını girdi (örn: 54.885,50 + 2 -> 54.885,52)
-  if (prevVal.includes(',') && !prevVal.endsWith(',00') && newText.length === prevVal.length + 1) {
-    const parts = prevVal.split(',');
-    const digit = newText.slice(-1);
-    if (/\d/.test(digit)) {
-      return parts[0] + ',' + (parts[1][0] || '0') + digit;
-    }
-  }
-
-  // Sabit ,00 formatında sonuna rakam eklendiyse (örn: 5,00 + 4 -> 54,00)
-  if (prevVal.endsWith(',00') && newText.startsWith(prevVal) && newText.length === prevVal.length + 1) {
-    const addedDigit = newText.slice(-1);
+  // Sabit ,00 formatında sonuna doğrudan rakam eklendiyse (örn: 5,00 + 4 -> 54,00)
+  if (prevVal.endsWith(',00') && normalized.startsWith(prevVal) && normalized.length === prevVal.length + 1) {
+    const addedDigit = normalized.slice(-1);
     if (/\d/.test(addedDigit)) {
       const prevInt = prevVal.slice(0, -3).replace(/\D/g, '');
       const newInt = prevInt + addedDigit;
@@ -66,22 +55,39 @@ export function handleLiveText(newText: string, prevVal: string = ''): string {
     }
   }
 
-  // Sabit ,00 iken backspace yapıldıysa (örn: 54.885,00 -> 5.488,00)
-  if (prevVal.endsWith(',00') && newText === prevVal.slice(0, -1)) {
+  // Sabit ,00 iken en sondan backspace yapıldıysa (örn: 54.885,00 -> 5.488,00)
+  if (prevVal.endsWith(',00') && normalized === prevVal.slice(0, -1)) {
     const prevInt = prevVal.slice(0, -3).replace(/\D/g, '');
     const newInt = prevInt.slice(0, -1);
     if (!newInt) return '';
     return Number(newInt).toLocaleString('tr-TR') + ',00';
   }
 
+  // Virgül vardı ve kullanıcı 1. kuruş rakamını girdi (örn: 54.885, + 5 -> 54.885,50)
+  if (prevVal.endsWith(',') && normalized.length === prevVal.length + 1) {
+    const digit = normalized.slice(-1);
+    if (/\d/.test(digit)) {
+      return prevVal + digit + '0';
+    }
+  }
+
+  // Virgüllüydü ve kullanıcı 2. kuruş rakamını girdi (örn: 54.885,50 + 2 -> 54.885,52)
+  if (prevVal.includes(',') && !prevVal.endsWith(',00') && normalized.length === prevVal.length + 1) {
+    const parts = prevVal.split(',');
+    const digit = normalized.slice(-1);
+    if (/\d/.test(digit)) {
+      return parts[0] + ',' + (parts[1][0] || '0') + digit;
+    }
+  }
+
   // Kuruşlu değerden backspace yapıldıysa
-  if (prevVal.includes(',') && !prevVal.endsWith(',00') && newText.length < prevVal.length) {
+  if (prevVal.includes(',') && !prevVal.endsWith(',00') && normalized.length < prevVal.length) {
     const parts = prevVal.split(',');
     return parts[0] + ',';
   }
 
-  // Genel ayrıştırma (Yapıştırma / dışarıdan veri besleme)
-  const clean = newText.replace(/[^0-9,]/g, '');
+  // Genel ayrıştırma (Araya yazma, kopyala-yapıştır veya klavye düzeltmeleri)
+  const clean = normalized.replace(/[^0-9,]/g, '');
   if (clean.includes(',')) {
     const parts = clean.split(',');
     const intStr = parts[0].replace(/\D/g, '').replace(/^0+(?=\d)/, '') || '0';

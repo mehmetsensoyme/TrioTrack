@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Modal, Alert, TouchableWithoutFeedback } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -46,14 +46,19 @@ export default function DebtsScreen({ navigation }: any) {
     setDueDateInput(d.toISOString().split('T')[0]);
   };
 
-  // Toplam Alacak & Borç Hesaplama (Ödenenler düşülmüş gerçek net bakiye)
-  const totalOweMe = debtors
-    .filter(d => !d.settled && d.type === 'owe_me')
-    .reduce((sum, d) => sum + Math.max(0, d.amount - (d.paidAmount || 0)), 0);
-
-  const totalIOwe = debtors
-    .filter(d => !d.settled && d.type === 'i_owe')
-    .reduce((sum, d) => sum + Math.max(0, d.amount - (d.paidAmount || 0)), 0);
+  // Toplam Alacak & Borç Hesaplama (useMemo ile optimize edildi)
+  const { totalOweMe, totalIOwe } = useMemo(() => {
+    let oweMe = 0;
+    let iOwe = 0;
+    for (const d of debtors) {
+      if (!d.settled) {
+        const rem = Math.max(0, d.amount - (d.paidAmount || 0));
+        if (d.type === 'owe_me') oweMe += rem;
+        else if (d.type === 'i_owe') iOwe += rem;
+      }
+    }
+    return { totalOweMe: oweMe, totalIOwe: iOwe };
+  }, [debtors]);
 
   const handleCreate = async () => {
     if (!nameInput.trim() || !amountInput.trim()) {
@@ -115,10 +120,12 @@ export default function DebtsScreen({ navigation }: any) {
     );
   };
 
-  const filteredDebtors = debtors.filter(d => {
-    if (activeTab === 'settled') return d.settled;
-    return !d.settled && d.type === activeTab;
-  });
+  const filteredDebtors = useMemo(() => {
+    return debtors.filter(d => {
+      if (activeTab === 'settled') return d.settled;
+      return !d.settled && d.type === activeTab;
+    });
+  }, [debtors, activeTab]);
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background, paddingTop: Math.max(insets.top, 16) }]}>

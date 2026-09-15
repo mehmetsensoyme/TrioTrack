@@ -142,8 +142,10 @@ const HomeScreen = ({ navigation }: any) => {
 
   const m = tStyles.fontSizeMultiplier;
 
-  // Filtrelenmiş işlemler (Aktif Ay)
-  const monthTransactions = transactions.filter(tx => tx.date.startsWith(selectedMonth));
+  // Filtrelenmiş işlemler (Aktif Ay - useMemo ile optimize edildi)
+  const monthTransactions = useMemo(() => {
+    return transactions.filter(tx => tx.date.startsWith(selectedMonth));
+  }, [transactions, selectedMonth]);
 
   // Arama Modalı İçin Filtrelenmiş İşlemler
   const filteredSearchTransactions = useMemo(() => {
@@ -162,10 +164,18 @@ const HomeScreen = ({ navigation }: any) => {
     });
   }, [transactions, categories, searchFilterType, searchAccountId, searchQuery]);
 
-  // Bekleyen net borç/alacak
-  const pendingDebts = debtors.filter(d => !d.settled);
-  const oweMeCount = pendingDebts.filter(d => d.type === 'owe_me').length;
-  const iOweCount = pendingDebts.filter(d => d.type === 'i_owe').length;
+  // Bekleyen net borç/alacak (useMemo ile optimize edildi)
+  const { oweMeCount, iOweCount } = useMemo(() => {
+    let oweMe = 0;
+    let iOwe = 0;
+    for (const d of debtors) {
+      if (!d.settled) {
+        if (d.type === 'owe_me') oweMe++;
+        else if (d.type === 'i_owe') iOwe++;
+      }
+    }
+    return { oweMeCount: oweMe, iOweCount: iOwe };
+  }, [debtors]);
 
   const handleSelectMonth = (mIndex: number) => {
     const monthFormatted = String(mIndex + 1).padStart(2, '0');

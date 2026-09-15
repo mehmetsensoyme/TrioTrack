@@ -223,46 +223,70 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isAppLocked, setIsAppLocked] = useState<boolean>(false);
   const [isLoaded, setIsLoaded] = useState(false);
 
-  // AsyncStorage'dan verileri yükle (Açılışta)
+  // AsyncStorage'dan verileri yükle (Açılışta - Hızlandırılmış Paralel / multiGet Okuma)
   useEffect(() => {
     (async () => {
       try {
-        const storedBiometric = await AsyncStorage.getItem('@triotrack_biometric_enabled');
+        const keys = [
+          '@triotrack_biometric_enabled',
+          '@triotrack_onboarded',
+          '@triotrack_username',
+          '@triotrack_user_avatar',
+          '@triotrack_financial_goal',
+          '@triotrack_savings_target',
+          '@triotrack_week_start',
+          '@triotrack_hide_balance',
+          '@triotrack_cycle_day',
+          STORAGE_KEY
+        ];
+
+        const entries = await AsyncStorage.multiGet(keys);
+        const map = new Map<string, string | null>(entries);
+
+        const storedBiometric = map.get('@triotrack_biometric_enabled');
         if (storedBiometric === 'true') {
           setIsBiometricEnabledState(true);
           setIsAppLocked(true);
           ScreenCapture.preventScreenCaptureAsync('triotrack_privacy').catch(() => {});
         }
-        const storedOnboarded = await AsyncStorage.getItem('@triotrack_onboarded');
+
+        const storedOnboarded = map.get('@triotrack_onboarded');
         if (storedOnboarded === 'true') {
           setIsOnboarded(true);
         }
-        const storedUser = await AsyncStorage.getItem('@triotrack_username');
+
+        const storedUser = map.get('@triotrack_username');
         if (storedUser) {
           setUserName(storedUser);
         }
-        const storedAvatar = await AsyncStorage.getItem('@triotrack_user_avatar');
+
+        const storedAvatar = map.get('@triotrack_user_avatar');
         if (storedAvatar) {
           setUserAvatarState(storedAvatar);
         }
-        const storedGoal = await AsyncStorage.getItem('@triotrack_financial_goal');
+
+        const storedGoal = map.get('@triotrack_financial_goal');
         if (storedGoal) {
           setFinancialGoalState(storedGoal);
         }
-        const storedSavingsTarget = await AsyncStorage.getItem('@triotrack_savings_target');
+
+        const storedSavingsTarget = map.get('@triotrack_savings_target');
         if (storedSavingsTarget) {
           const parsed = parseInt(storedSavingsTarget, 10);
           if (!isNaN(parsed)) setSavingsTargetPercentState(parsed);
         }
-        const storedWeekStart = await AsyncStorage.getItem('@triotrack_week_start');
-        if (storedWeekStart !== null) {
+
+        const storedWeekStart = map.get('@triotrack_week_start');
+        if (storedWeekStart !== null && storedWeekStart !== undefined) {
           setWeekStartMondayState(storedWeekStart === 'true');
         }
-        const storedHideBalance = await AsyncStorage.getItem('@triotrack_hide_balance');
+
+        const storedHideBalance = map.get('@triotrack_hide_balance');
         if (storedHideBalance === 'true') {
           setIsBalanceHidden(true);
         }
-        const storedCycleDay = await AsyncStorage.getItem('@triotrack_cycle_day');
+
+        const storedCycleDay = map.get('@triotrack_cycle_day');
         if (storedCycleDay) {
           const cDay = parseInt(storedCycleDay, 10);
           if (!isNaN(cDay) && cDay >= 1 && cDay <= 28) {
@@ -270,7 +294,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
           }
         }
 
-        const stored = await AsyncStorage.getItem(STORAGE_KEY);
+        const stored = map.get(STORAGE_KEY);
         if (stored) {
           const parsed = JSON.parse(stored);
           if (Array.isArray(parsed.transactions)) setTransactions(parsed.transactions);
@@ -293,25 +317,31 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     })();
   }, []);
 
-  // Veriler değiştikçe otomatik kaydet
+  // Veriler değiştikçe otomatik kaydet (Debounce ile gereksiz I/O ve takılmaları önle)
   useEffect(() => {
     if (!isLoaded) return;
-    try {
-      const dataToSave = {
-        transactions,
-        accounts,
-        categories,
-        budgets,
-        debtors,
-        recurringItems,
-        budgetRecalcMode,
-        budgetCycleDay,
-        monthlyBudgetGoal,
-      };
-      AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
-    } catch (err) {
-      console.warn('TrioTrack AsyncStorage kaydedilirken hata:', err);
-    }
+    const timeoutId = setTimeout(() => {
+      try {
+        const dataToSave = {
+          transactions,
+          accounts,
+          categories,
+          budgets,
+          debtors,
+          recurringItems,
+          budgetRecalcMode,
+          budgetCycleDay,
+          monthlyBudgetGoal,
+        };
+        AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave)).catch(err => {
+          console.warn('TrioTrack AsyncStorage kaydedilirken hata:', err);
+        });
+      } catch (err) {
+        console.warn('TrioTrack AsyncStorage serialize hatası:', err);
+      }
+    }, 250);
+
+    return () => clearTimeout(timeoutId);
   }, [transactions, accounts, categories, budgets, debtors, recurringItems, budgetRecalcMode, budgetCycleDay, monthlyBudgetGoal, isLoaded]);
 
   const [selectedMonth, setSelectedMonth] = useState<string>(() => {

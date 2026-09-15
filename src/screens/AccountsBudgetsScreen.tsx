@@ -76,18 +76,32 @@ export default function AccountsBudgetsScreen({ navigation }: any) {
 
   const m = tStyles.fontSizeMultiplier;
 
-  // Net Worth (Net Varlık) KPI Hesaplaması (Paisa & Zero)
-  const totalLiabilities = debtors
-    .filter(d => !d.settled && d.type === 'i_owe')
-    .reduce((s, d) => s + Math.max(0, d.amount - (d.paidAmount || 0)), 0);
-  const totalReceivables = debtors
-    .filter(d => !d.settled && d.type === 'owe_me')
-    .reduce((s, d) => s + Math.max(0, d.amount - (d.paidAmount || 0)), 0);
-  const netWorth = totalBalance + totalReceivables - totalLiabilities;
+  // Net Worth (Net Varlık) KPI Hesaplaması (useMemo ile optimize edildi)
+  const { totalLiabilities, totalReceivables, netWorth } = useMemo(() => {
+    let liabilities = 0;
+    let receivables = 0;
+    for (const d of debtors) {
+      if (!d.settled) {
+        const rem = Math.max(0, d.amount - (d.paidAmount || 0));
+        if (d.type === 'i_owe') liabilities += rem;
+        else if (d.type === 'owe_me') receivables += rem;
+      }
+    }
+    return {
+      totalLiabilities: liabilities,
+      totalReceivables: receivables,
+      netWorth: totalBalance + receivables - liabilities,
+    };
+  }, [debtors, totalBalance]);
 
-  // Zero-Based Budgeting Hesaplaması (Zero)
-  const totalAllocated = budgets.reduce((sum, b) => sum + b.amount, 0);
-  const unallocatedBudget = monthlyBudgetGoal - totalAllocated;
+  // Zero-Based Budgeting Hesaplaması (useMemo ile optimize edildi)
+  const { totalAllocated, unallocatedBudget } = useMemo(() => {
+    const allocated = budgets.reduce((sum, b) => sum + b.amount, 0);
+    return {
+      totalAllocated: allocated,
+      unallocatedBudget: monthlyBudgetGoal - allocated,
+    };
+  }, [budgets, monthlyBudgetGoal]);
 
   // Hesap ekleme
   const handleCreateAccount = async () => {
@@ -735,14 +749,16 @@ export default function AccountsBudgetsScreen({ navigation }: any) {
                 </Text>
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                   <Text style={{ fontSize: 22 * m, color: colors.text, fontWeight: 'bold', marginRight: 8 }}>{currency}</Text>
-                  <TextInput
+                  <CurrencyInputField
                     style={[styles.mainInput, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 22 * m }]}
-                    keyboardType="numeric"
-                    value={String(monthlyBudgetGoal)}
-                    onChangeText={val => {
-                      const num = parseCurrencyInput(val);
-                      setMonthlyBudgetGoal(num);
+                    containerStyle={{ flex: 1 }}
+                    value={monthlyBudgetGoal ? formatNumber(monthlyBudgetGoal) : ''}
+                    onChangeText={(formatted, numeric) => {
+                      setMonthlyBudgetGoal(numeric || 0);
                     }}
+                    placeholder="0,00"
+                    placeholderTextColor={colors.text + '40'}
+                    cursorColor={colors.primary}
                   />
                 </View>
               </View>

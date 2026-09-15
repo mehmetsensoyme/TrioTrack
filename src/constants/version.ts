@@ -1,5 +1,5 @@
-export const APP_VERSION = '1.7.0';
-export const APP_BUILD = '2026.09.11';
+export const APP_VERSION = '1.7.2';
+export const APP_BUILD = '2026.09.14';
 export const APP_NAME = 'TrioTrack';
 export const APP_DESCRIPTION = 'Paisa, Zero ve Buckwheat mimarilerini birleştiren akıllı kişisel finans ve bütçe yöneticisi';
 
@@ -24,10 +24,77 @@ export interface VersionRelease {
 
 export const CHANGELOG_HISTORY: VersionRelease[] = [
   {
+    version: '1.7.2',
+    buildDate: '14 Eylül 2026',
+    title: 'Maaş & Gelecek Ekonomik Projeksiyon Simülatörü ve Pasta Grafiği',
+    isLatest: true,
+    summary: 'Maaş artış/zam oranlarına göre gelecek 6 ve 12 aylık kümülatif tasarruf projeksiyonu, çift sütunlu karşılaştırma grafiği ve Raporlar ekranında Pasta/Donut harcama dağılımı görünümü eklendi.',
+    items: [
+      {
+        id: '172-1',
+        type: 'feature',
+        typeLabel: 'YENİ SİMÜLATÖR',
+        title: 'Maaş Zam & Artış Hesaplama Simülatörü',
+        description: 'Mevcut gelirlerden otomatik okunan veya elle girilebilen net maaşa; %15, %25, %30, %40, %50 veya özel yüzde oranında zam uygulayarak yeni net maaşı ve aylık gelir artışını anında hesaplar.'
+      },
+      {
+        id: '172-2',
+        type: 'feature',
+        typeLabel: 'EKONOMİK GRAFİK',
+        title: '6 ve 12 Aylık Gelecek Ekonomik Projeksiyon Grafiği',
+        description: 'Enflasyon / gider artış payını hesaba katarak mevcut seyir ile zamlı yeni seyir arasındaki aylık ve kümülatif net birikim farkını karşılaştırmalı çift sütunlu grafik üzerinde ay ay görselleştirir.'
+      },
+      {
+        id: '172-3',
+        type: 'design',
+        typeLabel: 'GRAFİK',
+        title: 'Kategori Harcama Pasta (Pie / Donut) Grafiği',
+        description: 'Finansal Raporlar ekranındaki harcama dağılımı için tek dokunuşla Çubuk ve Pasta (Pie/Donut & Segmentli İlerleme) görünümleri arasında geçiş yapabilme imkanı sunuldu.'
+      }
+    ]
+  },
+  {
+    version: '1.7.1',
+    buildDate: '13 Eylül 2026',
+    title: 'Sistem Genelinde Yüksek Performans & Güvenli Matematik Motoru',
+    isLatest: false,
+    summary: 'Açılışta paralel multiGet okuması, 250ms debounce kayıt mekanizması, tüm analitik ve liste filtrelerinde useMemo optimizasyonu, güvenli matematik ayrıştırıcısı ve Sıfır Tabanlı Bütçe canlı para maskelemesi.',
+    items: [
+      {
+        id: '171-1',
+        type: 'core',
+        typeLabel: 'PERFORMANS',
+        title: 'I/O & AsyncStorage multiGet Hızlandırması',
+        description: 'Uygulama açılışında ardışık okumalar yerine tek hamlede paralel AsyncStorage.multiGet sorgusuna geçildi. Veri kaydetme işlemlerine 250ms debounce uygulanarak arayüz kilitlenmeleri ve disk darboğazları engellendi.'
+      },
+      {
+        id: '171-2',
+        type: 'core',
+        typeLabel: 'PERFORMANS',
+        title: 'Hesaplama & Render Optimizasyonları (useMemo)',
+        description: 'Ana Sayfa, Finansal Raporlar, Borç & Alacak ve Hesaplar modüllerinde tüm filtreleme, kategori dağılımı ve KPI hesaplamaları useMemo ile önbelleğe alınarak sıfır gecikmeli gezinme sağlandı.'
+      },
+      {
+        id: '171-3',
+        type: 'core',
+        typeLabel: 'GÜVENLİK',
+        title: 'Güvenli Matematik Ayrıştırıcı (Safe Recursive Descent)',
+        description: 'Harcama ekleme hesaplayıcısındaki eval / dinamik kod yürütme yapısı kaldırıldı; token bazlı, parantez öncelikli ve sıfıra bölme korumalı saf matematiksel hesaplayıcı motoru devreye alındı.'
+      },
+      {
+        id: '171-4',
+        type: 'feature',
+        typeLabel: 'CANLI GİRDİ',
+        title: 'Sıfır Tabanlı Bütçe Canlı Para Maskelemesi',
+        description: 'Hesaplar & Bütçeler ekranındaki aylık hedef bütçe kutucuğu CurrencyInputField mimarisine kavuşturularak anlık 1.000,00 canlı formatına bağlandı.'
+      }
+    ]
+  },
+  {
     version: '1.7.0',
     buildDate: '11 Eylül 2026',
     title: 'Doğal Canlı TextInput & Karşılama Başlık İyileştirmesi',
-    isLatest: true,
+    isLatest: false,
     summary: 'Şeffaf katman kaldırılarak doğrudan yerel TextInput motoruna geçildi. İmleç konumu, metin seçimi ve tuşlara basıldığı anda anında 54.885,00 canlı formatlaması kusursuzlaştırıldı.',
     items: [
       {

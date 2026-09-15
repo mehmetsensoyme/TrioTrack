@@ -445,10 +445,57 @@ export default function AddExpenseScreen({ navigation }: any) {
         setCalcPreview('0');
         return '0';
       }
-      const sanitized = expr.replace(/×/g, '*').replace(/÷/g, '/');
-      // eslint-disable-next-line no-eval
-      const result = Function("'use strict'; return (" + sanitized + ")")();
-      if (typeof result === 'number' && !isNaN(result) && isFinite(result)) {
+      const sanitized = expr.replace(/×/g, '*').replace(/÷/g, '/').replace(/,/g, '.');
+      if (!/^[0-9+\-*/.()\s]+$/.test(sanitized)) {
+        return '';
+      }
+
+      const tokens = sanitized.match(/\d+(\.\d+)?|[+\-*/()]/g);
+      if (!tokens) return '';
+
+      let pos = 0;
+      const parseExpression = (): number => {
+        let val = parseTerm();
+        while (pos < tokens.length && (tokens[pos] === '+' || tokens[pos] === '-')) {
+          const op = tokens[pos++];
+          const nextVal = parseTerm();
+          if (op === '+') val += nextVal;
+          else val -= nextVal;
+        }
+        return val;
+      };
+
+      const parseTerm = (): number => {
+        let val = parseFactor();
+        while (pos < tokens.length && (tokens[pos] === '*' || tokens[pos] === '/')) {
+          const op = tokens[pos++];
+          const nextVal = parseFactor();
+          if (op === '*') val *= nextVal;
+          else {
+            if (nextVal === 0) throw new Error('Division by zero');
+            val /= nextVal;
+          }
+        }
+        return val;
+      };
+
+      const parseFactor = (): number => {
+        if (pos >= tokens.length) throw new Error('Unexpected end');
+        const token = tokens[pos++];
+        if (token === '(') {
+          const val = parseExpression();
+          if (tokens[pos++] !== ')') throw new Error('Missing )');
+          return val;
+        }
+        if (token === '-') return -parseFactor();
+        if (token === '+') return parseFactor();
+        const num = parseFloat(token);
+        if (isNaN(num)) throw new Error('Invalid number');
+        return num;
+      };
+
+      const result = parseExpression();
+      if (pos === tokens.length && typeof result === 'number' && !isNaN(result) && isFinite(result)) {
         const formatted = (Math.round(result * 100) / 100).toString();
         setCalcPreview(formatted);
         return formatted;
