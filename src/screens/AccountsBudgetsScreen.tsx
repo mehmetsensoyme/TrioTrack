@@ -546,13 +546,39 @@ export default function AccountsBudgetsScreen({ navigation }: any) {
               </View>
 
               <View style={styles.zeroFooterRow}>
-                <Text style={{ color: colors.text, opacity: 0.6, fontSize: 11 * m, fontFamily: tStyles.fontFamily }}>
+                <Text style={{ color: colors.text, opacity: 0.7, fontSize: 11 * m, fontFamily: tStyles.fontFamily }}>
                   Tahsis Edilen: {formatCurrency(totalAllocated, currency)} (%{monthlyBudgetGoal > 0 ? Math.round((totalAllocated / monthlyBudgetGoal) * 100) : 0})
                 </Text>
-                <Text style={{ color: colors.text, opacity: 0.6, fontSize: 11 * m, fontFamily: tStyles.fontFamily }}>
-                  Kalan: {formatCurrency(Math.max(0, unallocatedBudget), currency)}
+                <Text style={{ color: colors.text, opacity: 0.7, fontSize: 11 * m, fontFamily: tStyles.fontFamily }}>
+                  Kalan Havuz: {formatCurrency(Math.max(0, unallocatedBudget), currency)}
                 </Text>
               </View>
+
+              {monthlyBudgetGoal > 0 && unallocatedBudget === 0 && (
+                <View style={{
+                  marginTop: 10,
+                  paddingVertical: 8,
+                  paddingHorizontal: 12,
+                  backgroundColor: '#10B98115',
+                  borderRadius: tStyles.roundness > 12 ? 12 : tStyles.roundness,
+                  borderWidth: 1,
+                  borderColor: '#10B98140',
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: 8,
+                }}>
+                  <Ionicons name="checkmark-circle" size={18} color="#10B981" />
+                  <Text style={{
+                    color: '#10B981',
+                    fontSize: 11 * m,
+                    fontWeight: 'bold',
+                    fontFamily: tStyles.fontFamily,
+                    flex: 1
+                  }}>
+                    Mükemmel! Her kuruş görevlendirildi (Zero-Based Budgeting tamamlandı).
+                  </Text>
+                </View>
+              )}
             </View>
 
             <View style={styles.sectionHeaderRow}>

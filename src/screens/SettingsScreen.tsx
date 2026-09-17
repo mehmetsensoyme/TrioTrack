@@ -20,9 +20,11 @@ import {
   saveLocalSnapshot, 
   getLocalSnapshot, 
   parseAndNormalizeBackup,
+  exportTransactionsToCSV,
   NormalizedBackupResult,
   LocalSnapshotMeta 
 } from '../utils/backupService';
+import { triggerHaptic } from '../utils/hapticsUtils';
 
 const CURRENCIES = [
   { code: 'TRY', symbol: '₺', name: 'Türk Lirası' },
@@ -366,18 +368,16 @@ export default function SettingsScreen({ navigation }: any) {
     }
   };
 
-  // CSV Dışa Aktarma (Zero & Paisa esintisi)
+  // CSV Dışa Aktarma (Excel / E-Tablolar uyumlu UTF-8 dosya paylaşımı)
   const handleExportCSV = async () => {
     try {
-      let csvContent = 'ID,Tarih,Baslik,Tutar,Tur,Kategori\n';
-      transactions.forEach(tx => {
-        csvContent += `"${tx.id}","${tx.date}","${tx.title}",${tx.amount},"${tx.type}","${tx.categoryId}"\n`;
-      });
-
-      await Share.share({
-        title: 'TrioTrack Veri Dökümü (CSV)',
-        message: csvContent,
-      });
+      triggerHaptic('medium');
+      const success = await exportTransactionsToCSV(transactions, accounts);
+      if (success) {
+        triggerHaptic('success');
+      } else {
+        Alert.alert('Dışa Aktarma', 'CSV verisi paylaşılamadı veya iptal edildi.');
+      }
     } catch (e) {
       Alert.alert('Dışa Aktarma', 'CSV verisi paylaşılamadı.');
     }
@@ -485,6 +485,7 @@ export default function SettingsScreen({ navigation }: any) {
               { label: 'Sistem', val: 'system', icon: 'phone-portrait-outline' },
               { label: 'Aydınlık', val: 'light', icon: 'sunny-outline' },
               { label: 'Karanlık', val: 'dark', icon: 'moon-outline' },
+              { label: 'AMOLED', val: 'amoled', icon: 'contrast-outline' },
             ].map(item => (
               <TouchableOpacity
                 key={item.val}
@@ -493,10 +494,13 @@ export default function SettingsScreen({ navigation }: any) {
                   { backgroundColor: colors.background, borderRadius: Math.max(tStyles.roundness / 2, 6) },
                   themeMode === item.val && { backgroundColor: colors.primary }
                 ]}
-                onPress={() => setThemeMode(item.val as any)}
+                onPress={() => {
+                  triggerHaptic('selection');
+                  setThemeMode(item.val as any);
+                }}
               >
                 <Ionicons name={item.icon as any} size={18} color={themeMode === item.val ? colors.onPrimary : colors.text} style={{ marginBottom: 4 }} />
-                <Text style={{ color: themeMode === item.val ? colors.onPrimary : colors.text, fontWeight: 'bold', fontFamily: tStyles.fontFamily, fontSize: 12 * m }}>
+                <Text style={{ color: themeMode === item.val ? colors.onPrimary : colors.text, fontWeight: 'bold', fontFamily: tStyles.fontFamily, fontSize: 11 * m }}>
                   {item.label}
                 </Text>
               </TouchableOpacity>

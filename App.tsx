@@ -14,6 +14,7 @@ import { WhatsNewModal } from './src/components/WhatsNewModal';
 import { BiometricLockOverlay } from './src/components/BiometricLockOverlay';
 import { getAvatarPreset } from './src/utils/avatarUtils';
 import { formatCurrency, formatNumber } from './src/utils/formatUtils';
+import { triggerHaptic } from './src/utils/hapticsUtils';
 
 import OnboardingScreen from './src/screens/OnboardingScreen';
 import AddExpenseScreen from './src/screens/AddExpenseScreen';
@@ -1180,6 +1181,11 @@ const MainTabs = () => {
 
   return (
     <Tab.Navigator
+      screenListeners={{
+        tabPress: () => {
+          triggerHaptic('selection');
+        },
+      }}
       screenOptions={({ route }) => ({
         headerShown: false,
         tabBarStyle: {

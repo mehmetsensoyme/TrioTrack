@@ -21,6 +21,7 @@ import { useTheme } from '../theme/ThemeContext';
 import { useData } from '../context/DataContext';
 import { formatCurrency, formatNumber, parseCurrencyInput } from '../utils/formatUtils';
 import CurrencyInputField from '../components/CurrencyInputField';
+import { triggerHaptic } from '../utils/hapticsUtils';
 import { POPULAR_BRANDS, BRAND_CATEGORIES, BrandItem } from '../constants/brands';
 import { 
   PAISA_CORE_CATEGORIES, 
@@ -561,6 +562,7 @@ export default function AddExpenseScreen({ navigation }: any) {
       brandLogoUrl: brandLogoUrl || undefined,
     });
 
+    triggerHaptic('success');
     navigation.goBack();
   };
 

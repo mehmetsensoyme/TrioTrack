@@ -269,3 +269,53 @@ export function parseAndNormalizeBackup(rawJson: string): NormalizedBackupResult
     return { success: false, message: 'JSON ayrıştırılamadı: ' + err.message, sourceType: 'unknown' };
   }
 }
+
+/**
+ * İşlemleri Excel / Google E-Tablolar uyumlu UTF-8 CSV olarak dışa aktarır ve paylaşır
+ */
+export async function exportTransactionsToCSV(transactions: any[], accounts: any[] = []): Promise<boolean> {
+  try {
+    const accMap = new Map<string, string>();
+    accounts.forEach(a => accMap.set(a.id, a.name));
+
+    // CSV Başlıkları
+    const headers = ['Tarih', 'Tür', 'Tutar', 'Kategori', 'Hesap', 'Açıklama'];
+    const rows = transactions.map(tx => {
+      const date = tx.date ? new Date(tx.date).toLocaleDateString('tr-TR') : '';
+      const type = tx.type === 'expense' ? 'Gider' : tx.type === 'income' ? 'Gelir' : 'Transfer';
+      const amount = (tx.amount || 0).toString().replace('.', ',');
+      const category = `"${(tx.category || '').replace(/"/g, '""')}"`;
+      const account = `"${(accMap.get(tx.accountId) || tx.accountName || '').replace(/"/g, '""')}"`;
+      const note = `"${(tx.note || tx.description || '').replace(/"/g, '""')}"`;
+
+      return [date, type, amount, category, account, note].join(';');
+    });
+
+    // Excel Türkçe için UTF-8 BOM eklenir (\uFEFF) ve noktalı virgül kullanılır
+    const csvContent = '\uFEFF' + [headers.join(';'), ...rows].join('\r\n');
+    const fileName = `triotrack_islemler_${new Date().toISOString().slice(0, 10)}.csv`;
+    const filePath = `${FileSystem.cacheDirectory}${fileName}`;
+
+    await FileSystem.writeAsStringAsync(filePath, csvContent, {
+      encoding: FileSystem.EncodingType.UTF8,
+    });
+
+    if (await Sharing.isAvailableAsync()) {
+      await Sharing.shareAsync(filePath, {
+        mimeType: 'text/csv',
+        dialogTitle: 'TrioTrack İşlemlerini CSV Olarak Paylaş',
+        UTI: 'public.comma-separated-values-text',
+      });
+      return true;
+    } else {
+      await Share.share({
+        title: 'TrioTrack İşlem Dökümü',
+        message: csvContent,
+      });
+      return true;
+    }
+  } catch (error) {
+    console.error('CSV Export Error:', error);
+    return false;
+  }
+}

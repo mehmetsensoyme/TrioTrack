@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Image, Platform, ActivityIndi
 import { Ionicons } from '@expo/vector-icons';
 import * as LocalAuthentication from 'expo-local-authentication';
 import { useTheme } from '../theme/ThemeContext';
+import { triggerHaptic } from '../utils/hapticsUtils';
 
 interface BiometricLockOverlayProps {
   visible: boolean;
@@ -60,13 +61,16 @@ export const BiometricLockOverlay: React.FC<BiometricLockOverlayProps> = ({ visi
       }
 
       if (result.success) {
+        triggerHaptic('success');
         onUnlock();
       } else {
         if (result.error !== 'user_cancel' && result.error !== 'app_cancel') {
+          triggerHaptic('error');
           setErrorMessage(result.warning || 'Doğrulama başarısız oldu. Lütfen tekrar deneyin.');
         }
       }
     } catch (err: any) {
+      triggerHaptic('error');
       setErrorMessage(err?.message || 'Kimlik doğrulama sırasında bir hata oluştu.');
     } finally {
       setIsAuthenticating(false);

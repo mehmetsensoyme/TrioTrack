@@ -6,6 +6,7 @@ import {
   TextInputProps,
 } from 'react-native';
 import { parseCurrencyInput } from '../utils/formatUtils';
+import { triggerHaptic } from '../utils/hapticsUtils';
 
 export interface CurrencyInputFieldProps extends Omit<TextInputProps, 'value' | 'onChangeText'> {
   value?: string;
@@ -143,6 +144,7 @@ export const CurrencyInputField = forwardRef<TextInput, CurrencyInputFieldProps>
     const handleChangeText = (incoming: string) => {
       const formatted = handleLiveText(incoming, internalText);
       setInternalText(formatted);
+      triggerHaptic('selection');
       if (!formatted) {
         onChangeText('', 0);
       } else {

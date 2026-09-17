@@ -3,7 +3,7 @@ import { useColorScheme, Appearance, Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export type ThemeName = 'paisa' | 'zero' | 'buckwheat';
-export type ThemeMode = 'light' | 'dark' | 'system';
+export type ThemeMode = 'light' | 'dark' | 'amoled' | 'system';
 export type TextSize = 'small' | 'medium' | 'large';
 export type FontFamilyChoice = 'modern' | 'classic' | 'code';
 
@@ -85,7 +85,7 @@ export const ThemeProvider: React.FC<{children: React.ReactNode}> = ({ children 
         if (savedTheme && (savedTheme === 'paisa' || savedTheme === 'zero' || savedTheme === 'buckwheat')) {
           setThemeName(savedTheme as ThemeName);
         }
-        if (savedMode && (savedMode === 'light' || savedMode === 'dark' || savedMode === 'system')) {
+        if (savedMode && (savedMode === 'light' || savedMode === 'dark' || savedMode === 'amoled' || savedMode === 'system')) {
           setThemeMode(savedMode as ThemeMode);
         }
         if (savedSize && (savedSize === 'small' || savedSize === 'medium' || savedSize === 'large')) {
@@ -136,11 +136,12 @@ export const ThemeProvider: React.FC<{children: React.ReactNode}> = ({ children 
     AsyncStorage.setItem(STORAGE_CURRENCY, curr).catch(() => {});
   };
 
-  const isDark = themeMode === 'system' ? systemColorScheme === 'dark' : themeMode === 'dark';
+  const isAmoled = themeMode === 'amoled';
+  const isDark = themeMode === 'system' ? systemColorScheme === 'dark' : (themeMode === 'dark' || themeMode === 'amoled');
 
-  // Standart Koyu Gri (OLED olmayan yumuşak koyu tema) ve Aydınlık tema
-  const background = isDark ? '#18181B' : '#F8F9FA';
-  const card = isDark ? '#27272A' : '#FFFFFF';
+  // AMOLED: Gerçek Saf Siyah (#000000) ve derin kartlar (#111113). Standart Koyu Tema: #18181B. Aydınlık: #F8F9FA
+  const background = isAmoled ? '#000000' : (isDark ? '#18181B' : '#F8F9FA');
+  const card = isAmoled ? '#121214' : (isDark ? '#27272A' : '#FFFFFF');
   const text = isDark ? '#F4F4F5' : '#18181B';
 
   // Kontrastlı ve sapıtmayan renk paleti tanımları
