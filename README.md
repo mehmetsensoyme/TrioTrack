@@ -1,6 +1,6 @@
 <div align="center">
 
-# 💎 TrioTrack (v1.7.3)
+# 💎 TrioTrack
 
 ### *Akıllı Kişisel Finans, Bütçe & Gelecek Ekonomik Projeksiyon Asistanı*
 

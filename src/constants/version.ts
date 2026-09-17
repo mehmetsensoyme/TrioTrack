@@ -1,5 +1,5 @@
-export const APP_VERSION = '1.7.2';
-export const APP_BUILD = '2026.09.14';
+export const APP_VERSION = '1.7.3';
+export const APP_BUILD = '2026.09.17';
 export const APP_NAME = 'TrioTrack';
 export const APP_DESCRIPTION = 'Paisa, Zero ve Buckwheat mimarilerini birleştiren akıllı kişisel finans ve bütçe yöneticisi';
 
@@ -24,10 +24,54 @@ export interface VersionRelease {
 
 export const CHANGELOG_HISTORY: VersionRelease[] = [
   {
+    version: '1.7.3',
+    buildDate: '17 Eylül 2026',
+    title: 'Haptic Geri Bildirim, AMOLED Saf Siyah, Sıfır Bütçe Rozeti & CSV Dışa Aktarma',
+    isLatest: true,
+    summary: 'Klavye, işlem kaydı ve tab geçişlerinde dokunsal titreşim (expo-haptics), gerçek #000000 zeminli AMOLED modu, sıfır tabanlı bütçe tamamlama rozeti, Excel uyumlu UTF-8 CSV dökümü ve hafifletilmiş APK boyutu.',
+    items: [
+      {
+        id: '173-1',
+        type: 'feature',
+        typeLabel: 'DOKUNSAL',
+        title: 'Haptics & Dokunsal Geri Bildirim Motoru',
+        description: 'Tutar girişinde anlık tıklama hissi, yeni işlem kaydında başarı titreşimi, biyometrik kilitte onay/ret tepkisi ve alt sekme geçişlerinde hafif dokunsal his sağlandı.'
+      },
+      {
+        id: '173-2',
+        type: 'design',
+        typeLabel: 'AMOLED',
+        title: 'Saf Siyah (#000000) AMOLED Modu',
+        description: 'OLED ekranlarda pikselleri tamamen kapatarak sıfır pil tüketen ve en yüksek kontrastı sunan özel AMOLED siyah modu eklendi.'
+      },
+      {
+        id: '173-3',
+        type: 'feature',
+        typeLabel: 'SIFIR TABANLI',
+        title: 'Sıfır Tabanlı Bütçe Tamamlama Rozeti',
+        description: 'Aylık bütçe hedefinin tamamı kategorilere paylaştırıldığında beliren "Her kuruş görevlendirildi" durum rozeti ve ilerleme çubuğu getirildi.'
+      },
+      {
+        id: '173-4',
+        type: 'feature',
+        typeLabel: 'DIŞA AKTARMA',
+        title: 'Excel & E-Tablolar Uyumlu CSV Dışa Aktarımı',
+        description: 'Tüm gelir ve gider hareketlerini Türkçe Excel ile tam uyumlu UTF-8 BOM noktalı virgül (;) biçiminde dışa aktarıp paylaşabilme özelliği sunuldu.'
+      },
+      {
+        id: '173-5',
+        type: 'core',
+        typeLabel: 'OPTİMİZASYON',
+        title: 'APK Boyut Optimizasyonu (33 MB)',
+        description: 'ABI mimari ayrıştırması (Splits) ile 80 MB büyüklüğündeki APK boyutu modern cihazlar için 33 MB seviyesine indirildi.'
+      }
+    ]
+  },
+  {
     version: '1.7.2',
     buildDate: '14 Eylül 2026',
     title: 'Maaş & Gelecek Ekonomik Projeksiyon Simülatörü ve Pasta Grafiği',
-    isLatest: true,
+    isLatest: false,
     summary: 'Maaş artış/zam oranlarına göre gelecek 6 ve 12 aylık kümülatif tasarruf projeksiyonu, çift sütunlu karşılaştırma grafiği ve Raporlar ekranında Pasta/Donut harcama dağılımı görünümü eklendi.',
     items: [
       {
