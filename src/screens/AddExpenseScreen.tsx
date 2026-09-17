@@ -1020,11 +1020,16 @@ export default function AddExpenseScreen({ navigation }: any) {
           </View>
         )}
 
-        {/* Not (İsteğe Bağlı) */}
+        {/* Not (İsteğe Bağlı) ve Hızlı Etiketler (#Tags) */}
         <View style={[styles.inputCard, { backgroundColor: colors.card, borderRadius: tStyles.roundness, elevation: tStyles.elevation, marginTop: 4 }]}>
-          <Text style={[styles.label, { color: colors.text, opacity: 0.6, fontFamily: tStyles.fontFamily, fontSize: 12 * m }]}>
-            NOT / AÇIKLAMA (İSTEĞE BAĞLI)
-          </Text>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Text style={[styles.label, { color: colors.text, opacity: 0.6, fontFamily: tStyles.fontFamily, fontSize: 12 * m }]}>
+              NOT / AÇIKLAMA (İSTEĞE BAĞLI)
+            </Text>
+            <Text style={{ color: colors.primary, fontFamily: tStyles.fontFamily, fontSize: 11 * m, fontWeight: '600' }}>
+              #Etiketler
+            </Text>
+          </View>
           <TextInput
             style={[styles.textInput, { color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 14 * m }]}
             placeholder="Ek açıklama, etiket veya garanti notu..."
@@ -1032,6 +1037,44 @@ export default function AddExpenseScreen({ navigation }: any) {
             value={note}
             onChangeText={setNote}
           />
+          
+          {/* Hızlı Finansal Etiket Seçicisi (Actual & Paisa Esintisi) */}
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: 8, paddingTop: 4 }}>
+            {['#market', '#tatil', '#iş', '#eğlence', '#hediye', '#fatura', '#online'].map(tag => {
+              const isIncluded = note.includes(tag);
+              return (
+                <TouchableOpacity
+                  key={tag}
+                  onPress={() => {
+                    triggerHaptic('selection');
+                    if (isIncluded) {
+                      setNote(note.replace(tag, '').replace(/\s+/g, ' ').trim());
+                    } else {
+                      setNote((note ? `${note.trim()} ` : '') + tag);
+                    }
+                  }}
+                  style={{
+                    backgroundColor: isIncluded ? colors.primary : colors.background,
+                    paddingHorizontal: 10,
+                    paddingVertical: 5,
+                    borderRadius: 12,
+                    marginRight: 6,
+                    borderWidth: 1,
+                    borderColor: isIncluded ? colors.primary : (isDark ? '#3F3F46' : '#E4E4E7'),
+                  }}
+                >
+                  <Text style={{
+                    color: isIncluded ? colors.onPrimary : colors.text,
+                    fontSize: 11 * m,
+                    fontWeight: isIncluded ? 'bold' : '500',
+                    fontFamily: tStyles.fontFamily,
+                  }}>
+                    {tag}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
         </View>
 
         {/* Kaydet Butonu */}

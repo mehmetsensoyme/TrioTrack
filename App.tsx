@@ -52,6 +52,7 @@ const HomeScreen = ({ navigation }: any) => {
     categories, 
     accounts,
     debtors,
+    recurringItems,
     userName,
     userAvatar,
     selectedMonth,
@@ -616,6 +617,62 @@ const HomeScreen = ({ navigation }: any) => {
             </Text>
           </TouchableOpacity>
         </View>
+
+        {/* 🌟 3.5 DÜZENLİ ABONELİK VE FATURA TAAHHÜTLERİ (Paisa & Cashew Esintisi) */}
+        {recurringItems.filter(r => r.active).length > 0 && (
+          <View style={[{ backgroundColor: colors.card, borderRadius: tStyles.roundness, elevation: tStyles.elevation, marginBottom: 16, padding: 14 }]}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                <Ionicons name="repeat" size={18} color={colors.primary} />
+                <Text style={{ color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 13 * m, fontWeight: 'bold' }}>
+                  Aylık Taahhütler & Abonelikler
+                </Text>
+              </View>
+              <TouchableOpacity onPress={() => navigation.navigate('Hesaplar')}>
+                <Text style={{ color: colors.primary, fontFamily: tStyles.fontFamily, fontSize: 11 * m, fontWeight: 'bold' }}>
+                  Yönet ({recurringItems.filter(r => r.active).length})
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginHorizontal: -4 }}>
+              {recurringItems.filter(r => r.active).map(item => {
+                const cat = categories.find(c => c.id === item.categoryId);
+                const color = cat?.color || colors.primary;
+                return (
+                  <TouchableOpacity
+                    key={item.id}
+                    onPress={() => navigation.navigate('Hesaplar')}
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      backgroundColor: colors.background,
+                      paddingVertical: 8,
+                      paddingHorizontal: 12,
+                      borderRadius: Math.max(tStyles.roundness / 2, 8),
+                      marginRight: 8,
+                      gap: 8,
+                      borderWidth: 1,
+                      borderColor: isDark ? '#2C2C2E' : '#E5E5EA',
+                    }}
+                  >
+                    <View style={{ width: 28, height: 28, borderRadius: 14, backgroundColor: color + '20', justifyContent: 'center', alignItems: 'center' }}>
+                      <Ionicons name={(cat?.icon as any) || 'repeat-outline'} size={15} color={color} />
+                    </View>
+                    <View>
+                      <Text style={{ color: colors.text, fontFamily: tStyles.fontFamily, fontSize: 12 * m, fontWeight: 'bold' }}>
+                        {item.title}
+                      </Text>
+                      <Text style={{ color: item.type === 'expense' ? '#EF4444' : '#10B981', fontFamily: tStyles.fontFamily, fontSize: 11 * m, fontWeight: '600' }}>
+                        {formatCurrency(item.amount, currency)} / {item.frequency === 'monthly' ? 'ay' : item.frequency === 'weekly' ? 'hf' : 'yıl'}
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
+                );
+              })}
+            </ScrollView>
+          </View>
+        )}
 
         {/* 4. SON İŞLEMLER LİSTESİ */}
         <View style={styles.transactionsHeader}>
